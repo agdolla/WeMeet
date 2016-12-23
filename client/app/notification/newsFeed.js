@@ -7,6 +7,7 @@ export default class NewsFeed extends React.Component{
     e.preventDefault();
     this.props.onDelete(this.props.data._id);
   }
+  
 
   render(){
     return(
