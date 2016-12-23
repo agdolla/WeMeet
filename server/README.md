@@ -1,3 +1,3 @@
-# `server`
+# server
 
-Contains files for your Node.JS / Express server and server mock database.
+Contains files for Node.JS / Express server
