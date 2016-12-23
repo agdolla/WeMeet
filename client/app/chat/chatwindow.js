@@ -60,13 +60,9 @@ export default class ChatWindow extends React.Component {
     }
     render() {
         return (
-            <div className="col-md-7 col-sm-7 col-xs-7 chat-right" style={{
-                'paddingLeft': '0px'
-            }}>
-                <div className="panel panel-dafault" style={{
-                    'height': '107%'
-                }}>
-                    <div className="panel-heading panel-heading-chatwindow">
+            <div className="col-md-7 col-sm-7 col-xs-7 chat-right">
+                <div className="panel panel-dafault chatwindow">
+                    <div className="panel-heading">
                         <div className="media">
                             <div className="media-left">
                               <Link to={"profile/"+this.state.targetUser._id}>
@@ -89,7 +85,7 @@ export default class ChatWindow extends React.Component {
                         </div>
                     </div>
 
-                    <div className="panel-body panel-body-chatwindow" style={{'height': '60vh'}} ref="chatwindow">
+                    <div className="panel-body" ref="chatwindow">
                       <div style={{textAlign:"center"}}>
                         <a href="" onClick={(e)=>this.handleLoad(e)}>{this.props.btnText}</a>
                       </div>

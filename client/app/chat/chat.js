@@ -156,7 +156,7 @@ export default class Chat extends React.Component {
         return (
           <div style={{marginTop:'70'}}>
             <Navbar chat="active" user={this.state.user}/>
-            <div className="container">
+            <div className="container mainElement">
               <div className="row">
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
                   <div className="panel panel-dafault">

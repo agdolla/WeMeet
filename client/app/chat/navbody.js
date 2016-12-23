@@ -38,8 +38,7 @@ export default class NavBody extends React.Component {
         return (
             <div className="panel-body">
                 <ul className="list-group friends" style={{
-                    'marginBottom': '0',
-                    'marginTop': '-1'
+                    'marginBottom': '0'
                 }}>
                 {
                   this.state.data === undefined ? null:
