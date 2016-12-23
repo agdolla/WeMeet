@@ -125,7 +125,7 @@ export default class Chat extends React.Component {
       getMessages(time,this.props.user,this.state.sessionId,(messages)=>{
         if(messages.length===0){
           return this.setState({
-            btnText: "no new messages"
+            btnText: "nothing more to load"
           })
         }
         var newMessages = messages.concat(this.state.message);

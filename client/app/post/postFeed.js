@@ -13,7 +13,8 @@ export default class PostFeed extends React.Component{
     this.state = {
       contents: [],
       notified:false,
-      loadBtnText:"load more"
+      loadBtnText:"load more",
+      submitted:false
     }
   }
 
@@ -29,18 +30,23 @@ export default class PostFeed extends React.Component{
 
   handleLoadMore(e){
     e.preventDefault();
+    this.setState({
+      submitted:true
+    });
     var date = this.state.contents.length===0?(new Date()).getTime():
     this.state.contents[this.state.contents.length-1].contents.postDate;
     getAllPosts(date, this.props.userId, (postFeedData)=>{
       if(postFeedData.length===0){
         return this.setState({
-          loadBtnText:"nothing more to load"
+          loadBtnText:"nothing more to load",
+          submitted:false
         })
       }
       var newPostData = this.state.contents.concat(postFeedData);
       this.setState({
         contents:newPostData,
-        notified:false
+        notified:false,
+        submitted:false
       });
     });
   }
@@ -48,7 +54,11 @@ export default class PostFeed extends React.Component{
   onPost(text,img){
     postStatus(this.props.userId, text, img,()=>{
       socket.emit('newPost',{authorization:getToken(),user:this.props.userId});
-      this.getData();
+      this.setState({
+        loadBtnText:"load more"
+      },()=>{
+        this.getData();
+      })
     });
   }
 
@@ -100,7 +110,7 @@ export default class PostFeed extends React.Component{
         })}
         <div className="btn-group btn-group-justified" role="group" aria-label="...">
           <div className="btn-group" role="group">
-            <button className={"btn btn-default loadbtn "+disabledElement(this.state.loadBtnText==="nothing more to load")} onClick={(e)=>this.handleLoadMore(e)}>
+            <button className={"btn btn-default loadbtn "+disabledElement(this.state.loadBtnText==="nothing more to load"||this.state.submitted)} onClick={(e)=>this.handleLoadMore(e)}>
               {this.state.loadBtnText}
             </button>
           </div>
