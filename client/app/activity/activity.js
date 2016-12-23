@@ -18,7 +18,7 @@ export default class Activity extends React.Component{
 
   render(){
     return(
-      <div>
+      <div style={{marginTop:'70'}}>
         <Navbar activity="active" user={this.state}/>
         <div className="container index">
           <Link to="postactivity" className="btn btn-lg btn-blue-grey c-btn" name = "button">
@@ -27,7 +27,7 @@ export default class Activity extends React.Component{
           <div className="row">
             <div className="col-md-7 col-md-offset-2">
               <h4><span className="glyphicon glyphicon-flash" style={{'marginBottom':'10'}}></span>Recently Activities</h4>
-              <ActivityFeed user={this.props.user}/>
+              <ActivityFeed user={this.props.user} socket={this.props.socket}/>
             </div>
           </div>
         </div>
@@ -41,5 +41,6 @@ export default class Activity extends React.Component{
       if(res.status === "OK" && res.results.length > 0 && res.results[0] !== this.state.location)
         setlocation(this.props.user,res.results[0]);
     });
+
   }
 }

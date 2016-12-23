@@ -1,16 +1,16 @@
-import {} from './database.js';
-var token = 'eyJpZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMSJ9';
+import {} from './component/database.js';
+// var token = 'eyJpZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMSJ9';
 var moment = require('moment');
-
+import {updateCredentials,getToken} from './credentials';
 
 /**
 * Properly configure+send an XMLHttpRequest with error handling,
 * authorization token, and other needed properties.
 */
-function sendXHR(verb, resource, body, cb) {
+function sendXHR(verb, resource, body, cb, errorCb) {
   var xhr = new XMLHttpRequest();
   xhr.open(verb, resource);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+  xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
   // The below comment tells ESLint that AppError is a global.
   // Otherwise, ESLint would complain about it! (See what happens in Atom if
   // you remove the comment...)
@@ -18,7 +18,7 @@ function sendXHR(verb, resource, body, cb) {
   // Response received from server. It could be a failure, though!
   xhr.addEventListener('load', function() {
     var statusCode = xhr.status;
-    var statusText = xhr.statusText;
+    // var statusText = xhr.statusText;
     if (statusCode >= 200 && statusCode < 300) {
       // Success: Status code is in the [200, 300) range.
       // Call the callback with the final XHR object.
@@ -27,24 +27,28 @@ function sendXHR(verb, resource, body, cb) {
       // Client or server error.
       // The server may have included some response text with details concerning
       // the error.
-      var responseText = xhr.responseText;
-      window.AppError('Could not ' + verb + " " + resource + ": Received " +
-      statusCode + " " + statusText + ": " + responseText);
+      // var responseText = xhr.responseText;
+      if (errorCb) {
+        // We were given a custom error handler.
+        errorCb(statusCode);
+      }
+      // window.AppError('Could not ' + verb + " " + resource + ": Received " +
+      // statusCode + " " + statusText + ": " + responseText);
     }
   });
   // Time out the request if it takes longer than 10,000
   // milliseconds (10 seconds)
   xhr.timeout = 10000;
   // Network failure: Could not connect to server.
-  xhr.addEventListener('error', function() {
-    window.AppError('Could not ' + verb + " " + resource +
-    ": Could not connect to the server.");
-  });
+  // xhr.addEventListener('error', function() {
+  //   window.AppError('Could not ' + verb + " " + resource +
+  //   ": Could not connect to the server.");
+  // });
   // Network failure: request took too long to complete.
-  xhr.addEventListener('timeout', function() {
-    window.AppError('Could not ' + verb + " " + resource +
-    ": Request timed out.");
-  });
+  // xhr.addEventListener('timeout', function() {
+  //   window.AppError('Could not ' + verb + " " + resource +
+  //   ": Request timed out.");
+  // });
   switch (typeof(body)) {
     case 'undefined':
       // No body to send.
@@ -67,21 +71,25 @@ function sendXHR(verb, resource, body, cb) {
 }
 
 export function getlocation(cb){
-  var geolocation = require('geolocation');
-  geolocation.getCurrentPosition(function (err, position) {
-    if(err){
-      cb("error");
-    }
-    else{
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET',
-      'http://maps.googleapis.com/maps/api/geocode/json?latlng='+position.coords.latitude+","+position.coords.longitude+'&sensor=true');
-      xhr.onload = function() {
-        cb(JSON.parse(xhr.responseText));
+  if (/Edge\/\d./i.test(navigator.userAgent)){
+    return cb("error");
+  }
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function (err, position) {
+      if(err){
+        cb("error");
       }
-      xhr.send();
-    }
-  });
+      else{
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',
+        'https://maps.googleapis.com/maps/api/geocode/json?latlng='+position.coords.latitude+","+position.coords.longitude+'&sensor=true');
+        xhr.onload = function() {
+          cb(JSON.parse(xhr.responseText));
+        }
+        xhr.send();
+      }
+    });
+  }
 }
 
 export function setlocation(userId,location){
@@ -170,7 +178,7 @@ export function postStatus(user, text, img, cb){
       userId:user,
       text:text,
       img: img,
-      location:res!="error"&&res.status==="OK" && res.results.length>0 ? res.results[0] : {}
+      location:res!=="error"&&res.status==="OK" && res.results.length>0 ? res.results[0] : {}
     }, (xhr)=>{
       cb(JSON.parse(xhr.responseText));
     });
@@ -179,8 +187,6 @@ export function postStatus(user, text, img, cb){
 
 
 export function createActivity(data,cb){
-  var debug = require('react-debug');
-  debug(data);
     sendXHR('POST','/postActivity',{
          "type": data.type,
          "author":data.userData._id,
@@ -218,6 +224,22 @@ export function getActivityFeedData(user,cb){
   });
 }
 
+export function getAllActivities(user,cb){
+  // We don't need to send a body, so pass in 'undefined' for the body.
+  sendXHR('GET', '/user/' + user + '/activities', undefined, (xhr) => {
+    // Call the callback with the data.
+    cb(JSON.parse(xhr.responseText));
+  });
+}
+
+export function getAllPosts(time,user,cb){
+  // We don't need to send a body, so pass in 'undefined' for the body.
+  sendXHR('GET', '/user/' + user + '/posts/'+time, undefined, (xhr) => {
+    // Call the callback with the data.
+    cb(JSON.parse(xhr.responseText));
+  });
+}
+
 export function getUserData(user,cb){
   sendXHR('GET','/user/'+user,undefined,(xhr)=>{
     cb(JSON.parse(xhr.responseText));
@@ -239,13 +261,8 @@ export function adpostComment(activityId, author, comment, cb){
   })
 }
 
-export function getMessages(userid,id,cb){
-  // var message = readDocument('messageSession',sessionid);
-  // message.contents = message.contents.map(getMessageSync);
-  //
-  // emulateServerReturn(getMessageSync(sessionid).messages,cb);
-
-  sendXHR('GET','/user/'+userid+'/chatsession/'+id, undefined, (xhr) => {
+export function getMessages(time,userid,id,cb){
+  sendXHR('GET','/user/'+userid+'/chatsession/'+id+"/"+time, undefined, (xhr) => {
     cb(JSON.parse(xhr.responseText));
   });
 }
@@ -271,5 +288,38 @@ export function getSessionId(userid,targetid,cb){
 export function searchquery(userid,querytext,cb){
   sendXHR('GET','/search/userid/'+userid+'/querytext/'+querytext, undefined, (xhr) => {
     cb(JSON.parse(xhr.responseText));
+  });
+}
+
+
+ export function signup(email, username, password, cb) {
+   sendXHR('POST', '/signup', { fullname: username,
+                              email: email,
+                              password: password }, () => {
+     cb(true);
+   }, () => {
+     cb(false);
+   });
+ }
+
+ export function login(email, password, cb) {
+  sendXHR('POST', '/login', { email: email, password: password},
+  (xhr) => {
+    // Success callback: Login succeeded.
+    var authData = JSON.parse(xhr.responseText);
+    // Update credentials and indicate success via the callback!
+    updateCredentials(authData.user, authData.token);
+    cb(true);
+  }, () => {
+    // Error callback: Login failed.
+    cb(false);
+  });
+}
+
+export function addFriend(sender,target,cb){
+  sendXHR('POST','/friendRequest/'+sender+"/"+target,undefined,()=>{
+    cb(true);
+  },()=>{
+    cb(false);
   });
 }

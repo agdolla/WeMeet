@@ -1,9 +1,11 @@
 import React from 'React';
+// import ReactDOM from 'react-dom';
 import {getUserData} from '../server';
 import {Link} from 'react-router';
 import ChatEntry from './chatentry';
 import ChatRightBubble from './chatrightbubble';
 import ChatLeftBubble from './chatleftbubble';
+// var debug = require('react-debug');
 
 export default class ChatWindow extends React.Component {
 
@@ -11,12 +13,28 @@ export default class ChatWindow extends React.Component {
         super(props);
         this.state = {
           targetUser: {},
-          message: props.message
+          message: props.message,
+          load:false
         }
     }
 
     componentDidMount() {
         this.getData();
+    }
+
+    componentDidUpdate() {
+      if(!this.state.load)
+        this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
+    }
+
+    handleLoad(e){
+      e.preventDefault();
+      this.setState({
+        load:true
+      },()=>{
+        this.props.onLoad(e);
+      });
+
     }
 
     handlePostMessage(text){
@@ -40,7 +58,6 @@ export default class ChatWindow extends React.Component {
             })
       });}
     }
-
     render() {
         return (
             <div className="col-md-7 col-sm-7 col-xs-7 chat-right" style={{
@@ -61,7 +78,7 @@ export default class ChatWindow extends React.Component {
 
                                     <div className="media">
                                         <div className="media-left media-body">
-                                            <font size="3">{this.state.targetUser.firstname} {this.state.targetUser.lastname}</font>
+                                            <font size="3">{this.state.targetUser.fullname}</font>
                                         </div>
 
                                     </div>
@@ -72,7 +89,10 @@ export default class ChatWindow extends React.Component {
                         </div>
                     </div>
 
-                    <div className="panel-body panel-body-chatwindow" style={{'height': '60vh'}}>
+                    <div className="panel-body panel-body-chatwindow" style={{'height': '60vh'}} ref="chatwindow">
+                      <div style={{textAlign:"center"}}>
+                        <a href="" onClick={(e)=>this.handleLoad(e)}>{this.props.btnText}</a>
+                      </div>
 
                       {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
                         if(msg.sender._id===this.props.curUser){

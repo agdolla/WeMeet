@@ -1,28 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "/",
   "type": "object",
   "properties": {
-    "userId": {
-      "type": "string"
-    },
     "fullname": {
+      "id": "fullName",
       "type": "string"
     },
-    "nickname": {
+    "email": {
+      "id": "email",
       "type": "string"
     },
-    "description": {
-      "type": "string"
-    },
-    "birthday": {
+    "password": {
+      "id": "password",
       "type": "string"
     }
   },
   "required": [
-    "userId",
     "fullname",
-    "nickname",
-    "description",
-    "birthday"
+    "email",
+    "password"
   ]
 }

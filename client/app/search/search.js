@@ -18,12 +18,12 @@ export default class Search extends React.Component{
 
   render(){
     return(
-      <div className="search">
+      <div className="search" style={{marginTop:'70'}}>
         <Navbar search="active" user={this.state}/>
         <div className="container">
           <div className="row">
             <div className="col-md-7 col-md-offset-2 main-feed">
-              <SearchEntry user={this.props.user}/>
+              <SearchEntry user={this.state}/>
             </div>
           </div>
         </div>

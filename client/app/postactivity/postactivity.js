@@ -6,6 +6,7 @@ import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
 // var debug = require('react-debug');
+import {socket,getToken} from '../credentials';
 
 export default class PostActivity extends React.Component {
 
@@ -21,7 +22,10 @@ export default class PostActivity extends React.Component {
       endTime: '',
       description: "",
       location: "",
-      detail:""
+      detail:"",
+      alert:false,
+      sizealert:false,
+      fileWrongType:false
     }
   }
 
@@ -31,15 +35,24 @@ export default class PostActivity extends React.Component {
     // files, we ignore the others).
     var reader = new FileReader();
     var file = e.target.files[0];
-    // Called once the browser finishes loading the image.
-    reader.onload = (upload) => {
-      this.setState({
-        img: upload.target.result,
-        cropperOpen:true
-      });
-    };
-
-    reader.readAsDataURL(file);
+    if(!file.type.match('image.*')){
+      this.setState({fileWrongType:true});
+    }
+    else if(file.size<150000){
+      // Called once the browser finishes loading the image.
+      reader.onload = (upload) => {
+        this.setState({
+          img: upload.target.result,
+          cropperOpen:true
+        });
+      };
+      reader.readAsDataURL(file);
+      this.setState({sizealert:false});
+        this.setState({fileWrongType:false});
+    }
+    else{
+      this.setState({sizealert:true});
+    }
   }
 
   handleFileClick(e){
@@ -79,8 +92,12 @@ export default class PostActivity extends React.Component {
         this.state.detail.trim()!==""
     ){
       createActivity(this.state,()=>{
-        hashHistory.push('/');
+        socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
+        hashHistory.push('/activity');
       });
+    }
+    else{
+      this.setState({alert:true})
     }
   }
 
@@ -138,7 +155,7 @@ export default class PostActivity extends React.Component {
 
   render() {
     return (
-      <div className='postactivity'>
+      <div className='postactivity' style={{marginTop:'70'}}>
         {this.state.cropperOpen &&
           <AvatarCropper
             onRequestHide={(e)=>this.handleRequestHide(e)}
@@ -165,6 +182,19 @@ export default class PostActivity extends React.Component {
                   <div className="row">
                     <div className="col-md-12">
                       <h4>Activity Info</h4>
+                        <div className={hideElement(!this.state.alert)}>
+                         <div className="alert alert-warning alert-dismissible" role="alert">
+                                        <strong>Please fill in blanks</strong>
+                                      </div>
+                        </div>
+                        <div className={hideElement(!this.state.sizealert)}>
+                         <div className="alert alert-warning alert-dismissible" role="alert">
+                                        <strong>File is too large</strong>
+                                      </div>
+                        </div>
+                        <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileWrongType)} role="alert">
+                          <strong>File is not a image file</strong>
+                        </div>
                       <div className="row">
                         <div className="col-md-12">
                           <div className="md-form">

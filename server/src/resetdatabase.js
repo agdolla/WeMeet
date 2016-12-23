@@ -3,28 +3,42 @@ var ObjectID = require('mongodb').ObjectID;
 var databaseName = "Upao";
 // Put the initial mock objects here.
 var initialData = {
+  "userSocketIds":{
+    "1":{
+      userId:new ObjectID("000000000000000000000001"),
+      socketId:1
+    },
+    "2":{
+      userId:new ObjectID("000000000000000000000002"),
+      socketId:1
+    },
+    "3":{
+      userId:new ObjectID("000000000000000000000003"),
+      socketId:1
+    }
+  },
   //users
   "users":{
     "1":{
       "_id":new ObjectID("000000000000000000000001"),
-      "firstname": "Vincent",
-      "lastname": "Lou",
-      "nickname": "crown",
-      "avatar": "img/user.png",
-      "description": "Hello everyone, I'm a mock user",
+      "fullname":"WeMeet",
+      "nickname": "make your life better",
+      "avatar": "img/logo/mipmap-xxhdpi/ic_launcher.png",
+      "description": "Welcome to Wemeet! If there are any questions, ask me!",
       "location":{},
       "friends":[new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")],
       "post":new ObjectID("000000000000000000000001"),
       "activity":new ObjectID("000000000000000000000001"),
       "notification":new ObjectID("000000000000000000000001"),
       "email": "upao@umass.edu",
-      "birthday":147812931,
-      "sessions":[new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002")]
+      "birthday":1476057600000,
+      "sessions":[new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002")],
+      "password":"$2a$10$1BmmDhIqBX7zdb/VlysJzeabojvhOc4yez/LCwwetMmTkzWlMGzMa",
+      "online":false
     },
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
-      "firstname": "Test",
-      "lastname": "Account2",
+      "fullname":"Test Account2",
       "nickname": "None",
       "avatar": "img/user.png",
       "description": "Hello everyone, I'm a test account",
@@ -35,12 +49,13 @@ var initialData = {
       "notification":new ObjectID("000000000000000000000002"),
       "email": "test@umass.edu",
       "birthday":1478129314000,
-      "sessions":[new ObjectID("000000000000000000000001")]
+      "sessions":[new ObjectID("000000000000000000000001")],
+      "password":"$2a$10$1BmmDhIqBX7zdb/VlysJzeabojvhOc4yez/LCwwetMmTkzWlMGzMa",
+      "online":false
     },
     "3": {
       "_id":new ObjectID("000000000000000000000003"),
-      "firstname": "Test",
-      "lastname": "Account3",
+      "fullname":"Test Account3",
       "nickname": "None",
       "avatar": "img/user.png",
       "description": "Hello everyone, I'm a test account",
@@ -51,7 +66,9 @@ var initialData = {
       "notification":new ObjectID("000000000000000000000003"),
       "email": "test2@umass.edu",
       "birthday":1478129314000,
-      "sessions":[new ObjectID("000000000000000000000002")]
+      "sessions":[new ObjectID("000000000000000000000002")],
+      "password":"$2a$10$1BmmDhIqBX7zdb/VlysJzeabojvhOc4yez/LCwwetMmTkzWlMGzMa",
+      "online":false
     }
   },
   //notification collections
@@ -72,12 +89,14 @@ var initialData = {
   "notificationItems": {
     "1": {
       "_id":new ObjectID("000000000000000000000001"),
+      "target":new ObjectID("000000000000000000000001"),
       "sender":new ObjectID("000000000000000000000002"),
       "type": "FR"
     },
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
-      "author": new ObjectID("000000000000000000000002"),
+      "target":new ObjectID("000000000000000000000001"),
+      "sender":new ObjectID("000000000000000000000002"),
       "type": "NF"
     }
   },
@@ -124,7 +143,7 @@ var initialData = {
     },
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
-      "type": "Party",
+      "type": "Entertainment",
       "author":new ObjectID("000000000000000000000002"),
       "title": "birthday party",
       "img":"img/Birthday-Party.jpg",
@@ -147,7 +166,7 @@ var initialData = {
     },
     "3": {
       "_id":new ObjectID("000000000000000000000003"),
-      "type": "Party",
+      "type": "Entertainment",
       "author":new ObjectID("000000000000000000000003"),
       "title": "dance party",
       "img":"img/parties.jpg",
@@ -223,20 +242,32 @@ var initialData = {
       "1": {
         "_id":new ObjectID("000000000000000000000001"),
         "users": [new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002")],
-        "contents": [new ObjectID("000000000000000000000001")],
-        "lastmessage":"cool"
+        "contents": new ObjectID("00000000000000000000000A"),
+        "lastmessage":{
+          "sender":new ObjectID("000000000000000000000001"),
+          "target":new ObjectID("000000000000000000000002"),
+          "date" : 1478149540000,
+          "text": "cool",
+          "isread":true
+        }
       },
       "2": {
         "_id":new ObjectID("000000000000000000000002"),
         "users": [new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000003")],
-        "contents": [new ObjectID("000000000000000000000002")],
-        "lastmessage":"Good night!"
+        "contents": new ObjectID("00000000000000000000000B"),
+        "lastmessage":{
+          "sender":new ObjectID("000000000000000000000001"),
+          "target":new ObjectID("000000000000000000000003"),
+          "date" : 1478149540000,
+          "text": "Good night!",
+          "isread":true
+        }
       }
     },
     //message table
     "message": {
       "1": {
-        "_id":new ObjectID("000000000000000000000001"),
+        "_id":new ObjectID("00000000000000000000000A"),
         "messages": [
           {
             "sender":new ObjectID("000000000000000000000001"),
@@ -261,7 +292,7 @@ var initialData = {
         ]
       },
       "2": {
-          "_id":new ObjectID("000000000000000000000002"),
+          "_id":new ObjectID("00000000000000000000000B"),
           "messages": [
             {
               "sender":new ObjectID("000000000000000000000001"),
@@ -308,10 +339,7 @@ function resetCollection(db, name, cb) {
  * Adds any desired indexes to the database.
  */
 function addIndexes(db, cb) {
-  db.collection('postFeedItems').createIndex({ "contents.text": "text" });
-  db.collection('activityItems').createIndex({ description: "text" });
-  db.collection('users').createIndex({ lastname: "text",
-  firstname: "text"},null,cb);
+  db.collection('users').createIndex({email:1},{unique:true},cb);
 }
 
 /**

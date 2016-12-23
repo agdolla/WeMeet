@@ -14,15 +14,17 @@ export default class Settings extends React.Component{
     super(props);
     this.state = {
       userData: {},
-      lastname: "",
-      firstname: "",
+      username:"",
       nickname: "",
       description: "",
       birthday:"",
       oldEmail:"",
       newEmail:"",
       img: null,
-      cropperOpen: false
+      cropperOpen: false,
+      changeInfoFailed:false,
+      fileTooLarge:false,
+      fileWrongType:false
     }
   }
 
@@ -33,10 +35,22 @@ export default class Settings extends React.Component{
     var reader = new FileReader();
     var file = e.target.files[0];
     // Called once the browser finishes loading the image.
+    if(file.size > 102400){
+      return this.setState({
+        fileTooLarge:true
+      })
+    }
+    else if(!file.type.match('image.*')){
+      return this.setState({
+        fileWrongType:true
+      })
+    }
     reader.onload = (upload) => {
       this.setState({
         img: upload.target.result,
-        cropperOpen:true
+        cropperOpen:true,
+        fileTooLarge:false,
+        fileWrongType:false
       });
     };
 
@@ -72,28 +86,30 @@ export default class Settings extends React.Component{
 
   handleChangeUserInfo(e){
     e.preventDefault();
-    if(this.state.lastname!==""&&
-        this.state.firstname!=""&&
+    if(this.state.username!==""&&
         this.state.nickname!==""&&
         this.state.description!==""){
           changeUserInfo({
             userId: this.state.userData._id,
-            lastname: this.state.lastname,
-            firstname:  this.state.firstname,
+            fullname:this.state.username,
             nickname: this.state.nickname,
             description: this.state.description,
             birthday:this.state.birthday
           },(userData)=>{
-            alert = (<div className="alert alert-success alert-dismissible" role="alert">
-                          <strong>Change info succeed!</strong>
-                        </div>);
-          this.setState({userData: userData});
+            alert = <div className={"alert alert-success alert-dismissible"} role="alert">
+              <strong>Change info succeed!</strong>
+            </div>
+            this.setState({
+              userData: userData,
+              changeInfoFailed:false
+            });
           });
         }
         else{
-          alert = (<div className="alert alert-warning alert-dismissible" role="alert">
-                        <strong>Please fill in blanks</strong>
-                      </div>);
+          alert = null;
+          this.setState({
+            changeInfoFailed:true
+          });
         }
 
   }
@@ -102,8 +118,7 @@ export default class Settings extends React.Component{
     getUserData(this.props.user,(userData)=>{
         this.setState({
           userData:userData,
-          lastname: userData.lastname,
-          firstname: userData.firstname,
+          username:userData.fullname,
           nickname: userData.nickname,
           description: userData.description,
           birthday: moment(userData.birthday).format('YYYY-MM-DD')
@@ -111,15 +126,11 @@ export default class Settings extends React.Component{
     });
   }
 
-  handleLastname(e){
+  handleUsername(e){
     e.preventDefault();
-    this.setState({lastname: e.target.value});
+    this.setState({username: e.target.value});
   }
 
-  handleFirstname(e){
-    e.preventDefault();
-    this.setState({firstname: e.target.value});
-  }
 
   handleNickname(e){
     e.preventDefault();
@@ -168,7 +179,7 @@ export default class Settings extends React.Component{
       }
       else{
         emailAlert = (<div className="alert alert-warning" role="alert">
-                      <strong>fill in blanks</strong>
+                      <strong>Please fill in blanks</strong>
                     </div>);
       }
 
@@ -181,7 +192,7 @@ export default class Settings extends React.Component{
 
   render(){
     return(
-      <div>
+      <div style={{marginTop:'70'}}>
         {this.state.cropperOpen &&
           <AvatarCropper
             onRequestHide={(e)=>this.handleRequestHide(e)}
@@ -204,22 +215,17 @@ export default class Settings extends React.Component{
                       <h4>Personal Info</h4>
                       <div>
                         {alert}
+                        <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.changeInfoFailed)} role="alert">
+                          <strong>Please fill in blanks</strong>
+                        </div>
                       </div>
                       <div className="row">
-                        <div className="col-md-6">
+                        <div className="col-md-12">
                           <div className="md-form">
                               <input type="text" className="form-control"
-                                value={this.state.lastname}
-                                onChange={(e)=>this.handleLastname(e)}/>
-                              <label className="shown">LastName</label>
-                          </div>
-                        </div>
-                        <div className="col-md-6">
-                          <div className="md-form">
-                              <input type="text" id="" className="form-control"
-                                value={this.state.firstname}
-                                onChange={(e)=>this.handleFirstname(e)}/>
-                              <label className="shown">FirstName</label>
+                                value={this.state.username}
+                                onChange={(e)=>this.handleUsername(e)}/>
+                              <label className="shown">Your name</label>
                           </div>
                         </div>
                       </div>
@@ -264,7 +270,7 @@ export default class Settings extends React.Component{
             <div className="col-md-3 system-settings">
               <div className="list-group">
                 <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#reset-password" aria-expanded="true" aria-controls="reset-password">
-                  Reset Password <span className="pull-right"><i className="fa fa-angle-right" aria-hidden="true"></i></span>
+                  Change Password <span className="pull-right"><i className="fa fa-angle-right" aria-hidden="true"></i></span>
                 </a>
                 <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
@@ -307,6 +313,12 @@ export default class Settings extends React.Component{
 
                 <div id="change-avatar" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
+                    <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileTooLarge)} role="alert">
+                      <strong>File is too large</strong>
+                    </div>
+                    <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileWrongType)} role="alert">
+                      <strong>File is not a image file</strong>
+                    </div>
                     <div className="row">
                       <div className="col-md-8 col-md-offset-3">
                         <div className="btn-group" role="group">

@@ -39,7 +39,7 @@ export default class Profile extends React.Component{
 
   render(){
     return(
-      <div>
+      <div style={{marginTop:'70'}}>
         <Navbar user={this.state.currUser}/>
         <div className="container profile">
           <div className="row">
@@ -63,7 +63,7 @@ export default class Profile extends React.Component{
               <ProfilePersonalInfo user={this.state.user} />
             </div>
             <div className="col-md-4">
-              Recent Activities
+              Your posts
               <div className="row sidebar">
                 <ProfileRecentActivityFeed user={this.props.user} />
                 <ProfileRecentPostFeed user={this.props.user} />
