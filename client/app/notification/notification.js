@@ -22,9 +22,9 @@ export default class Notification extends React.Component{
   }
 
   render(){
-    var navbar = <NavTab request="active"/>;
+    var navbar = <NavTab friendrequest="active"/>;
     if(this.props.id == 2){
-      navbar = <NavTab news="active"/>;
+      navbar = <NavTab activityNotification="active"/>;
     }
 
     return(

@@ -1,6 +1,6 @@
 import React from 'react';
 import Request from './friendRequest';
-import NewsFeed from './newsFeed'
+import ActivityNotification from './activityNotification'
 import {getNotificationData, deleteNotification,acceptRequest} from '../server';
 
 export default class NotificationBody extends React.Component{
@@ -9,25 +9,25 @@ export default class NotificationBody extends React.Component{
     super(props);
     this.state = {
       FR: [],
-      NF: []
+      AN: []
     }
   }
 
   getData(){
     getNotificationData(this.props.user,(notificationData)=>{
       var FR = [];
-      var NF = [];
+      var AN = [];
       notificationData.contents.map((notification)=>{
         if(notification.type === "FR"){
           FR.push(notification);
         }
         else{
-          NF.push(notification);
+          AN.push(notification);
         }
       });
       this.setState({
         FR: FR,
-        NF: NF
+        AN: AN
       });
     })
   }
@@ -66,7 +66,7 @@ export default class NotificationBody extends React.Component{
       )
     }
     else{
-      if(this.state.NF.length === 0){
+      if(this.state.AN.length === 0){
         return(
           <div className="panel panel-default">
             <div className="panel-body">
@@ -78,8 +78,8 @@ export default class NotificationBody extends React.Component{
       return(
         <div className="panel panel-default">
           <div className="panel-body">
-            {this.state.NF.map((nf,i)=>{
-              return <NewsFeed key={i} data={nf} onDelete={(id)=>this.handleDelete(id)}/>
+            {this.state.AN.map((AN,i)=>{
+              return <ActivityNotification key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(id)=>this.handleAccept(id)}/>
             })}
           </div>
         </div>

@@ -401,6 +401,9 @@ MongoClient.connect(url, function(err, db) {
       }, function(err, userData) {
           if (err)
               callback(err);
+          if(userData===null){
+            callback(null,userData)
+          }
           else {
               resolveUserObjects(userData.friends, function(err, userMap) {
                   if (err)
@@ -514,6 +517,9 @@ MongoClient.connect(url, function(err, db) {
       db.collection('activityItems').findOne({
           _id: activityId
       }, function(err, activityItem) {
+        if(activityItem===null){
+          callback(null,activityItem)
+        }
           if (err)
               return callback(err);
 
@@ -1000,6 +1006,9 @@ MongoClient.connect(url, function(err, db) {
       }, function(err, notifications) {
           if (err)
               return callback(err);
+              else if (notifications === null) {
+                  callback(null, null);
+              }
 
           var resolvedContents = [];
 
@@ -1175,6 +1184,10 @@ MongoClient.connect(url, function(err, db) {
           }, function(err, message) {
               if (err)
                   sendDatabaseError(res, err);
+              else if(message == null){
+                res.status(400);
+                res.send();
+              }
               else {
                 if(message.lastmessage===undefined?false:
                   (message.lastmessage.target===undefined?"":message.lastmessage.target.str===userid.str)){

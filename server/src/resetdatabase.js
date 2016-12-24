@@ -60,7 +60,7 @@ var initialData = {
       "avatar": "img/user.png",
       "description": "Hello everyone, I'm a test account",
       "location":{},
-      "friends":[],
+      "friends":[new ObjectID("000000000000000000000001")],
       "post":new ObjectID("000000000000000000000003"),
       "activity":new ObjectID("000000000000000000000003"),
       "notification":new ObjectID("000000000000000000000003"),
@@ -75,7 +75,7 @@ var initialData = {
   "notifications": {
       "1": {
         "_id":new ObjectID("000000000000000000000001"),
-        "contents":[new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002")]
+        "contents":[new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")]
       },
       "2": {
         "_id":new ObjectID("000000000000000000000002"),
@@ -96,8 +96,18 @@ var initialData = {
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
       "target":new ObjectID("000000000000000000000001"),
-      "sender":new ObjectID("000000000000000000000002"),
-      "type": "NF"
+      "sender":new ObjectID("000000000000000000000003"),
+      "type": "AN",
+      "RequestOrInvite": "request",
+      "activityid":new ObjectID("000000000000000000000001")
+    },
+    "3": {
+      "_id":new ObjectID("000000000000000000000003"),
+      "target":new ObjectID("000000000000000000000001"),
+      "sender":new ObjectID("000000000000000000000003"),
+      "type": "AN",
+      "RequestOrInvite": "invite",
+      "activityid":new ObjectID("000000000000000000000003")
     }
   },
   //activity collection
@@ -127,7 +137,7 @@ var initialData = {
       "endTime": 1479940314000,
       "description": "Hack Umass",
       "location": "University of Massachusetts Amherst",
-      "participants": [new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")],
+      "participants": [new ObjectID("000000000000000000000002")],
       "likeCounter": [new ObjectID("000000000000000000000001"),
       new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")],
       "comments":[
