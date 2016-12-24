@@ -324,3 +324,11 @@ export function addFriend(sender,target,cb){
     cb(false);
   });
 }
+
+export function sendJoinActivityRequest(sender,target,activityid,cb){
+  sendXHR('POST','/activityJoinRequest/'+sender+'/'+target+'/'+activityid,undefined,()=>{
+    cb(true);
+  },()=>{
+    cb(false);
+  })
+}

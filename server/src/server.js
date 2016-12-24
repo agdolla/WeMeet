@@ -1772,6 +1772,52 @@ function getMessage(time,sessionId, cb) {
     }
   });
 
+  app.post('/activityJoinRequest/:sender/:target/:activityid',function(req,res){
+    var fromUser = getUserIdFromToken(req.get('Authorization'));
+    var sender = req.params.sender;
+    var target = req.params.target;
+    var activityid = req.params.activityid;
+    if(fromUser === sender){
+      db.collection('notificationItems').insertOne({
+        sender: new ObjectID(sender),
+        target: new ObjectID(target),
+        type:"AN",
+        RequestOrInvite:"request",
+        activityid: new ObjectID(activityid)
+      },function(err,result){
+        if(err){
+          sendDatabaseError(res,err);
+        }
+        else{
+          getUserData(new ObjectID(target),function(err,userData){
+            if(err){
+              sendDatabaseError(res,err);
+            }
+            else{
+              db.collection('notifications').updateOne({_id:userData.notification},{
+                $addToSet:{
+                  contents: result.insertedId
+                }
+              },function(err){
+                if(err){
+                  sendDatabaseError(res,err);
+                }
+                else{
+                  res.send();
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+    else{
+      res.status(401).end();
+    }
+  });
+
+
+
   var server = http.createServer(app);
 
   var io = require('socket.io')(server);
