@@ -1107,7 +1107,7 @@ MongoClient.connect(url, function(err, db) {
       });
   }
 
-  //acceptRequest
+  //acceptRequest friend request
   app.put('/notification/:notificationId/:userId', function(req, res) {
       var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
       var userId = new ObjectID(req.params.userId);
@@ -1171,6 +1171,58 @@ MongoClient.connect(url, function(err, db) {
           res.status(401).end();
       }
   });
+
+  //accept activity request
+  app.put('/acceptactivity/:notificationId/:fromuser',function(req,res){
+    var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+    var user = new ObjectID(req.params.fromuser);
+    var notificationId = new ObjectID(req.params.notificationId);
+    if(fromUser.str === user.str){
+      getNotificationItem(notificationId,function(err,notification){
+        if(err)
+          return sendDatabaseError(res, err);
+        else{
+
+            var userToAdd;
+            if(notification.RequestOrInvite==="request"){
+              userToAdd = notification.sender._id
+            }
+            else{
+              userToAdd = notification.target._id
+            }
+
+            db.collection('activityItems').updateOne({
+              _id:notification.activityid
+            },{
+              $addToSet:{
+                participants:userToAdd
+              }
+            },function(err){
+                if(err){
+                console.log(user)
+                  return sendDatabaseError(res,err);
+                }
+
+                deleteNotification(notificationId,user,function(err,notificationData){
+
+                  if(err)
+                  sendDatabaseError(res,err);
+                  else{
+                    res.status(201);
+                    res.send(notificationData);
+                  }
+                })
+              }
+            )
+        }
+      });
+
+  }
+  else {
+      res.status(401).end();
+  }
+
+});
 
   //getMessage
   app.get('/user/:userId/chatsession/:id/:time', function(req, res) {

@@ -13,7 +13,7 @@ export default class ActivityNotification extends React.Component{
 
   handleAccept(e){
     e.preventDefault();
-    this.props.onAccept(this.props.data._id);
+      this.props.onAccept(this.props.data._id);
   }
 
   handleDelete(e){

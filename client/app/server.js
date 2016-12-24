@@ -99,10 +99,16 @@ export function deleteNotification(id, user ,cb){
   });
 }
 
-export function acceptRequest(id,user,cb){
+export function acceptFriendRequest(id,user,cb){
   sendXHR('PUT','/notification/'+id+'/'+user,undefined,(xhr)=>{
     cb(JSON.parse(xhr.responseText));
   });
+}
+
+export function acceptActivityRequest(notificationid,fromuser,cb){
+  sendXHR('PUT','/acceptactivity/'+notificationid+'/'+fromuser,undefined,(xhr)=>{
+    cb(JSON.parse(xhr.responseText));
+  })
 }
 
 export function getNotificationData(user, cb){
