@@ -17,11 +17,10 @@ export default class Ad_body extends React.Component{
     super(props);
     this.state = {
       activity: {},
-      ishost: ""
+      ishost: "",
+      joined: false
     };
   }
-
-
 
   didUserLike(user) {
     var likeCounter = this.state.activity.likeCounter;
@@ -65,15 +64,29 @@ export default class Ad_body extends React.Component{
         if(this.isHost()){
           this.setState({ishost:"disabled"});
         }
+        if(this.checkJoined()){
+          this.setState({ishost:"disabled"});
+          this.setState({joined:true});
+        }
       });
     });
 
   }
 
-
-
   isHost(){
     return this.props.currentUser === this.state.activity.author._id;
+  }
+
+
+  checkJoined(){
+    if(this.state.activity.participants===undefined){
+      return false;
+    }
+    return this.state.activity.participants.filter((user)=>{
+      if(user._id===this.props.currentUser)
+        return true;
+      else return false;
+    }).length>0;
   }
 
 
@@ -83,6 +96,7 @@ export default class Ad_body extends React.Component{
 
   render(){
     var buttonText = this.state.ishost==="disabled" ? "You are the host" : "Click to sign up";
+    buttonText = this.state.ishost==="disabled"&&this.state.joined===true ? "You have joined" : "Click to sign up";
     var data = this.state.activity
     var contents;
     var text;
@@ -123,6 +137,7 @@ export default class Ad_body extends React.Component{
         text = null;
         name = null;
     }
+
 
     return(
       <div className="activityDetail">
