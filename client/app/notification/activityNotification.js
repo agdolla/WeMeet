@@ -18,7 +18,7 @@ export default class ActivityNotification extends React.Component{
 
   handleDelete(e){
     e.preventDefault();
-    this.props.ondelete(this.props.data._id);
+    this.props.onDelete(this.props.data._id);
   }
 
   getData(){
