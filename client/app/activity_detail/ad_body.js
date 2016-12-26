@@ -193,8 +193,7 @@ export default class Ad_body extends React.Component{
             </div>
           </div>
         </div>
-        <div className= "adbackground">
-          <img src={this.state.activity.img} />
+        <div className= "adbackground" style={{"backgroundImage": "url("+this.state.activity.img+")"}}>
         </div>
         <div className = "container">
           <div className="row">
