@@ -185,7 +185,7 @@ export default class Ad_body extends React.Component{
                     (this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
                     this.state.activity.participants.map((p,i)=>{
                     return (
-                      <Ad_participates_item key={i} data={p} />
+                      <Ad_participates_item key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
                     )
                   }))}
                 </ul>
