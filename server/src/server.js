@@ -1893,7 +1893,6 @@ function getMessage(time,sessionId, cb) {
         }
       }
     });
-
     socket.on('notification',function(data){
       if(data.authorization!==undefined&&data.authorization!==null){
         var tokenObj = jwt.verify(data.authorization, secretKey);

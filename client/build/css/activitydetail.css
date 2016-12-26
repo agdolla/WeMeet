@@ -2,18 +2,17 @@
   margin-top: 0px;
 }
 
-.adbackground img{
+.adbackground{
+  background-size: cover;
+  background-position: center;
   margin-top: -20px;
-}
-
-.adbackground img {
   height:350px;
-  object-fit: cover;
   width:100%;
 }
 
+
 .body-title {
-    margin-top: -45px;
+  margin-top: -45px;
 }
 
 .body-title-signed-in{
@@ -23,7 +22,7 @@
 .body-title-icon {
   margin-bottom: 5px;
   padding-right:30px;
-    font-size: 15px;
+  font-size: 15px;
 }
 
 .body-detail{
@@ -97,18 +96,18 @@
 
 .body-comments .media .media-body textarea{
   border-color: rgba(65, 67, 68, 0.25);
-background: #f3f3f3;
+  background: #f3f3f3;
 }
 .body-comments .media .media-body textarea:focus{
   border-color: rgba(65, 67, 68, 0.25);
   background:   #fdfdfd;
-    outline: 0 none;
+  outline: 0 none;
 }
 
 .modal.fade{
-    -webkit-transition: opacity .2s linear, none;
-    -moz-transition: opacity .2s linear, none;
-    -ms-transition: opacity .2s linear, none;
-    -o-transition: opacity .2s linear, none;
-    transition: opacity .2s linear, none;
+  -webkit-transition: opacity .2s linear, none;
+  -moz-transition: opacity .2s linear, none;
+  -ms-transition: opacity .2s linear, none;
+  -o-transition: opacity .2s linear, none;
+  transition: opacity .2s linear, none;
 }
