@@ -11,7 +11,7 @@ import {Link} from 'react-router';
 var moment = require('moment');
 import {socket,getToken} from '../credentials';
 import {hideElement} from '../util';
-
+// var debug = require('react-debug');
 
 
 
@@ -97,15 +97,15 @@ export default class Ad_body extends React.Component{
     e.preventDefault();
     sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id,(success)=>{
       if(success){
+        socket.emit('notification',{
+          authorization:getToken(),
+          sender: this.props.currentUser,
+          target: this.state.activity.author._id
+        });
         this.setState({
           success:true
         });
 
-        socket.emit('notification',{
-          authorization:getToken(),
-          sender: this.props.currentUser._id,
-          target: this.state.activity.author._id
-        });
       }
     });
   }

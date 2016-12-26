@@ -42,7 +42,7 @@ export default class Navbar extends React.Component{
       });
     });
     socket.on('notification',()=>{
-      debug("here")
+      debug("_____________________________________________________________________here")
       this.setState({
         notification: true
       });
