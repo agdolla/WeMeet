@@ -46,7 +46,7 @@ export default class FriendItem extends React.Component{
         <h5>  {this.props.data.fullname}</h5>
         <h5 style={{color:'grey'}}>    {this.props.data.description}</h5>
       </div>
-      <div className="media-body media-right" align="right" style={{"paddingRight":'20'}}>
+      <div className="media-body media-right" align="right" style={{"paddingRight":'20',width: 0}}>
   <i className={"fa fa-check pull-right "+hideElement(this.state.invited!=="disabled")} style={{color:'green','paddingRight':'20px','marginTop':'10',fontSize: 23}} aria-hidden="true"></i>
         <button type="button" className={"btn btn-default btn-blue-grey pull-right " +hideElement(this.state.invited==="disabled")} style={{marginTop:10}} onClick={(e) => this.handleSubmit(e)} name="button">Invite</button>
       </div>
