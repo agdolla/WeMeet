@@ -30,14 +30,6 @@ export default class FriendItem extends React.Component{
       }
     }
 
-    componentWillUpdate(){
-      if(this.props.reset===true && this.state.reseted===false){
-        this.setState({
-            invited:"",
-            reseted:true
-        })
-      }
-    }
 
 
   render(){
