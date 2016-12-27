@@ -25,7 +25,7 @@ export default class NotificationBody extends React.Component{
       var AN = [];
       notificationData.contents.map((notification)=>{
         if(notification.type === "FR"){
-          FR.push(notification);
+          FR.insert("0",notification);
         }
         else{
           AN.insert("0",notification);
