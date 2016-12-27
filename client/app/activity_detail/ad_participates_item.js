@@ -33,11 +33,8 @@ export default class Ad_participates_item extends React.Component{
 
   handleAddFriend(e){
     e.preventDefault();
-      debug("----gg---------------------------------------this.props.currUser")
     addFriend(this.props.currUser,this.props.data._id,(success)=>{
       if(success){
-        debug("-------------------------------------------this.props.currUser")
-        debug(this.props.currUser)
         socket.emit('notification',{
           authorization:getToken(),
 
@@ -53,7 +50,7 @@ export default class Ad_participates_item extends React.Component{
 
     render(){
       return(
-        <li className="media">
+        <li className="media ad-media">
         <div className={"alert alert-success "+hideElement(!this.state.success)} role="alert">Request sent!</div>
           <div className="media-left">
             <a onClick={(e)=>this.handleRedirect(e)} data-dismiss="modal" aria-label="Close">
@@ -62,11 +59,11 @@ export default class Ad_participates_item extends React.Component{
           </div>
           <div className="media-body media-top">
           <h5>  {this.props.data.fullname}</h5>
-          <h5>    {this.props.data.description}</h5>
+          <h5 style={{color:'grey'}}>    {this.props.data.description}</h5>
         </div>
         <div className="media-body media-right" style={{textAlign:"right",width:'0px'}} >
           <a href="#" onClick={(e)=>this.handleAddFriend(e)}><i className={"fa fa-user-plus pull-right "+hideElement(this.checkFriendsOfUser()||this.props.data._id===this.props.currUser)} style={{'paddingRight':'20px'}} aria-hidden="true"></i></a>
-          <i className={"fa fa-check pull-right "+hideElement(!this.checkFriendsOfUser())} style={{color:'green','paddingRight':'20px'}} aria-hidden="true"></i>
+          <i className={"fa fa-check pull-right "+hideElement(!this.checkFriendsOfUser())} style={{color:'green','paddingRight':'20px','marginTop':'10'}} aria-hidden="true"></i>
         </div>
       </li>
       )

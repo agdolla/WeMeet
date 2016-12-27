@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from '../component/navbar';
-import {getUserData,createActivity} from '../server';
+import {getUserData,createActivity,sendInviteActivityRequest} from '../server';
 import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
@@ -25,7 +25,9 @@ export default class PostActivity extends React.Component {
       detail:"",
       alert:false,
       sizealert:false,
-      fileWrongType:false
+      fileWrongType:false,
+      invitelist:[],
+      reset:false
     }
   }
 
@@ -57,6 +59,15 @@ export default class PostActivity extends React.Component {
 
   handleFileClick(e){
     e.target.value = null;
+  }
+
+  handlePostUser(e){
+    var a = this.state.invitelist;
+    a.push(e);
+    this.setState({
+      invitelist: a,
+      reset:false
+    })
   }
 
   handleRequestHide(e){
@@ -91,10 +102,27 @@ export default class PostActivity extends React.Component {
         this.state.location.trim()!==""&&
         this.state.detail.trim()!==""
     ){
-      createActivity(this.state,()=>{
+      //activity created succesfully
+      var id;
+      createActivity(this.state,(data)=>{
+        id=data._id;
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
-        hashHistory.push('/activity');
+        for (var i=0;i<this.state.invitelist.length;i++)
+        {
+          sendInviteActivityRequest(this.props.user,this.state.invitelist[i],id,(success)=>{
+            if(success){
+              socket.emit('notification',{
+                authorization:getToken(),
+                sender: this.props.user,
+                target: this.state.invitelist[i]
+              });
+            }
+          });
+        }
+          hashHistory.push('/activity');
       });
+      //handle invited userData
+
     }
     else{
       this.setState({alert:true})
@@ -103,6 +131,19 @@ export default class PostActivity extends React.Component {
 
   componentDidMount(){
     this.getData();
+  }
+
+  handlereset(e){
+    this.setState({
+      invitelist: [],
+      reset:true
+    });
+  }
+
+  handleInvite(e){
+    this.setState({
+      reset:false
+    })
   }
 
   handleTitle(e){
@@ -265,23 +306,21 @@ export default class PostActivity extends React.Component {
                   <div className="panel-footer">
                     <div className="row">
                       <div className="col-md-6 nopadding">
-                        <button type="button" className="btn btn-blue-grey pull-Left nomargin" name="button" data-toggle="modal" data-target="#invitemodal">Invite Friend</button>
+                        <button type="button" className="btn btn-blue-grey pull-Left nomargin" onClick={(e)=>this.handleInvite(e)} name="button" data-toggle="modal" data-target="#invitemodal">Invite Friend</button>
                         <div className="modal fade " id="invitemodal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel">
                           <div className="modal-dialog" role="document">
                             <div className="modal-content">
-                              <div className="modal-header" style={{
-                                  "border":'none'
-                                }}>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 className="modal-title" id="myModalLabel">Invite friends</h4>
-                                <hr />
+                              <div className="modal-header">
+                                <button type="button" className="close"  data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h3 className="modal-title">Invite friends</h3>
+
                               </div>
                               <div className="modal-body " style={{
                                   "padding":'0'
                                 }}>
                                 <ul className="media-list">
                                   {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{
-                                    return <FriendItem data={friend} key={i}/>
+                                    return <FriendItem data={friend} key={i} reset={this.state.reset} onPost={(e)=>this.handlePostUser(e)}/>
                                   })}
                                 </ul>
                           </div>
@@ -289,8 +328,8 @@ export default class PostActivity extends React.Component {
                           <div className="modal-footer" style={{
                               'border':'none'
                             }}>
-                            <button type="button" className="btn btn-default btn-blue-grey" data-dismiss="modal">Close</button>
-                            <button type="button" className="btn btn-primary btn-blue-grey">Confirm</button>
+                            <button type="button" className="btn btn-primary btn-blue-grey" onClick={(e)=>this.handlereset(e)}>Reset</button>
+                            <button type="button" className="btn btn-default btn-blue-grey" data-dismiss="modal">Confirm</button>
                           </div>
                         </div>
                       </div>

@@ -10,6 +10,10 @@
   width:100%;
 }
 
+.ad-media {
+  margin-top : 0px !important;
+  margin-bottom: 7px !important;
+}
 
 .body-title {
   margin-top: -45px;
@@ -110,4 +114,8 @@
   -ms-transition: opacity .2s linear, none;
   -o-transition: opacity .2s linear, none;
   transition: opacity .2s linear, none;
+}
+
+.myModalLable{
+      padding-bottom: 10px;
 }

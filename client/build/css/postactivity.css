@@ -57,12 +57,6 @@
 
 .modal-open .modal { outline: none !important; }
 
-.modal-header{
-  padding-top:15px;
-  padding-left:15px;
-  padding-right: 15px;
-  padding-bottom: 0px;
-}
 
 .md-form select{
   font-size: 10px;
@@ -78,4 +72,9 @@
 .nomargin{
     margin-left: 0px !important;
     margin-right: 0px !important;
+}
+
+.postactivity-media{
+  padding-top:8px;
+  margin-top:0px !important;
 }

@@ -3,6 +3,10 @@ import Request from './friendRequest';
 import ActivityNotification from './activityNotification'
 import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../server';
 
+Array.prototype.insert = function (index, item) {
+this.splice(index, 0, item);
+};
+
 export default class NotificationBody extends React.Component{
 
   constructor(props){
@@ -13,6 +17,8 @@ export default class NotificationBody extends React.Component{
     }
   }
 
+
+
   getData(){
     getNotificationData(this.props.user,(notificationData)=>{
       var FR = [];
@@ -22,7 +28,7 @@ export default class NotificationBody extends React.Component{
           FR.push(notification);
         }
         else{
-          AN.push(notification);
+          AN.insert("0",notification);
         }
       });
       this.setState({

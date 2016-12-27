@@ -173,11 +173,11 @@ export default class Ad_body extends React.Component{
         <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="modal-header" style={{'paddingBottom':'4px'}}>
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h3 className="modal-title" id="myModalLabel">Participating users</h3>
+                <h3 className="modal-title" style={{'paddingBottom':'10px'}}> Participating users</h3>
               </div>
               <div className="modal-body">
                 <ul className="media-list">
