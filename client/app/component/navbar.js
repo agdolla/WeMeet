@@ -14,7 +14,8 @@ export default class Navbar extends React.Component{
       activity:false,
       post:false,
       chat:false,
-      notifiction:false
+      notifiction:false,
+      notified:false
     }
   }
 
@@ -42,10 +43,18 @@ export default class Navbar extends React.Component{
       });
     });
     socket.on('notification',()=>{
-      debug("_____________________________________________________________________here")
       this.setState({
         notification: true
       });
+    });
+    socket.on('friend request accepted',(data)=>{
+      if(!this.state.notified){
+        this.notifyMe(data.sender,()=>{
+          this.setState({
+            notified:false
+          })
+        })
+      }
     });
   }
 
@@ -81,6 +90,30 @@ export default class Navbar extends React.Component{
     hashHistory.push('/notification/1');
   }
 
+  notifyMe(sender,cb) {
+    if (!Notification) {
+      alert('Desktop notifications not available in your browser. Try Chromium.');
+      return;
+    }
+
+    if (Notification.permission !== "granted")
+      Notification.requestPermission();
+    else {
+      this.setState({
+        notified:true
+      });
+      var notification = new Notification('WeMeet', {
+        icon: 'https://www.w1meet.com/img/logo/mipmap-xxhdpi/ic_launcher.png',
+        body: sender+" accepted your request"
+      });
+      notification.onclick = (event)=>{
+        event.preventDefault();
+        event.target.close();
+        hashHistory.push("/chat");
+        cb();
+      }
+    }
+  }
 
 
     render(){

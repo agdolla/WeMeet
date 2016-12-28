@@ -2,6 +2,7 @@ import React from 'react';
 import Request from './friendRequest';
 import ActivityNotification from './activityNotification'
 import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../server';
+import {socket,getToken} from '../credentials';
 
 Array.prototype.insert = function (index, item) {
 this.splice(index, 0, item);
@@ -44,9 +45,14 @@ export default class NotificationBody extends React.Component{
     });
   }
 
-  handleFriendAccept(id){
+  handleFriendAccept(id,user){
     acceptFriendRequest(id,this.props.user,()=>{
       this.getData();
+      socket.emit("friend request accepted",{
+        authorization: getToken(),
+        sender: this.props.user,
+        target: user
+      });
     });
   }
 
@@ -71,7 +77,7 @@ export default class NotificationBody extends React.Component{
         <div className="panel panel-default">
           <div className="panel-body">
             {this.state.FR.map((fr,i)=>{
-              return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id)=>this.handleFriendAccept(id)}/>
+              return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
             })}
           </div>
         </div>

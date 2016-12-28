@@ -1937,6 +1937,7 @@ function getMessage(time,sessionId, cb) {
         }
       }
     });
+
     socket.on('notification',function(data){
       if(data.authorization!==undefined&&data.authorization!==null){
         var tokenObj = jwt.verify(data.authorization, secretKey);
@@ -1947,6 +1948,28 @@ function getMessage(time,sessionId, cb) {
               io.emit('notification',err);
             else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
               io.sockets.connected[socketData.socketId].emit('notification');
+            }
+          });
+        }
+      }
+    });
+
+    socket.on('friend request accepted',function(data){
+      if(data.authorization!==undefined&&data.authorization!==null){
+        var tokenObj = jwt.verify(data.authorization, secretKey);
+        var id = tokenObj['id'];
+        if(id===data.sender){
+          db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
+            if(err)
+              io.emit('friend request accepted',err);
+            else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
+              db.collection('users').findOne({_id:new ObjectID(data.sender)},function(err,userData){
+                if(err)
+                  io.emit('friend request accepted',err);
+                else{
+                  io.sockets.connected[socketData.socketId].emit('friend request accepted',{sender:userData.fullname});
+                }
+              });
             }
           });
         }
