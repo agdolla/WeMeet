@@ -3,18 +3,22 @@ var express = require('express');
 // Creates an Express server.
 var app = express();
 var http = require('http');
+var https = require('https');
 var bodyParser = require('body-parser');
 // Support receiving JSON in HTTP request bodies
 var mongo_express = require('mongo-express/lib/middleware');
 // Import the default Mongo Express configuration
 var mongo_express_config = require('mongo-express/config.default.js');
 var fs = require('fs');
+var path = require('path');
 var MongoDB = require('mongodb');
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/Upao';
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+// var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
+// var certificate = fs.readFileSync(path.join(__dirname, '2_www.w1meet.com.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
 fda064351da14375118884b463b47a4c0699f67aed0094f339998f102d99bdfe479dbefae0
 6933592c86abd20c5447a5f9af1b275c909de4108ae2256bcb0285daad0aa890171849fb3c
@@ -1861,7 +1865,12 @@ function getMessage(time,sessionId, cb) {
   });
 
 
-
+ //  var server = http.createServer(function (req, res) {
+ //      res.writeHead(301, { "Location": "https://www.w1meet.com:443/"});
+ //      res.end();
+ //  },app);
+ // var httpsServer = https.createServer({key: privateKey, cert: certificate, requestCert: true, rejectUnauthorized: false},
+ //                     app);
   var server = http.createServer(app);
 
   var io = require('socket.io')(server);
@@ -1981,4 +1990,11 @@ function getMessage(time,sessionId, cb) {
   server.listen(3000, function() {
       console.log('app listening on port 3000!');
   });
+  // httpsServer.listen(443,function(){
+  // console.log('https on port 443');
+  // });
+  //
+  // server.listen(80, function() {
+  //     console.log('http on port 80');
+  // });
 });
