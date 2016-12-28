@@ -92,20 +92,6 @@ export default class PostActivity extends React.Component {
     });
   }
 
-  sendNotification(targetid){
-    debug("1________________________________________");
-      sendInviteActivityRequest(this.props.user,targetid,id,(success)=>{
-        debug("2________________________________________");
-        if(success){
-          debug("3________________________________________");
-          socket.emit('notification',{
-            authorization:getToken(),
-            sender: this.props.user,
-            target: targetid
-          });
-        }
-      });
-  }
 
   handleSubmit(e){
     e.preventDefault();
