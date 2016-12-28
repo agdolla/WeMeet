@@ -5,7 +5,7 @@ import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 import {socket,getToken} from '../credentials';
 
 export default class PostActivity extends React.Component {
@@ -65,7 +65,7 @@ export default class PostActivity extends React.Component {
     var invitedUsers = this.state.invitedlist;
     invitedUsers.push(e);
     this.setState({
-      invitelist: invitedUsers,
+      invitedlist: invitedUsers,
       reset:false
     })
   }
@@ -107,14 +107,14 @@ export default class PostActivity extends React.Component {
       createActivity(this.state,(data)=>{
         id=data._id;
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
-        for (var i=0;i<this.state.invitelist.length;i++)
+        for (var i=0;i<this.state.invitedlist.length;i++)
         {
-          sendInviteActivityRequest(this.props.user,this.state.invitelist[i],id,(success)=>{
+          sendInviteActivityRequest(this.props.user,this.state.invitedlist[i],id,(success)=>{
             if(success){
               socket.emit('notification',{
                 authorization:getToken(),
                 sender: this.props.user,
-                target: this.state.invitelist[i]
+                target: this.state.invitedlist[i]
               });
             }
           });
@@ -136,7 +136,7 @@ export default class PostActivity extends React.Component {
   handlereset(e){
     e.preventDefault();
     this.setState({
-      invitelist: [],
+      invitedlist: [],
       reset:true
     });
   }
