@@ -3,18 +3,22 @@ var express = require('express');
 // Creates an Express server.
 var app = express();
 var http = require('http');
+var https = require('https');
 var bodyParser = require('body-parser');
 // Support receiving JSON in HTTP request bodies
 var mongo_express = require('mongo-express/lib/middleware');
 // Import the default Mongo Express configuration
 var mongo_express_config = require('mongo-express/config.default.js');
 var fs = require('fs');
+var path = require('path');
 var MongoDB = require('mongodb');
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/Upao';
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+// var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
+// var certificate = fs.readFileSync(path.join(__dirname, '2_www.w1meet.com.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
 fda064351da14375118884b463b47a4c0699f67aed0094f339998f102d99bdfe479dbefae0
 6933592c86abd20c5447a5f9af1b275c909de4108ae2256bcb0285daad0aa890171849fb3c
@@ -401,6 +405,9 @@ MongoClient.connect(url, function(err, db) {
       }, function(err, userData) {
           if (err)
               callback(err);
+          if(userData===null){
+            callback(null,userData)
+          }
           else {
               resolveUserObjects(userData.friends, function(err, userMap) {
                   if (err)
@@ -514,6 +521,9 @@ MongoClient.connect(url, function(err, db) {
       db.collection('activityItems').findOne({
           _id: activityId
       }, function(err, activityItem) {
+        if(activityItem===null){
+          callback(null,activityItem)
+        }
           if (err)
               return callback(err);
 
@@ -974,7 +984,7 @@ MongoClient.connect(url, function(err, db) {
   function getNotificationItem(notificationId, callback) {
       db.collection('notificationItems').findOne({
           _id: notificationId
-      }, function(err, notification) {
+      },   function(err, notification) {
           if (err)
               return callback(err);
           else if (notification === null)
@@ -1000,6 +1010,9 @@ MongoClient.connect(url, function(err, db) {
       }, function(err, notifications) {
           if (err)
               return callback(err);
+              else if (notifications === null) {
+                  callback(null, null);
+              }
 
           var resolvedContents = [];
 
@@ -1098,7 +1111,7 @@ MongoClient.connect(url, function(err, db) {
       });
   }
 
-  //acceptRequest
+  //acceptRequest friend request
   app.put('/notification/:notificationId/:userId', function(req, res) {
       var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
       var userId = new ObjectID(req.params.userId);
@@ -1163,6 +1176,58 @@ MongoClient.connect(url, function(err, db) {
       }
   });
 
+  //accept activity request
+  app.put('/acceptactivity/:notificationId/:fromuser',function(req,res){
+    var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+    var user = new ObjectID(req.params.fromuser);
+    var notificationId = new ObjectID(req.params.notificationId);
+    if(fromUser.str === user.str){
+      getNotificationItem(notificationId,function(err,notification){
+        if(err)
+          return sendDatabaseError(res, err);
+        else{
+
+            var userToAdd;
+            if(notification.RequestOrInvite==="request"){
+              userToAdd = notification.sender._id
+            }
+            else{
+              userToAdd = notification.target._id
+            }
+
+            db.collection('activityItems').updateOne({
+              _id:notification.activityid
+            },{
+              $addToSet:{
+                participants:userToAdd
+              }
+            },function(err){
+                if(err){
+                console.log(user)
+                  return sendDatabaseError(res,err);
+                }
+
+                deleteNotification(notificationId,user,function(err,notificationData){
+
+                  if(err)
+                  sendDatabaseError(res,err);
+                  else{
+                    res.status(201);
+                    res.send(notificationData);
+                  }
+                })
+              }
+            )
+        }
+      });
+
+  }
+  else {
+      res.status(401).end();
+  }
+
+});
+
   //getMessage
   app.get('/user/:userId/chatsession/:id/:time', function(req, res) {
       var fromUser = getUserIdFromToken(req.get('Authorization'));
@@ -1175,6 +1240,10 @@ MongoClient.connect(url, function(err, db) {
           }, function(err, message) {
               if (err)
                   sendDatabaseError(res, err);
+              else if(message == null){
+                res.status(400);
+                res.send();
+              }
               else {
                 if(message.lastmessage===undefined?false:
                   (message.lastmessage.target===undefined?"":message.lastmessage.target.str===userid.str)){
@@ -1707,6 +1776,101 @@ function getMessage(time,sessionId, cb) {
     }
   });
 
+  app.post('/activityJoinRequest/:sender/:target/:activityid',function(req,res){
+    var fromUser = getUserIdFromToken(req.get('Authorization'));
+    var sender = req.params.sender;
+    var target = req.params.target;
+    var activityid = req.params.activityid;
+    if(fromUser === sender){
+      db.collection('notificationItems').insertOne({
+        sender: new ObjectID(sender),
+        target: new ObjectID(target),
+        type:"AN",
+        RequestOrInvite:"request",
+        activityid: new ObjectID(activityid)
+      },function(err,result){
+        if(err){
+          sendDatabaseError(res,err);
+        }
+        else{
+          getUserData(new ObjectID(target),function(err,userData){
+            if(err){
+              sendDatabaseError(res,err);
+            }
+            else{
+              db.collection('notifications').updateOne({_id:userData.notification},{
+                $addToSet:{
+                  contents: result.insertedId
+                }
+              },function(err){
+                if(err){
+                  sendDatabaseError(res,err);
+                }
+                else{
+                  res.send();
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+    else{
+      res.status(401).end();
+    }
+  });
+
+  app.post('/activityInviteRequest/:sender/:target/:activityid',function(req,res){
+    var fromUser = getUserIdFromToken(req.get('Authorization'));
+    var sender = req.params.sender;
+    var target = req.params.target;
+    var activityid = req.params.activityid;
+    if(fromUser === sender){
+      db.collection('notificationItems').insertOne({
+        sender: new ObjectID(sender),
+        target: new ObjectID(target),
+        type:"AN",
+        RequestOrInvite:"invite",
+        activityid: new ObjectID(activityid)
+      },function(err,result){
+        if(err){
+          sendDatabaseError(res,err);
+        }
+        else{
+          getUserData(new ObjectID(target),function(err,userData){
+            if(err){
+              sendDatabaseError(res,err);
+            }
+            else{
+              db.collection('notifications').updateOne({_id:userData.notification},{
+                $addToSet:{
+                  contents: result.insertedId
+                }
+              },function(err){
+                if(err){
+                  sendDatabaseError(res,err);
+                }
+                else{
+                  res.send();
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+    else{
+      res.status(401).end();
+    }
+  });
+
+
+ //  var server = http.createServer(function (req, res) {
+ //      res.writeHead(301, { "Location": "https://www.w1meet.com:443/"});
+ //      res.end();
+ //  },app);
+ // var httpsServer = https.createServer({key: privateKey, cert: certificate, requestCert: true, rejectUnauthorized: false},
+ //                     app);
   var server = http.createServer(app);
 
   var io = require('socket.io')(server);
@@ -1799,9 +1963,38 @@ function getMessage(time,sessionId, cb) {
       }
     });
 
+    socket.on('friend request accepted',function(data){
+      if(data.authorization!==undefined&&data.authorization!==null){
+        var tokenObj = jwt.verify(data.authorization, secretKey);
+        var id = tokenObj['id'];
+        if(id===data.sender){
+          db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
+            if(err)
+              io.emit('friend request accepted',err);
+            else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
+              db.collection('users').findOne({_id:new ObjectID(data.sender)},function(err,userData){
+                if(err)
+                  io.emit('friend request accepted',err);
+                else{
+                  io.sockets.connected[socketData.socketId].emit('friend request accepted',{sender:userData.fullname});
+                }
+              });
+            }
+          });
+        }
+      }
+    });
+
   });
 
   server.listen(3000, function() {
       console.log('app listening on port 3000!');
   });
+  // httpsServer.listen(443,function(){
+  // console.log('https on port 443');
+  // });
+  //
+  // server.listen(80, function() {
+  //     console.log('http on port 80');
+  // });
 });

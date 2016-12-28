@@ -85,6 +85,9 @@ export function getlocation(cb){
       xhr.send();
     });
   }
+  else{
+    cb("Google is banned");
+  }
 }
 
 export function setlocation(userId,location){
@@ -99,10 +102,16 @@ export function deleteNotification(id, user ,cb){
   });
 }
 
-export function acceptRequest(id,user,cb){
+export function acceptFriendRequest(id,user,cb){
   sendXHR('PUT','/notification/'+id+'/'+user,undefined,(xhr)=>{
     cb(JSON.parse(xhr.responseText));
   });
+}
+
+export function acceptActivityRequest(notificationid,fromuser,cb){
+  sendXHR('PUT','/acceptactivity/'+notificationid+'/'+fromuser,undefined,(xhr)=>{
+    cb(JSON.parse(xhr.responseText));
+  })
 }
 
 export function getNotificationData(user, cb){
@@ -317,4 +326,20 @@ export function addFriend(sender,target,cb){
   },()=>{
     cb(false);
   });
+}
+
+export function sendJoinActivityRequest(sender,target,activityid,cb){
+  sendXHR('POST','/activityJoinRequest/'+sender+'/'+target+'/'+activityid,undefined,()=>{
+    cb(true);
+  },()=>{
+    cb(false);
+  })
+}
+
+export function sendInviteActivityRequest(sender,target,activityid,cb){
+  sendXHR('POST','/activityInviteRequest/'+sender+'/'+target+'/'+activityid,undefined,()=>{
+    cb(true);
+  },()=>{
+    cb(false);
+  })
 }

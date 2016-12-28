@@ -8,7 +8,7 @@ export default class Request extends React.Component{
   }
   handleAccept(e){
     e.preventDefault();
-    this.props.onAccept(this.props.data._id);
+    this.props.onAccept(this.props.data._id,this.props.data.sender._id);
   }
   render(){
     return(

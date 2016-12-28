@@ -4,11 +4,14 @@ import Ad_commentThread from './ad_commentThread';
 import Ad_participates_item from './ad_participates_item';
 import Ad_signeduser from './ad_signeduser'
 import {getActivityDetail} from '../server';
-import {adpostComment} from '../server';
+import {adpostComment,sendJoinActivityRequest} from '../server';
 import {likeActivity} from '../server';
 import {unLikeActivity} from '../server';
 import {Link} from 'react-router';
 var moment = require('moment');
+import {socket,getToken} from '../credentials';
+import {hideElement} from '../util';
+// var debug = require('react-debug');
 
 
 
@@ -17,11 +20,11 @@ export default class Ad_body extends React.Component{
     super(props);
     this.state = {
       activity: {},
-      ishost: ""
+      ishost: "",
+      joined: false,
+      success:false
     };
   }
-
-
 
   didUserLike(user) {
     var likeCounter = this.state.activity.likeCounter;
@@ -65,15 +68,46 @@ export default class Ad_body extends React.Component{
         if(this.isHost()){
           this.setState({ishost:"disabled"});
         }
+        if(this.checkJoined()){
+          this.setState({ishost:"disabled"});
+          this.setState({joined:true});
+        }
       });
     });
 
   }
 
-
-
   isHost(){
     return this.props.currentUser === this.state.activity.author._id;
+  }
+
+
+  checkJoined(){
+    if(this.state.activity.participants===undefined){
+      return false;
+    }
+    return this.state.activity.participants.filter((user)=>{
+      if(user._id===this.props.currentUser)
+        return true;
+      else return false;
+    }).length>0;
+  }
+
+  handleRequestJoin(e){
+    e.preventDefault();
+    sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id,(success)=>{
+      if(success){
+        socket.emit('notification',{
+          authorization:getToken(),
+          sender: this.props.currentUser,
+          target: this.state.activity.author._id
+        });
+        this.setState({
+          success:true
+        });
+
+      }
+    });
   }
 
 
@@ -82,7 +116,16 @@ export default class Ad_body extends React.Component{
   }
 
   render(){
-    var buttonText = this.state.ishost==="disabled" ? "You are the host" : "Click to sign up";
+    var buttonText;
+    if(this.state.ishost==="disabled"&&this.state.joined!=true){
+      buttonText = "You are the host"
+    }
+    else if(this.state.ishost==="disabled"&&this.state.joined==true){
+      buttonText = "You have joined"
+    }
+    else{
+        buttonText = "Click to sign up"
+    }
     var data = this.state.activity
     var contents;
     var text;
@@ -124,16 +167,17 @@ export default class Ad_body extends React.Component{
         name = null;
     }
 
+
     return(
       <div className="activityDetail">
         <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="modal-header" style={{'paddingBottom':'4px'}}>
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h3 className="modal-title" id="myModalLabel">Participating users</h3>
+                <h3 className="modal-title" style={{'paddingBottom':'10px'}}> Participating users</h3>
               </div>
               <div className="modal-body">
                 <ul className="media-list">
@@ -141,7 +185,7 @@ export default class Ad_body extends React.Component{
                     (this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
                     this.state.activity.participants.map((p,i)=>{
                     return (
-                      <Ad_participates_item key={i} data={p} />
+                      <Ad_participates_item key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
                     )
                   }))}
                 </ul>
@@ -149,8 +193,7 @@ export default class Ad_body extends React.Component{
             </div>
           </div>
         </div>
-        <div className= "adbackground">
-          <img src={this.state.activity.img} />
+        <div className= "adbackground" style={{"backgroundImage": "url("+this.state.activity.img+")"}}>
         </div>
         <div className = "container">
           <div className="row">
@@ -196,9 +239,17 @@ export default class Ad_body extends React.Component{
                 </div>
                 <div className="row">
                   <div className = "col-md-12 col-sm-12 col-xs-12 remain-places" style={{'paddingTop':'25px',textAlign:"center"}} >
-                    <a><span className={"btn btn-default sign-up-btn "+this.state.ishost}  align="center">
+                  <div className={"alert alert-success"+hideElement(!this.state.success)}  role="alert" align="center" style={{
+                    'marginLeft': '43%',
+                     marginRight: '43%',
+                     paddingTop: 8,
+                     paddingBottom: 8,
+                     marginBottom: 7
+                  }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
+                    <a><span className={"btn btn-default sign-up-btn "+this.state.ishost} onClick={(e)=>this.handleRequestJoin(e)} align="center">
                     {buttonText}
                     </span></a>
+
                   </div>
                 </div>
 

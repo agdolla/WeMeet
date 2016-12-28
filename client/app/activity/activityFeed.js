@@ -53,7 +53,7 @@ export default class ActivityFeed extends React.Component{
         notified:true
       });
       var notification = new Notification('WeMeet', {
-        icon: 'http://localhost:3000/img/logo/mipmap-xxhdpi/ic_launcher.png',
+        icon: 'https://www.w1meet.com/img/logo/mipmap-xxhdpi/ic_launcher.png',
         body: "Hey there! You have new activities"
       });
       notification.onclick = (event)=>{
