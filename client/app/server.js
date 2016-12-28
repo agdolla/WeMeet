@@ -87,7 +87,6 @@ export function getlocation(cb){
   }
   else{
     cb("Google is banned");
-    xhr.send()
   }
 }
 

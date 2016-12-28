@@ -26,7 +26,7 @@ export default class PostActivity extends React.Component {
       alert:false,
       sizealert:false,
       fileWrongType:false,
-      invitelist:[],
+      invitedlist:[],
       reset:false
     }
   }
@@ -61,11 +61,11 @@ export default class PostActivity extends React.Component {
     e.target.value = null;
   }
 
-  handlePostUser(e){
-    var a = this.state.invitelist;
-    a.push(e);
+  handleInviteUser(e){
+    var invitedUsers = this.state.invitedlist;
+    invitedUsers.push(e);
     this.setState({
-      invitelist: a,
+      invitelist: invitedUsers,
       reset:false
     })
   }
@@ -134,6 +134,7 @@ export default class PostActivity extends React.Component {
   }
 
   handlereset(e){
+    e.preventDefault();
     this.setState({
       invitelist: [],
       reset:true
@@ -141,6 +142,7 @@ export default class PostActivity extends React.Component {
   }
 
   handleInvite(e){
+    e.preventDefault();
     this.setState({
       reset:false
     })
@@ -320,7 +322,7 @@ export default class PostActivity extends React.Component {
                                 }}>
                                 <ul className="media-list">
                                   {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{
-                                    return <FriendItem data={friend} key={i} reset={this.state.reset} onPost={(e)=>this.handlePostUser(e)}/>
+                                    return <FriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
                                   })}
                                 </ul>
                           </div>
