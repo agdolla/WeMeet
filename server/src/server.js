@@ -3,14 +3,14 @@ var express = require('express');
 // Creates an Express server.
 var app = express();
 var http = require('http');
-var https = require('https');
+// var https = require('https');
 var bodyParser = require('body-parser');
 // Support receiving JSON in HTTP request bodies
 var mongo_express = require('mongo-express/lib/middleware');
 // Import the default Mongo Express configuration
 var mongo_express_config = require('mongo-express/config.default.js');
 var fs = require('fs');
-var path = require('path');
+// var path = require('path');
 var MongoDB = require('mongodb');
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
