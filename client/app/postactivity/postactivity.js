@@ -92,6 +92,21 @@ export default class PostActivity extends React.Component {
     });
   }
 
+  sendNotification(targetid){
+    debug("1________________________________________");
+      sendInviteActivityRequest(this.props.user,targetid,id,(success)=>{
+        debug("2________________________________________");
+        if(success){
+          debug("3________________________________________");
+          socket.emit('notification',{
+            authorization:getToken(),
+            sender: this.props.user,
+            target: targetid
+          });
+        }
+      });
+  }
+
   handleSubmit(e){
     e.preventDefault();
     if(this.state.type!=="------Select a Activity Type-----"&&
@@ -107,26 +122,27 @@ export default class PostActivity extends React.Component {
       createActivity(this.state,(data)=>{
         id=data._id;
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
-        for (var i=0;i<this.state.invitedlist.length;i++)
-        {
-          sendInviteActivityRequest(this.props.user,this.state.invitedlist[i],id,(success)=>{
-            if(success){
-              socket.emit('notification',{
-                authorization:getToken(),
-                sender: this.props.user,
-                target: this.state.invitedlist[i]
-              });
-            }
-          });
-        }
-          hashHistory.push('/activity');
+        //for (var i=0;i<this.state.invitedlist.length;i++)
+        this.state.invitedlist.map((targetid)=>{
+            sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
+              if(success){
+                socket.emit('notification',{
+                  authorization:getToken(),
+                  sender: this.props.user,
+                  target: targetid
+                });
+              }
+            });
+        });
       });
+
       //handle invited userData
 
     }
     else{
       this.setState({alert:true})
     }
+    hashHistory.push('/activity');
   }
 
   componentDidMount(){
