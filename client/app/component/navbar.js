@@ -4,7 +4,7 @@ import {logout} from '../credentials';
 import {hashHistory} from 'react-router'
 import {socket} from '../credentials';
 import {hideElement} from '../util'
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export default class Navbar extends React.Component{
 
