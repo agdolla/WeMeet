@@ -11,7 +11,7 @@ import {Link} from 'react-router';
 var moment = require('moment');
 import {socket,getToken} from '../credentials';
 import {hideElement} from '../util';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 
 
 
@@ -22,7 +22,7 @@ export default class Ad_body extends React.Component{
       activity: {},
       ishost: "",
       joined: false,
-      success:false
+      success:false,
     };
   }
 
@@ -246,7 +246,16 @@ export default class Ad_body extends React.Component{
                      paddingBottom: 8,
                      marginBottom: 7
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
-                    <a><span className={"btn btn-default sign-up-btn "+this.state.ishost} onClick={(e)=>this.handleRequestJoin(e)} align="center">
+                  <a>  <span className={"btn btn-default sign-up-btn "+this.state.ishost} onClick={
+                    (e)=>{
+                      if(this.state.ishost!=="disabled"){
+                      this.handleRequestJoin(e)
+                      }
+                      else{
+                        return
+                      }
+                    }
+                  } align="center">
                     {buttonText}
                     </span></a>
 
