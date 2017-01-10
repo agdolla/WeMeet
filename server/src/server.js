@@ -32,7 +32,6 @@ app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 
 
 MongoClient.connect(url, function(err, db) {
-  // var moment = require('moment');
   app.use(bodyParser.json());
   app.use(bodyParser.text());
   app.use(express.static('../client/build'));
@@ -54,155 +53,121 @@ MongoClient.connect(url, function(err, db) {
   var loginSchema = require('./schemas/login.json');
   var validate = require('express-jsonschema').validate;
 
-  function getAllPosts(time,callback){
-    db.collection('postFeedItems').find({
-        "contents.postDate":{
-          $lt:time
-        }
-    }).limit(5).sort({"contents.postDate":-1}).toArray(function(err,collection){
-      if(err){
-        return callback(err);
-      }
-      var resolvedPosts = [];
+  function getAllPosts(time){
+    return new Promise((resolve,reject)=>{
+      db.collection('postFeedItems').findAsync({
+          "contents.postDate":{
+            $lt:time
+          }
+      })
+      .then(function(cursor){
+        return cursor.limit(5).sort({"contents.postDate":-1}).toArrayAsync();
+      })
+      .then(function(collection){
 
-      function processNextFeedItem(i) {
-        // Asynchronously resolve a feed item.
-        resolvePostItem(collection[i], function(err, postItem) {
-          if (err) {
-            // Pass an error to the callback.
-            callback(err);
-          } else {
-            // Success!
+        var resolvedPosts = [];
+
+        if (collection.length === 0) {
+          return resolve(collection);
+        }
+        collection.forEach((c) => {
+          resolvePostItem(c)
+          .then(postItem => {
             resolvedPosts.push(postItem);
             if (resolvedPosts.length === collection.length) {
-              collection = resolvedPosts;
-              callback(null, collection);
-            } else {
-              // Process the next feed item.
-              processNextFeedItem(i + 1);
+              return resolve(resolvedPosts);
             }
-          }
-        });
-      }
+          })
+          .catch(err => {reject(err)})
+        })
 
-      if (collection.length === 0) {
-        callback(null, collection);
-      } else {
-        processNextFeedItem(0);
-      }
-
-
-    });
+      })
+      .catch(err => {
+        reject(err);
+      })
+    })
   }
 
 
   //get post feed data
-  function getPostFeedItem(feedItemId, callback) {
-      db.collection('postFeedItems').findOne({
-          _id: feedItemId
-      }, function(err, postFeedItem) {
-          if (err)
-              callback(err);
-          else if (postFeedItem === null) {
-              callback(null, null);
-          } else {
-            resolvePostItem(postFeedItem,callback);
-          }
-      });
+  function getPostFeedItem(feedItemId) {
+    return new Promise(function(resolve, reject) {
+      db.collection('postFeedItems').findOneAsync({
+        _id: feedItemId
+      })
+      .then(postFeedItem => {
+        if (postFeedItem === null) {
+          resolve(null);
+        } else {
+          resolvePostItem(postFeedItem)
+          .then(postItem =>{
+            resolve(postItem);
+          })
+        }
+      })
+      .catch(err => {reject(err)})
+    });
   }
 
-  function getPostFeedData(user, callback) {
-      db.collection('users').findOne({
-          _id: user
-      }, function(err, userData) {
-          if (err) {
-              return callback(err);
-          } else if (userData === null) {
-              // User not found.
-              return callback(null, null);
-          }
+  function getPostFeedData(user) {
+    return new Promise(function(resolve, reject) {
+      db.collection('users').findOneAsync({
+        _id: user
+      })
+      .then(userData => {
+        if (userData === null) {
+          return resolve(null);
+        }
+        return db.collection('postFeeds').findOneAsync({
+          _id: userData.post
+        })
+      })
+      .then((feedData)=>{
+        if (feedData === null) {
+          return resolve(null);
+        }
 
-          db.collection('postFeeds').findOne({
-              _id: userData.post
-          }, function(err, feedData) {
-              if (err) {
-                  return callback(err);
-              } else if (feedData === null) {
-                  // Feed not found.
-                  return callback(null, null);
+        var resolvedContents = [];
+
+        // Special case: Feed is empty.
+        if (feedData.contents.length === 0) {
+          resolve(feedData);
+        } else {
+          feedData.contents.forEach((feedItemId) => {
+            getPostFeedItem(feedItemId)
+            .then(feedItem => {
+              resolvedContents.push(feedItem);
+              if (resolvedContents.length === feedData.contents.length) {
+                feedData.contents = resolvedContents;
+                return resolve(feedData);
               }
-
-              // We will place all of the resolved FeedItems here.
-              // When done, we will put them into the Feed object
-              // and send the Feed to the client.
-              var resolvedContents = [];
-
-              // processNextFeedItem is like an asynchronous for loop:
-              // It performs processing on one feed item, and then triggers
-              // processing the next item once the first one completes.
-              // When all of the feed items are processed, it completes
-              // a final action: Sending the response to the client.
-              function processNextFeedItem(i) {
-                  // Asynchronously resolve a feed item.
-                  getPostFeedItem(feedData.contents[i], function(err, feedItem) {
-                      if (err) {
-                          // Pass an error to the callback.
-                          callback(err);
-                      } else {
-                          // Success!
-                          resolvedContents.push(feedItem);
-                          if (resolvedContents.length === feedData.contents.length) {
-                              // I am the final feed item; all others are resolved.
-                              // Pass the resolved feed document back to the callback.
-                              feedData.contents = resolvedContents;
-
-                              callback(null, feedData);
-                          } else {
-                              // Process the next feed item.
-                              processNextFeedItem(i + 1);
-                          }
-                      }
-                  });
-              }
-
-              // Special case: Feed is empty.
-              if (feedData.contents.length === 0) {
-                  callback(null, feedData);
-              } else {
-                  processNextFeedItem(0);
-              }
-          });
-      });
+            })
+          })
+        }
+      })
+      .catch(err => {reject(err)})
+    });
   }
-
-  // function getPostFeedData(user){
-  //   var userData = readDocument('users',user);
-  //   var feedData = readDocument('postFeeds',userData.post);
-  //   feedData.contents = feedData.contents.map(getPostFeedItemSync);
-  //   return feedData;
-  // }
 
   app.get('/user/:userId/feed', function(req, res) {
       var userId = req.params.userId;
-      // var fromUser = getUserIdFromToken(req.get('Authorization'));
-      // if(userId === fromUser){
-      getPostFeedData(new ObjectID(userId), function(err, feedData) {
-          if (err)
-              sendDatabaseError(res, err);
-          else if (feedData === null) {
-              res.status(400);
-              res.send("Could not look up feed for user " + userId);
-          } else {
-              res.send(feedData);
-          }
-      });
-      // }
-      // else{
-      // res.status(401).end();
-      // }
+      getPostFeedData(new ObjectID(userId))
+      .then(feedData => {
+        if (feedData === null) {
+          res.status(400);
+          res.send("Could not look up feed for user " + userId);
+        } else {
+          feedData.contents.sort((a,b)=>{
+            return b.contents.postData - a.contents.postDate
+          })
+          res.send(feedData);
+        }
+      })
+      .catch(err => {sendDatabaseError(res,err)})
   });
 
-  function postStatus(user, text, location, img, callback) {
+  function postStatus(user, text, location, img) {
+    return new Promise(function(resolve,reject){
       var time = new Date().getTime();
 
       var post = {
@@ -240,26 +205,26 @@ MongoClient.connect(url, function(err, db) {
         })
       })
       .then(function(){
-        callback(null, post);
+        resolve(post);
       })
       .catch(function(err){
-        callback(err);
+        reject(err);
       })
-
+    });
   }
   //create post
   app.post('/postItem', validate({body: statusUpdateSchema}), function(req, res) {
       var body = req.body;
       var fromUser = getUserIdFromToken(req.get('Authorization'));
       if (fromUser === body.userId) {
-          postStatus(new ObjectID(body.userId), body.text, body.location, body.img, function(err, newPost) {
-              if (err)
-                  sendDatabaseError(res, err);
-              else {
-                  res.status(201);
-                  res.send(newPost);
-              }
-          });
+        postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
+        .then(function(newPost){
+          res.status(201);
+          res.send(newPost);
+        })
+        .catch(err => {
+          sendDatabaseError(res, err);
+        })
       } else {
           res.status(401).end();
       }
@@ -272,25 +237,22 @@ MongoClient.connect(url, function(err, db) {
       var userId = req.params.userId;
 
       if (userId === fromUser) {
-          db.collection('postFeedItems').updateOne({
-              _id: new ObjectID(postItemId)
-          }, {
-              $addToSet: {
-                  likeCounter: new ObjectID(userId)
-              }
-          }, function(err) {
-              if (err)
-                  sendDatabaseError(res, err);
-              else {
-                  getPostFeedItem(new ObjectID(postItemId), function(err, postItem) {
-                      if (err)
-                          sendDatabaseError(res, err);
-                      else {
-                          res.send(postItem.likeCounter);
-                      }
-                  })
-              }
-          });
+        db.collection('postFeedItems').updateOneAsync({
+          _id: new ObjectID(postItemId)
+        }, {
+          $addToSet: {
+            likeCounter: new ObjectID(userId)
+          }
+        })
+        .then(function(){
+          return getPostFeedItem(new ObjectID(postItemId))
+        })
+        .then(postItem => {
+          res.send(postItem.likeCounter);
+        })
+        .catch(function(err){
+          sendDatabaseError(res, err);
+        })
       } else {
           res.status(401).end();
       }
@@ -302,25 +264,22 @@ MongoClient.connect(url, function(err, db) {
       var postItemId = req.params.postItemId;
       var userId = req.params.userId;
       if (userId === fromUser) {
-          db.collection("postFeedItems").updateOne({
-              _id: new ObjectID(postItemId)
-          }, {
-              $pull: {
-                  likeCounter: new ObjectID(userId)
-              }
-          }, function(err) {
-              if (err)
-                  sendDatabaseError(res, err);
-              else {
-                  getPostFeedItem(new ObjectID(postItemId), function(err, postItem) {
-                      if (err)
-                          sendDatabaseError(res, err);
-                      else {
-                          res.send(postItem.likeCounter);
-                      }
-                  })
-              }
-          });
+        db.collection('postFeedItems').updateOneAsync({
+          _id: new ObjectID(postItemId)
+        }, {
+          $pull: {
+            likeCounter: new ObjectID(userId)
+          }
+        })
+        .then(function(){
+          return getPostFeedItem(new ObjectID(postItemId))
+        })
+        .then(postItem => {
+          res.send(postItem.likeCounter);
+        })
+        .catch(function(err){
+          sendDatabaseError(res, err);
+        })
       } else {
           res.status(401).end();
       }
@@ -454,7 +413,7 @@ MongoClient.connect(url, function(err, db) {
       var postItemId = req.params.postItemId;
       var userId = body.author;
       if (fromUser === userId) {
-          db.collection('postFeedItems').updateOne({
+          db.collection('postFeedItems').updateOneAsync({
               _id: new ObjectID(postItemId)
           }, {
               $push: {
@@ -464,19 +423,14 @@ MongoClient.connect(url, function(err, db) {
                       "postDate": (new Date()).getTime()
                   }
               }
-          }, function(err) {
-              if (err)
-                  sendDatabaseError(res.err);
-              else {
-                  getPostFeedItem(new ObjectID(postItemId), function(err, postItem) {
-                      if (err)
-                          sendDatabaseError(res, err);
-                      else {
-                          res.send(postItem);
-                      }
-                  });
-              }
-          });
+          })
+          .then(() => {
+            getPostFeedItem(new ObjectID(postItemId))
+            .then(postItem => {
+              res.send(postItem);
+            })
+          })
+          .catch(err => {sendDatabaseError(res,err)})
       } else {
           res.status(401).end();
       }
@@ -550,24 +504,26 @@ MongoClient.connect(url, function(err, db) {
     });
   }
 
-  function resolvePostItem(postFeedItem,callback){
-    var userList = [postFeedItem.contents.author];
-    postFeedItem.comments.forEach((comment) => {
+  function resolvePostItem(postFeedItem){
+    return new Promise(function(resolve, reject) {
+      var userList = [postFeedItem.contents.author];
+      postFeedItem.comments.forEach((comment) => {
         userList.push(comment.author);
-    });
-    userList = userList.concat(postFeedItem.likeCounter);
+      });
+      userList = userList.concat(postFeedItem.likeCounter);
 
-    resolveUserObjects(userList, function(err, userMap) {
+      resolveUserObjects(userList, function(err, userMap) {
         if (err)
-            callback(err);
+          reject(err);
         else {
-            postFeedItem.likeCounter = postFeedItem.likeCounter.map((id) => userMap[id]);
-            postFeedItem.contents.author = userMap[postFeedItem.contents.author];
-            postFeedItem.comments.forEach((comment) => {
-                comment.author = userMap[comment.author];
-            });
-            callback(null, postFeedItem);
+          postFeedItem.likeCounter = postFeedItem.likeCounter.map((id) => userMap[id]);
+          postFeedItem.contents.author = userMap[postFeedItem.contents.author];
+          postFeedItem.comments.forEach((comment) => {
+            comment.author = userMap[comment.author];
+          });
+          resolve(postFeedItem);
         }
+      });
     });
   }
 
@@ -626,18 +582,19 @@ MongoClient.connect(url, function(err, db) {
       res.status(401).end();
     }
   });
+
   app.get('/user/:userId/posts/:time',function(req,res){
     var userId = req.params.userId;
     var time = parseInt(req.params.time);
     var fromUser = getUserIdFromToken(req.get('Authorization'));
     if(userId === fromUser){
-      getAllPosts(time,function(err, postData) {
-        if (err)
-          sendDatabaseError(res, err);
-        else {
-          res.send(postData);
-        }
-      });
+      getAllPosts(time)
+      .then((postData)=>{
+        res.send(postData);
+      })
+      .catch(err => {
+        sendDatabaseError(res, err);
+      })
     }
     else{
       res.status(401).end();
@@ -1528,15 +1485,16 @@ function getMessage(time,sessionId, cb) {
     var userid = req.params.userid
     var data={};
     if(userid === fromUser){
-      db.collection('users').find({
+      db.collection('users').findAsync({
         $or:
           [
             {fullname:{$regex:querytext,$options:'i'}}
           ]
-      }).toArray(function(err, items) {
-        if (err) {
-          return sendDatabaseError(res, err);
-        }
+      })
+      .then(cursor => {
+        return cursor.toArrayAsync();
+      })
+      .then(items => {
         data["users"]=items;
 
         db.collection('activityItems').find({
@@ -1553,49 +1511,29 @@ function getMessage(time,sessionId, cb) {
             if (err) {
               return sendDatabaseError(res, err);
             }
-            var postId=[];
-            postitems.forEach((postitem)=>postId.push(postitem._id));
-            var postfeeditems=[];
-            postId.map((id)=>(getPostFeedItem(id,function(err,postfeeditem){(postfeeditems.push(postfeeditem))}
 
-            )))
+            var resolvedPosts = [];
 
-            data["posts"]=postfeeditems;
-
-            var resolvedContents = [];
-
-            function processNextFeedItem(i) {
-              // Asynchronously resolve a feed item.
-              getPostFeedItem(postId[i], function(err, feedItem) {
-                if (err) {
-                    sendDatabaseError(res, err);
-                } else {
-                  // Success!
-                  resolvedContents.push(feedItem);
-                  if (resolvedContents.length === postId.length) {
-                    // I am the final feed item; all others are resolved.
-                    // Pass the resolved feed document back to the callback.
-                    data["posts"]=resolvedContents;
-                    res.send(data);
-                  } else {
-                    // Process the next feed item.
-                    processNextFeedItem(i + 1);
-                  }
+            if (postitems.length === 0) {
+              return res.send(data);
+            }
+            postitems.forEach((c) => {
+              resolvePostItem(c)
+              .then(postItem => {
+                resolvedPosts.push(postItem);
+                if (resolvedPosts.length === postitems.length) {
+                  data["posts"] = resolvedPosts;
+                  return res.send(data);
                 }
-              });
-            }
-
-            // Special case: Feed is empty.
-            if (postId.length === 0) {
-              res.send(data);
-            } else {
-              processNextFeedItem(0);
-            }
+              })
+              .catch(err => {sendDatabaseError(res,err)})
+            })
 
           })
 
         })
       })
+      .catch(err => {sendDatabaseError(res,err)});
     }
     else{
       res.status(401).end();
