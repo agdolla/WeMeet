@@ -1,11 +1,11 @@
 import React from 'react';
 import Navbar from '../component/navbar';
-import {getUserData,createActivity} from '../server';
+import {getUserData,createActivity,sendInviteActivityRequest} from '../server';
 import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 import {socket,getToken} from '../credentials';
 
 export default class PostActivity extends React.Component {
@@ -25,7 +25,9 @@ export default class PostActivity extends React.Component {
       detail:"",
       alert:false,
       sizealert:false,
-      fileWrongType:false
+      fileWrongType:false,
+      invitedlist:[],
+      reset:false
     }
   }
 
@@ -59,6 +61,15 @@ export default class PostActivity extends React.Component {
     e.target.value = null;
   }
 
+  handleInviteUser(e){
+    var invitedUsers = this.state.invitedlist;
+    invitedUsers.push(e);
+    this.setState({
+      invitedlist: invitedUsers,
+      reset:false
+    })
+  }
+
   handleRequestHide(e){
     e.preventDefault();
     this.setState({
@@ -81,6 +92,7 @@ export default class PostActivity extends React.Component {
     });
   }
 
+
   handleSubmit(e){
     e.preventDefault();
     if(this.state.type!=="------Select a Activity Type-----"&&
@@ -91,18 +103,51 @@ export default class PostActivity extends React.Component {
         this.state.location.trim()!==""&&
         this.state.detail.trim()!==""
     ){
-      createActivity(this.state,()=>{
+      //activity created succesfully
+      var id;
+      createActivity(this.state,(data)=>{
+        id=data._id;
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
-        hashHistory.push('/activity');
+        //for (var i=0;i<this.state.invitedlist.length;i++)
+        this.state.invitedlist.map((targetid)=>{
+            sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
+              if(success){
+                socket.emit('notification',{
+                  authorization:getToken(),
+                  sender: this.props.user,
+                  target: targetid
+                });
+              }
+            });
+        });
       });
+
+      //handle invited userData
+
     }
     else{
       this.setState({alert:true})
     }
+    hashHistory.push('/activity');
   }
 
   componentDidMount(){
     this.getData();
+  }
+
+  handlereset(e){
+    e.preventDefault();
+    this.setState({
+      invitedlist: [],
+      reset:true
+    });
+  }
+
+  handleInvite(e){
+    e.preventDefault();
+    this.setState({
+      reset:false
+    })
   }
 
   handleTitle(e){
@@ -265,23 +310,21 @@ export default class PostActivity extends React.Component {
                   <div className="panel-footer">
                     <div className="row">
                       <div className="col-md-6 nopadding">
-                        <button type="button" className="btn btn-blue-grey pull-Left nomargin" name="button" data-toggle="modal" data-target="#invitemodal">Invite Friend</button>
+                        <button type="button" className="btn btn-blue-grey pull-Left nomargin" onClick={(e)=>this.handleInvite(e)} name="button" data-toggle="modal" data-target="#invitemodal">Invite Friend</button>
                         <div className="modal fade " id="invitemodal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel">
                           <div className="modal-dialog" role="document">
                             <div className="modal-content">
-                              <div className="modal-header" style={{
-                                  "border":'none'
-                                }}>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 className="modal-title" id="myModalLabel">Invite friends</h4>
-                                <hr />
+                              <div className="modal-header">
+                                <button type="button" className="close"  data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h3 className="modal-title">Invite friends</h3>
+
                               </div>
                               <div className="modal-body " style={{
                                   "padding":'0'
                                 }}>
                                 <ul className="media-list">
                                   {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{
-                                    return <FriendItem data={friend} key={i}/>
+                                    return <FriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
                                   })}
                                 </ul>
                           </div>
@@ -289,8 +332,8 @@ export default class PostActivity extends React.Component {
                           <div className="modal-footer" style={{
                               'border':'none'
                             }}>
-                            <button type="button" className="btn btn-default btn-blue-grey" data-dismiss="modal">Close</button>
-                            <button type="button" className="btn btn-primary btn-blue-grey">Confirm</button>
+                            <button type="button" className="btn btn-primary btn-blue-grey" onClick={(e)=>this.handlereset(e)}>Reset</button>
+                            <button type="button" className="btn btn-default btn-blue-grey" data-dismiss="modal">Confirm</button>
                           </div>
                         </div>
                       </div>

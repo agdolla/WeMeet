@@ -21,7 +21,7 @@ export default class Activity_detail extends React.Component{
     return(
       <div style={{marginTop:'70'}}>
         <Navbar activity="active" user={this.state}/>
-        <Ad_body id={this.props.id} avatar={this.state.avatar} currentUser={this.props.user}/>
+        <Ad_body id={this.props.id} avatar={this.state.avatar} currentUser={this.props.user} friends={this.state.friends}/>
       </div>
     )
   }

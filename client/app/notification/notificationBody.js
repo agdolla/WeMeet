@@ -1,7 +1,12 @@
 import React from 'react';
 import Request from './friendRequest';
-import NewsFeed from './newsFeed'
-import {getNotificationData, deleteNotification,acceptRequest} from '../server';
+import ActivityNotification from './activityNotification'
+import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../server';
+import {socket,getToken} from '../credentials';
+
+Array.prototype.insert = function (index, item) {
+this.splice(index, 0, item);
+};
 
 export default class NotificationBody extends React.Component{
 
@@ -9,25 +14,27 @@ export default class NotificationBody extends React.Component{
     super(props);
     this.state = {
       FR: [],
-      NF: []
+      AN: []
     }
   }
+
+
 
   getData(){
     getNotificationData(this.props.user,(notificationData)=>{
       var FR = [];
-      var NF = [];
+      var AN = [];
       notificationData.contents.map((notification)=>{
         if(notification.type === "FR"){
-          FR.push(notification);
+          FR.insert("0",notification);
         }
         else{
-          NF.push(notification);
+          AN.insert("0",notification);
         }
       });
       this.setState({
         FR: FR,
-        NF: NF
+        AN: AN
       });
     })
   }
@@ -38,10 +45,21 @@ export default class NotificationBody extends React.Component{
     });
   }
 
-  handleAccept(id){
-    acceptRequest(id,this.props.user,()=>{
+  handleFriendAccept(id,user){
+    acceptFriendRequest(id,this.props.user,()=>{
       this.getData();
+      socket.emit("friend request accepted",{
+        authorization: getToken(),
+        sender: this.props.user,
+        target: user
+      });
     });
+  }
+
+  handleActivityAccept(notificationid){
+    acceptActivityRequest(notificationid,this.props.user,()=>{
+      this.getData();
+    })
   }
 
   render(){
@@ -59,14 +77,14 @@ export default class NotificationBody extends React.Component{
         <div className="panel panel-default">
           <div className="panel-body">
             {this.state.FR.map((fr,i)=>{
-              return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id)=>this.handleAccept(id)}/>
+              return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
             })}
           </div>
         </div>
       )
     }
     else{
-      if(this.state.NF.length === 0){
+      if(this.state.AN.length === 0){
         return(
           <div className="panel panel-default">
             <div className="panel-body">
@@ -78,8 +96,8 @@ export default class NotificationBody extends React.Component{
       return(
         <div className="panel panel-default">
           <div className="panel-body">
-            {this.state.NF.map((nf,i)=>{
-              return <NewsFeed key={i} data={nf} onDelete={(id)=>this.handleDelete(id)}/>
+            {this.state.AN.map((AN,i)=>{
+              return <ActivityNotification key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>
             })}
           </div>
         </div>
