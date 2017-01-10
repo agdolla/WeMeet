@@ -8,8 +8,9 @@ var bodyParser = require('body-parser');
 var mongo_express = require('mongo-express/lib/middleware');
 // Import the default Mongo Express configuration
 var mongo_express_config = require('mongo-express/config.default.js');
+var Promise = require("bluebird");
 var fs = require('fs');
-var MongoDB = require('mongodb');
+var MongoDB = Promise.promisifyAll(require('mongodb'));
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/Upao';
@@ -213,39 +214,35 @@ MongoClient.connect(url, function(err, db) {
           },
           "comments": []
       };
-      db.collection('postFeedItems').insertOne(post, {
+
+      db.collection('postFeedItems').insertOneAsync(post, {
         ordered: true
-      },function(err, result) {
-          if (err)
-              callback(err);
-          else {
-              post._id = result.insertedId;
-              db.collection("users").findOne({
-                  _id: user
-              }, function(err, userData) {
-                  if (err)
-                      callback(err);
-                  else {
-                      db.collection('postFeeds').updateOne({
-                          _id: userData.post
-                      }, {
-                          $push: {
-                              contents: {
-                                  $each: [post._id],
-                                  $position: 0
-                              }
-                          }
-                      }, function(err) {
-                          if (err)
-                              callback(err);
-                          else {
-                              callback(null, post);
-                          }
-                      });
-                  }
-              });
+      })
+      .then(function(result) {
+        post._id = result.insertedId;
+        return db.collection("users").findOneAsync({
+          _id: user
+        });
+      })
+      .then(function(userData) {
+        return db.collection('postFeeds').updateOneAsync({
+          _id: userData.post
+        }, {
+          $push: {
+            contents: {
+              $each: [post._id],
+              $position: 0
+            }
           }
-      });
+        })
+      })
+      .then(function(){
+        callback(null, post);
+      })
+      .catch(function(err){
+        callback(err);
+      })
+
   }
   //create post
   app.post('/postItem', validate({body: statusUpdateSchema}), function(req, res) {
