@@ -1,5 +1,6 @@
 // Imports the express Node module.
 var express = require('express');
+var compression = require('compression');
 // Creates an Express server.
 var app = express();
 var http = require('http');
@@ -29,7 +30,7 @@ f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571b
 
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
-
+app.use(compression());
 
 MongoClient.connect(url, function(err, db) {
   app.use(bodyParser.json());
@@ -66,21 +67,24 @@ MongoClient.connect(url, function(err, db) {
       .then(function(collection){
 
         var resolvedPosts = [];
-
         if (collection.length === 0) {
           return resolve(collection);
         }
-        collection.forEach((c) => {
-          resolvePostItem(c)
+        else{
+          processNextFeedItem(0);
+        }
+        function processNextFeedItem(i) {
+          resolvePostItem(collection[i])
           .then(postItem => {
             resolvedPosts.push(postItem);
             if (resolvedPosts.length === collection.length) {
               return resolve(resolvedPosts);
             }
+            else{
+              processNextFeedItem(i + 1);
+            }
           })
-          .catch(err => {reject(err)})
-        })
-
+        }
       })
       .catch(err => {
         reject(err);
@@ -99,11 +103,11 @@ MongoClient.connect(url, function(err, db) {
         if (postFeedItem === null) {
           resolve(null);
         } else {
-          resolvePostItem(postFeedItem)
-          .then(postItem =>{
-            resolve(postItem);
-          })
+          return resolvePostItem(postFeedItem)
         }
+      })
+      .then(postItem =>{
+        resolve(postItem);
       })
       .catch(err => {reject(err)})
     });
@@ -128,20 +132,22 @@ MongoClient.connect(url, function(err, db) {
         }
 
         var resolvedContents = [];
-
-        // Special case: Feed is empty.
         if (feedData.contents.length === 0) {
-          resolve(feedData);
-        } else {
-          feedData.contents.forEach((feedItemId) => {
-            getPostFeedItem(feedItemId)
-            .then(feedItem => {
-              resolvedContents.push(feedItem);
-              if (resolvedContents.length === feedData.contents.length) {
-                feedData.contents = resolvedContents;
-                return resolve(feedData);
-              }
-            })
+          return resolve(feedData);
+        }
+        else{
+          processNextFeedItem(0);
+        }
+        function processNextFeedItem(i) {
+          getPostFeedItem(feedData.contents[i])
+          .then(feedItem => {
+            resolvedContents.push(feedItem);
+            if (resolvedContents.length === feedData.contents.length) {
+              feedData.contents = resolvedContents;
+              return resolve(feedData);
+            } else {
+              processNextFeedItem(i + 1);
+            }
           })
         }
       })
@@ -157,9 +163,6 @@ MongoClient.connect(url, function(err, db) {
           res.status(400);
           res.send("Could not look up feed for user " + userId);
         } else {
-          feedData.contents.sort((a,b)=>{
-            return b.contents.postData - a.contents.postDate
-          })
           res.send(feedData);
         }
       })
@@ -321,29 +324,31 @@ MongoClient.connect(url, function(err, db) {
       }
   }
 
-  function resolveSessionObject(sessionList, callback) {
+  function resolveSessionObject(sessionList) {
+    return new Promise(function(resolve, reject) {
       if (sessionList.length === 0) {
-          callback(null, {});
+        resolve({});
       } else {
-          var query = {
-              $or: sessionList.map((id) => {
-                  return {_id: id}
-              })
-          };
-          // Resolve 'like' counter
-          db.collection('messageSession').find(query).toArray(function(err, sessions) {
-              if (err) {
-                  return callback(err);
-              }
-              // Build a map from ID to user object.
-              // (so userMap["4"] will give the user with ID 4)
-              var sessionMap = {};
-              sessions.forEach((session) => {
-                  sessionMap[session._id] = session;
-              });
-              callback(null, sessionMap);
+        var query = {
+          $or: sessionList.map((id) => {
+            return {_id: id}
+          })
+        };
+        // Resolve 'like' counter
+        db.collection('messageSession').findAsync(query)
+        .then(cursor => {
+          return cursor.toArrayAsync();
+        })
+        .then(sessions => {
+          var sessionMap = {};
+          sessions.forEach((session) => {
+            sessionMap[session._id] = session;
           });
+          resolve(sessionMap);
+        })
+        .catch(err => {reject(err)});
       }
+    });
   }
 
   /**
@@ -355,33 +360,26 @@ MongoClient.connect(url, function(err, db) {
   }
 
   function getUserData(userId, callback) {
-      db.collection('users').findOne({
+      db.collection('users').findOneAsync({
           _id: userId
-      }, function(err, userData) {
-          if (err)
-              callback(err);
-          if(userData===null){
-            callback(null,userData)
-          }
-          else {
-              resolveUserObjects(userData.friends, function(err, userMap) {
-                  if (err)
-                      callback(err);
-                  else {
-                      userData.friends = userData.friends.map((id) => userMap[id]);
-                    resolveSessionObject(userData.sessions, function(err, sessionMap) {
-                          if (err)
-                              callback(err);
-                          else {
-                              userData.sessions = userData.sessions.map((id) => sessionMap[id]);
-                              delete userData.password;
-                              callback(null, userData);
-                          }
-                      });
-                  }
-              });
-          }
-      });
+      })
+      .then(userData => {
+        if(userData===null){
+          callback(null,userData)
+        }
+        else {
+          resolveUserObjects(userData.friends, function(err, userMap) {
+            userData.friends = userData.friends.map((id) => userMap[id]);
+            resolveSessionObject(userData.sessions)
+            .then(sessionMap => {
+              userData.sessions = userData.sessions.map((id) => sessionMap[id]);
+              delete userData.password;
+              callback(null, userData);
+            })
+          });
+        }
+      })
+      .catch(err => {callback(err)})
   }
 
   app.get('/chatNotification/:userid',function(req,res){
