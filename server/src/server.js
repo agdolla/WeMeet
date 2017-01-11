@@ -541,30 +541,25 @@ MongoClient.connect(url, function(err, db) {
 	}
 
 	function getAllActivities(callback){
-		db.collection('activityItems').find().toArray(function(err,collection){
-			if(err){
-				return callback(err);
-			}
+		db.collection('activityItems').findAsync()
+		.then(cursor =>{
+			return cursor.toArrayAsync();
+		})
+		.then(collection => {
 			var resolvedActivities = [];
 
 			function processNextFeedItem(i) {
 				// Asynchronously resolve a feed item.
 				resolveActivityItem(collection[i], function(err, activityItem) {
-					if (err) {
-						// Pass an error to the callback.
-						callback(err);
+					resolvedActivities.push(activityItem);
+					if (resolvedActivities.length === collection.length) {
+						// I am the final feed item; all others are resolved.
+						// Pass the resolved feed document back to the callback.
+						collection = resolvedActivities.reverse();
+						callback(null, collection);
 					} else {
-						// Success!
-						resolvedActivities.push(activityItem);
-						if (resolvedActivities.length === collection.length) {
-							// I am the final feed item; all others are resolved.
-							// Pass the resolved feed document back to the callback.
-							collection = resolvedActivities.reverse();
-							callback(null, collection);
-						} else {
-							// Process the next feed item.
-							processNextFeedItem(i + 1);
-						}
+						// Process the next feed item.
+						processNextFeedItem(i + 1);
 					}
 				});
 			}
@@ -574,9 +569,8 @@ MongoClient.connect(url, function(err, db) {
 			} else {
 				processNextFeedItem(0);
 			}
-
-
-		});
+		})
+		.catch((err)=>{callback(err)});
 	}
 
 	app.get('/user/:userId/activities',function(req,res){
@@ -615,54 +609,53 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	function getActivityFeedData(userId, callback) {
-			db.collection('users').findOne({
+			db.collection('users').findOneAsync({
 					_id: userId
-			}, function(err, userData) {
-					if (err)
-							return callback(err);
-					else if (userData === null)
+			})
+			.then(userData =>{
+					if (userData === null)
 							return callback(null, null);
 					else {
-							db.collection('activities').findOne({
+							return db.collection('activities').findOneAsync({
 									_id: userData.activity
-							}, function(err, activity) {
-									if (err)
-											return callback(err);
-									else if (activity === null)
-											return callback(null, null);
-
-									var resolvedContents = [];
-
-									function processNextFeedItem(i) {
-											// Asynchronously resolve a feed item.
-											getActivityFeedItem(activity.contents[i], function(err, feedItem) {
-													if (err) {
-															// Pass an error to the callback.
-															callback(err);
-													} else {
-															// Success!
-															resolvedContents.push(feedItem);
-															if (resolvedContents.length === activity.contents.length) {
-																	// I am the final feed item; all others are resolved.
-																	// Pass the resolved feed document back to the callback.
-																	activity.contents = resolvedContents;
-																	callback(null, activity);
-															} else {
-																	// Process the next feed item.
-																	processNextFeedItem(i + 1);
-															}
-													}
-											});
-									}
-
-									if (activity.contents.length === 0) {
-											callback(null, activity);
-									} else {
-											processNextFeedItem(0);
-									}
-							});
+							})
 					}
-			});
+			})
+			.then(function(activity) {
+				if (activity === null)
+						return callback(null, null);
+
+				var resolvedContents = [];
+
+				function processNextFeedItem(i) {
+						// Asynchronously resolve a feed item.
+						getActivityFeedItem(activity.contents[i], function(err, feedItem) {
+								if (err) {
+										// Pass an error to the callback.
+										callback(err);
+								} else {
+										// Success!
+										resolvedContents.push(feedItem);
+										if (resolvedContents.length === activity.contents.length) {
+												// I am the final feed item; all others are resolved.
+												// Pass the resolved feed document back to the callback.
+												activity.contents = resolvedContents;
+												callback(null, activity);
+										} else {
+												// Process the next feed item.
+												processNextFeedItem(i + 1);
+										}
+								}
+						});
+				}
+
+				if (activity.contents.length === 0) {
+						callback(null, activity);
+				} else {
+						processNextFeedItem(0);
+				}
+			})
+			.catch(err => {callback(err)})
 	}
 
 	function validateEmail(email) {
