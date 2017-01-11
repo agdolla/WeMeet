@@ -64,7 +64,8 @@ export default class Settings extends React.Component{
   handleRequestHide(e){
     e.preventDefault();
     this.setState({
-      cropperOpen: false
+      cropperOpen: false,
+      img: null
     })
   }
 
@@ -199,8 +200,8 @@ export default class Settings extends React.Component{
             cropperOpen={this.state.cropperOpen}
             onCrop={(e)=>this.handleCrop(e)}
             image={this.state.img}
-            width={400}
-            height={350}
+            width={512}
+            height={512}
             />
         }
         <Navbar user={this.state.userData}/>

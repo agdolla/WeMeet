@@ -40,7 +40,7 @@ export default class PostEntry extends React.Component{
     var reader = new FileReader();
     var file = e.target.files[0];
     // Called once the browser finishes loading the image.
-    if(file.size > 150000){
+    if(file.size > 1500000){
       return this.setState({
         fileTooLarge:true
       })

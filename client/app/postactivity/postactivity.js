@@ -73,7 +73,8 @@ export default class PostActivity extends React.Component {
   handleRequestHide(e){
     e.preventDefault();
     this.setState({
-      cropperOpen: false
+      cropperOpen: false,
+      img:null
     })
   }
 
@@ -207,7 +208,7 @@ export default class PostActivity extends React.Component {
             cropperOpen={this.state.cropperOpen}
             onCrop={(e)=>this.handleCrop(e)}
             image={this.state.img}
-            width={1800}
+            width={1200}
             height={500}
             />
         }

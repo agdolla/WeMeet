@@ -138,7 +138,11 @@ export default class PostFeedItem extends React.Component{
         <div className="panel-footer">
           <div className="row">
             <div className="col-md-12">
-              <a href="#" onClick={(e)=>this.handleLikeClick(e)}><span className="glyphicon glyphicon-heart"></span>{data.likeCounter.length}</a>
+              <a href="#" onClick={(e)=>this.handleLikeClick(e)}>
+                <span className="glyphicon glyphicon-heart" 
+                style={{"color":this.didUserLike(this.props.currentUser)===true?"rgb(223, 61, 71)":"grey"}}></span>
+                {data.likeCounter.length}
+              </a>
               <span className="glyphicon glyphicon-comment"></span>{data.comments.length}
 
               <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)}>

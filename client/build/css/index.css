@@ -14,10 +14,16 @@
 {
 	background-color: #757575;
 }
-
-
 .AvatarCropper-base{
-	overflow: auto;
+  overflow-x: hidden;
+}
+
+.AvatarCropper-canvas canvas{
+  width:100%;
+}
+
+.AvatarCropper-canvas input{
+  width:90% !important;
 }
 
 .index .panel{

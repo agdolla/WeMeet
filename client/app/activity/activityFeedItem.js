@@ -23,7 +23,7 @@ export default class ActivityFeedItem extends React.Component{
           </Link>
           <div className="panel-body" style={{'textAlign':'justify'}}>
             <div className="media">
-              <div className="media-left media-middle">
+              <div className="media-left">
                 <Link to={"activity_detail/"+this.state._id}>
                   <img className="media-object" src={this.state.img} width="200px" height="120px;" alt="..." />
                 </Link>
