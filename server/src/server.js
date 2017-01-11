@@ -11,7 +11,8 @@ var mongo_express = require('mongo-express/lib/middleware');
 // Import the default Mongo Express configuration
 var mongo_express_config = require('mongo-express/config.default.js');
 var Promise = require("bluebird");
-var fs = require('fs');
+var fs = Promise.promisifyAll(require('fs'));
+var Jimp = require("jimp");
 var MongoDB = Promise.promisifyAll(require('mongodb'));
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
@@ -693,7 +694,6 @@ MongoClient.connect(url, function(err, db) {
       if (fromUser.str === userId.str) {
         var regex = /^data:.+\/(.+);base64,(.*)$/;
         var matches = body.img.match(regex);
-        var ext = matches[1];
         var data = matches[2];
         var buffer = new Buffer(data, 'base64');
 
@@ -703,7 +703,7 @@ MongoClient.connect(url, function(err, db) {
               ['_id', 'asc']
           ], {
               $set: {
-                  avatar: "img/"+userId+"." + ext
+                  avatar: "img/"+userId+".jpg"
               }
           }, {
               "new": true
@@ -712,7 +712,12 @@ MongoClient.connect(url, function(err, db) {
                   return sendDatabaseError(res, err);
               else {
                   res.send(result.value);
-                  fs.writeFileSync("../client/build/img/"+userId+"." + ext, buffer);
+                  Jimp.read(buffer)
+                  .then(image => {
+                    image.quality(10)
+                    .write("../client/build/img/"+userId+".jpg");
+                  })
+                  .catch(err => {throw(err)});
               }
           });
       } else {

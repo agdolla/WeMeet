@@ -40,7 +40,7 @@ export default class PostActivity extends React.Component {
     if(!file.type.match('image.*')){
       this.setState({fileWrongType:true});
     }
-    else if(file.size<150000){
+    else if(file.size<1100000){
       // Called once the browser finishes loading the image.
       reader.onload = (upload) => {
         this.setState({

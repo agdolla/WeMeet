@@ -35,7 +35,7 @@ export default class Settings extends React.Component{
     var reader = new FileReader();
     var file = e.target.files[0];
     // Called once the browser finishes loading the image.
-    if(file.size > 102400){
+    if(file.size > 1100000){
       return this.setState({
         fileTooLarge:true
       })
