@@ -90,11 +90,12 @@ export default class PostFeedItem extends React.Component{
         throw new Error("Unknown FeedItem: " + data.type);
     }
 
-    var img = <a onClick={(e)=>this.handleImgClick(e)}><img src={contents.img} width="100%" height="100%" alt="" /></a>;
+    // var img = <a onClick={(e)=>this.handleImgClick(e)}><img src={contents.img} width="100%" height="100%" alt="" /></a>;
 
-    if(contents.img === null)
-      img = null;
+    // if(contents.img === null)
+    //   img = null;
 
+    
     var time = moment(contents.postDate).calendar();
 
     if((new Date().getTime()) - contents.postDate <= 86400000)

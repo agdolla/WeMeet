@@ -1,0 +1,79 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _React = require('React');
+
+var _React2 = _interopRequireDefault(_React);
+
+var _reactRouter = require('react-router');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var moment = require('moment');
+
+var Ad_comment = function (_React$Component) {
+  _inherits(Ad_comment, _React$Component);
+
+  function Ad_comment(props) {
+    _classCallCheck(this, Ad_comment);
+
+    var _this = _possibleConstructorReturn(this, (Ad_comment.__proto__ || Object.getPrototypeOf(Ad_comment)).call(this, props));
+
+    _this.state = props.data;
+    return _this;
+  }
+
+  _createClass(Ad_comment, [{
+    key: 'render',
+    value: function render() {
+      //default time format
+      var time = moment(this.state.postDate).calendar();
+      //if less than 24 hours, use relative time
+      if (new Date().getTime() - this.state.postDate <= 86400000) time = moment(this.state.postDate).fromNow();
+
+      return _React2.default.createElement(
+        'div',
+        null,
+        _React2.default.createElement(
+          'div',
+          { className: 'media-left' },
+          _React2.default.createElement(
+            _reactRouter.Link,
+            { to: "profile/" + this.state.author._id },
+            _React2.default.createElement('img', { className: 'media-object', src: this.state.author.avatar, height: '45px', style: { marginTop: '10' } })
+          )
+        ),
+        _React2.default.createElement(
+          'div',
+          { className: 'media-body media-top' },
+          _React2.default.createElement(
+            'h5',
+            null,
+            this.state.author.fullname,
+            _React2.default.createElement(
+              'small',
+              { style: { marginLeft: "5px" } },
+              time
+            )
+          ),
+          this.state.text
+        )
+      );
+    }
+  }]);
+
+  return Ad_comment;
+}(_React2.default.Component);
+
+exports.default = Ad_comment;

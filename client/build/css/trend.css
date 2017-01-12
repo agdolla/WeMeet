@@ -3,6 +3,20 @@
   border-radius: 5px;
   border: none;
 }
+.postImg{
+  font-size:0;
+}
+.postImg div {
+  font-size: 16px; 
+  display: inline-block;
+  margin-bottom: 8px;
+  margin-right: 8px;
+}
+
+.postImg div:nth-of-type(2n) {
+  margin-right: 0;
+}
+
 .main-feed .panel .panel-heading{
   background-color: #FDFDFD;
   border-bottom-color: #FDFDFD

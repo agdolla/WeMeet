@@ -8,5 +8,7 @@ build/js/app.js
 # Ignores .gitignore
 .gitignore
 
+.happypack
+
 # Ignores npm-debug.log
 npm-debug.log*

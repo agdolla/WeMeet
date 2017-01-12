@@ -1,5 +1,7 @@
 var path = require('path');
 
+var HappyPack = require('happypack');
+
 module.exports = {
   // The main "entry point" of your web app. WebPack will pack every module that
   // this file depends on (and its dependencies depend on).
@@ -10,14 +12,27 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "build", "js"),
     publicPath: "/js/",
-    filename: "app.js"
+    filename: "app.js",
+    pathinfo: true
   },
   // Source Maps map locations in build/js/app.js back to individual application
   // modules. Chrome Developer Tools uses this so you can see your original code
   // in the development tools.
   // We use the "inline-source-map" setting (as opposed to external source maps)
   // so this works in a foolproof way.
-  devtool: 'inline-source-map',
+  devtool: 'cheap-module-source-map',
+  plugins: [
+    new HappyPack({
+      loaders: [
+      {
+        loader: 'babel-loader',
+        query: {
+          presets: ['es2015', 'react']
+        }
+      }
+    ]
+    }),
+  ],
   module: {
     // Transforms your application's code using Babel.
     // Babel lets you use new JavaScript features in browsers that do not
@@ -32,13 +47,7 @@ module.exports = {
         // Don't transform any of the modules you depend on -- just transform
         // *your* code.
         exclude: /(node_modules|bower_components)/,
-        loader: 'babel-loader',
-        query: {
-          // es2015 == ECMAScript 2015. Lets you use new JavaScript features.
-          // The React module runs the React compiler, which translates the
-          // HTML in your React modules into code.
-          presets: ['es2015', 'react']
-        }
+        loader: 'happypack/loader'
       }
     ]
   },

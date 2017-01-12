@@ -1,0 +1,151 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+var _util = require('../util');
+
+var _server = require('../server');
+
+var _credentials = require('../credentials');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SearchFeedUserFeedItem = function (_React$Component) {
+  _inherits(SearchFeedUserFeedItem, _React$Component);
+
+  function SearchFeedUserFeedItem(props) {
+    _classCallCheck(this, SearchFeedUserFeedItem);
+
+    var _this = _possibleConstructorReturn(this, (SearchFeedUserFeedItem.__proto__ || Object.getPrototypeOf(SearchFeedUserFeedItem)).call(this, props));
+
+    _this.state = {
+      data: props.data,
+      sucess: false
+    };
+    return _this;
+  }
+
+  _createClass(SearchFeedUserFeedItem, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      this.setState({
+        data: nextProps.data
+      });
+    }
+  }, {
+    key: 'checkFriendsOfUser',
+    value: function checkFriendsOfUser() {
+      var _this2 = this;
+
+      return this.props.currentUser.friends.filter(function (friend) {
+        if (friend._id === _this2.state.data._id) return true;else return false;
+      }).length > 0;
+    }
+  }, {
+    key: 'handleAddFriend',
+    value: function handleAddFriend(e) {
+      var _this3 = this;
+
+      e.preventDefault();
+      (0, _server.addFriend)(this.props.currentUser._id, this.state.data._id, function (success) {
+        if (success) {
+          _this3.setState({
+            success: true
+          });
+
+          _credentials.socket.emit('notification', {
+            authorization: (0, _credentials.getToken)(),
+            sender: _this3.props.currentUser._id,
+            target: _this3.state.data._id
+          });
+        }
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this4 = this;
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'panel panel-default', style: { padding: '10' } },
+        _react2.default.createElement(
+          'div',
+          { className: "alert alert-success " + (0, _util.hideElement)(!this.state.success), role: 'alert' },
+          'Request sent!'
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'media' },
+          _react2.default.createElement(
+            'div',
+            { className: 'media-left' },
+            _react2.default.createElement(
+              _reactRouter.Link,
+              { to: "profile/" + this.state.data._id },
+              _react2.default.createElement('img', { className: 'media-object', src: this.state.data.avatar, width: '50px', height: '50px', alt: '...' })
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'media-body' },
+            _react2.default.createElement(
+              'div',
+              { className: 'row' },
+              _react2.default.createElement(
+                'div',
+                { className: 'col-md-8' },
+                _react2.default.createElement(
+                  'h4',
+                  { className: 'media-heading' },
+                  this.state.data.fullname
+                ),
+                this.state.data.description
+              ),
+              _react2.default.createElement(
+                'div',
+                { className: 'col-md-4' },
+                _react2.default.createElement(
+                  'div',
+                  { className: 'row' },
+                  _react2.default.createElement(
+                    'div',
+                    { className: 'col-md-12' },
+                    _react2.default.createElement(
+                      'a',
+                      { href: '#', onClick: function onClick(e) {
+                          return _this4.handleAddFriend(e);
+                        } },
+                      _react2.default.createElement('i', { className: "fa fa-user-plus pull-right " + (0, _util.hideElement)(this.checkFriendsOfUser() || this.state.data._id === this.props.currentUser._id), 'aria-hidden': 'true' })
+                    ),
+                    _react2.default.createElement('i', { className: "fa fa-check pull-right " + (0, _util.hideElement)(!this.checkFriendsOfUser()), style: { color: 'green' }, 'aria-hidden': 'true' })
+                  )
+                )
+              )
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return SearchFeedUserFeedItem;
+}(_react2.default.Component);
+
+exports.default = SearchFeedUserFeedItem;

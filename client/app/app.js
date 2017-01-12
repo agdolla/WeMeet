@@ -23,9 +23,7 @@ class ActivityPage extends React.Component{
       window.onload = ()=>{
         socket.emit('user',userId);
       }
-      return(
-        <Activity user={userId}/>
-      );
+      return(<Activity user={userId}/>);
     }
     else{
       hashHistory.push('/');

@@ -1,0 +1,83 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.socket = undefined;
+exports.getToken = getToken;
+exports.getUserId = getUserId;
+exports.getUserFullName = getUserFullName;
+exports.updateCredentials = updateCredentials;
+exports.isUserLoggedIn = isUserLoggedIn;
+exports.logout = logout;
+
+var _socket = require('socket.io-client');
+
+var _socket2 = _interopRequireDefault(_socket);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// var debug = require('react-debug');
+var socket = exports.socket = (0, _socket2.default)();
+/**
+ * Stores authentication credentials.
+ */
+var user = null;
+// var debug = require('react-debug');
+
+/**
+ * Get the token of the currently authenticated user.
+ */
+function getToken() {
+  if (isUserLoggedIn()) {
+    return localStorage.getItem('token');
+  }
+  return null;
+}
+
+/**
+ * Get the user ID of the currently authenticated user.
+ */
+function getUserId() {
+  if (isUserLoggedIn()) {
+    return user._id;
+  }
+  return null;
+}
+
+/**
+ * Get the full name of the currently authenticated user.
+ */
+function getUserFullName() {
+  if (isUserLoggedIn()) {
+    return user.fullName;
+  }
+  return null;
+}
+
+/**
+ * Update the token and user document of the currently authenticated user.
+ */
+function updateCredentials(newUser, newToken) {
+  localStorage.setItem('token', newToken);
+  localStorage.setItem('user', JSON.stringify(newUser));
+}
+
+/**
+ * Returns true if the user is logged in.
+ * You will implement this during the workshop.
+ */
+function isUserLoggedIn() {
+  // Replace later.
+  user = JSON.parse(localStorage.getItem('user'));
+  return user !== null && user !== undefined;
+}
+/**
+ * Logs the user out.
+ * You will implement this during the workshop.
+ */
+function logout() {
+  socket.emit('logout', user._id);
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 import {hideElement} from '../util';
+// var debug = require('react-debug');
 
 export default class PostEntry extends React.Component{
 
@@ -8,7 +9,7 @@ export default class PostEntry extends React.Component{
     super(props);
     this.state = {
       text: "",
-      img: null,
+      img: [],
       fileTooLarge:false,
       fileWrongType:false
     }
@@ -27,7 +28,7 @@ export default class PostEntry extends React.Component{
       this.setState(
         {
           text:"",
-          img:null
+          img:[]
         }
       );
     }
@@ -35,31 +36,39 @@ export default class PostEntry extends React.Component{
 
   uploadImg(e){
     e.preventDefault();
-    // Read the first file that the user selected (if the user selected multiple
-    // files, we ignore the others).
-    var reader = new FileReader();
-    var file = e.target.files[0];
-    // Called once the browser finishes loading the image.
-    if(file.size > 1500000){
-      return this.setState({
-        fileTooLarge:true
-      })
-    }
-    else if(!file.type.match('image.*')){
-      return this.setState({
-        fileWrongType:true
-      })
-    }
-    reader.onload = (upload) => {
-      this.setState({
-        img: upload.target.result,
-        fileTooLarge:false,
-        fileWrongType:false
-      });
-    };
+    var files = e.target.files; // FileList object
 
-    // Tell the brower to read the image in as a data URL!
-    reader.readAsDataURL(file);
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0; i<files.length; i++) {
+      var file = files[i];
+
+      if(file.size > 1500000){
+        return this.setState({
+          fileTooLarge:true
+        })
+      }
+      else if(!file.type.match('image.*')){
+        return this.setState({
+          fileWrongType:true
+        })
+      }
+
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (() => {
+        return (e) => {
+          var img = this.state.img;
+          img.push(e.target.result);
+          this.setState({
+            img:img
+          })
+        };
+      })(file);
+
+      // Read in the image file as a data URL.
+      reader.readAsDataURL(file);
+    }
   }
 
   render(){
@@ -79,7 +88,7 @@ export default class PostEntry extends React.Component{
                 <label htmlFor="pic">
                   <a><i className="fa fa-camera" aria-hidden="true"></i></a>
                 </label>
-                <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onChange={(e)=>this.uploadImg(e)}></input>
+                <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onChange={(e)=>this.uploadImg(e)} multiple></input>
               </div>
               <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handlePost(e)}>Submit</button>
             </div>
@@ -90,7 +99,17 @@ export default class PostEntry extends React.Component{
               <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileTooLarge)} role="alert">
                 <strong>File is too large</strong>
               </div>
-              <img className={hideElement(this.state.img === null)} src={this.state.img} style={{width: "100%"}} />
+              <div className="postImg">
+                {
+                  this.state.img.map((element, index) =>{
+                    return(
+                        <div style={{"width":"calc("+(100/(this.state.img.length>2?2:this.state.img.length))+"% - 4px)"}}>
+                          <img src={element} key={index} alt="" style={{'width':"100%"}}/>
+                        </div>
+                      )
+                  })
+                }
+              </div>
             </div>
           </div>
         </div>

@@ -1,0 +1,176 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _friendRequest = require('./friendRequest');
+
+var _friendRequest2 = _interopRequireDefault(_friendRequest);
+
+var _activityNotification = require('./activityNotification');
+
+var _activityNotification2 = _interopRequireDefault(_activityNotification);
+
+var _server = require('../server');
+
+var _credentials = require('../credentials');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+Array.prototype.insert = function (index, item) {
+  this.splice(index, 0, item);
+};
+
+var NotificationBody = function (_React$Component) {
+  _inherits(NotificationBody, _React$Component);
+
+  function NotificationBody(props) {
+    _classCallCheck(this, NotificationBody);
+
+    var _this = _possibleConstructorReturn(this, (NotificationBody.__proto__ || Object.getPrototypeOf(NotificationBody)).call(this, props));
+
+    _this.state = {
+      FR: [],
+      AN: []
+    };
+    return _this;
+  }
+
+  _createClass(NotificationBody, [{
+    key: 'getData',
+    value: function getData() {
+      var _this2 = this;
+
+      (0, _server.getNotificationData)(this.props.user, function (notificationData) {
+        var FR = [];
+        var AN = [];
+        notificationData.contents.map(function (notification) {
+          if (notification.type === "FR") {
+            FR.insert("0", notification);
+          } else {
+            AN.insert("0", notification);
+          }
+        });
+        _this2.setState({
+          FR: FR,
+          AN: AN
+        });
+      });
+    }
+  }, {
+    key: 'handleDelete',
+    value: function handleDelete(id) {
+      var _this3 = this;
+
+      (0, _server.deleteNotification)(id, this.props.user, function () {
+        _this3.getData();
+      });
+    }
+  }, {
+    key: 'handleFriendAccept',
+    value: function handleFriendAccept(id, user) {
+      var _this4 = this;
+
+      (0, _server.acceptFriendRequest)(id, this.props.user, function () {
+        _this4.getData();
+        _credentials.socket.emit("friend request accepted", {
+          authorization: (0, _credentials.getToken)(),
+          sender: _this4.props.user,
+          target: user
+        });
+      });
+    }
+  }, {
+    key: 'handleActivityAccept',
+    value: function handleActivityAccept(notificationid) {
+      var _this5 = this;
+
+      (0, _server.acceptActivityRequest)(notificationid, this.props.user, function () {
+        _this5.getData();
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this6 = this;
+
+      if (this.props.id == 1) {
+        if (this.state.FR.length === 0) {
+          return _react2.default.createElement(
+            'div',
+            { className: 'panel panel-default' },
+            _react2.default.createElement(
+              'div',
+              { className: 'panel-body' },
+              'Nothing here yet'
+            )
+          );
+        }
+        return _react2.default.createElement(
+          'div',
+          { className: 'panel panel-default' },
+          _react2.default.createElement(
+            'div',
+            { className: 'panel-body' },
+            this.state.FR.map(function (fr, i) {
+              return _react2.default.createElement(_friendRequest2.default, { key: i, data: fr, onDelete: function onDelete(id) {
+                  return _this6.handleDelete(id);
+                }, onAccept: function onAccept(id, user) {
+                  return _this6.handleFriendAccept(id, user);
+                } });
+            })
+          )
+        );
+      } else {
+        if (this.state.AN.length === 0) {
+          return _react2.default.createElement(
+            'div',
+            { className: 'panel panel-default' },
+            _react2.default.createElement(
+              'div',
+              { className: 'panel-body' },
+              'Nothing here yet'
+            )
+          );
+        }
+        return _react2.default.createElement(
+          'div',
+          { className: 'panel panel-default' },
+          _react2.default.createElement(
+            'div',
+            { className: 'panel-body' },
+            this.state.AN.map(function (AN, i) {
+              return _react2.default.createElement(_activityNotification2.default, { key: i, data: AN, onDelete: function onDelete(id) {
+                  return _this6.handleDelete(id);
+                }, onAccept: function onAccept(activityid, userid) {
+                  return _this6.handleActivityAccept(activityid, userid);
+                } });
+            })
+          )
+        );
+      }
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.getData();
+    }
+  }]);
+
+  return NotificationBody;
+}(_react2.default.Component);
+
+exports.default = NotificationBody;

@@ -1,0 +1,252 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _postComment = require('./postComment');
+
+var _postComment2 = _interopRequireDefault(_postComment);
+
+var _postCommentThread = require('./postCommentThread');
+
+var _postCommentThread2 = _interopRequireDefault(_postCommentThread);
+
+var _server = require('../server');
+
+var _reactRouter = require('react-router');
+
+var _reactImages = require('react-images');
+
+var _reactImages2 = _interopRequireDefault(_reactImages);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var moment = require('moment');
+var debug = require('react-debug');
+
+var PostFeedItem = function (_React$Component) {
+  _inherits(PostFeedItem, _React$Component);
+
+  function PostFeedItem(props) {
+    _classCallCheck(this, PostFeedItem);
+
+    var _this = _possibleConstructorReturn(this, (PostFeedItem.__proto__ || Object.getPrototypeOf(PostFeedItem)).call(this, props));
+
+    _this.state = {
+      data: props.data,
+      isOpen: false
+    };
+    return _this;
+  }
+
+  _createClass(PostFeedItem, [{
+    key: 'handlePostComment',
+    value: function handlePostComment(comment) {
+      var _this2 = this;
+
+      (0, _server.postComment)(this.state.data._id, this.props.currentUser, comment, function (newFeedItem) {
+        _this2.setState({
+          data: newFeedItem
+        });
+      });
+    }
+  }, {
+    key: 'handleImgClick',
+    value: function handleImgClick(e) {
+      e.preventDefault();
+      this.setState({
+        isOpen: true
+      });
+    }
+  }, {
+    key: 'closeLightbox',
+    value: function closeLightbox(e) {
+      e.preventDefault();
+      this.setState({
+        isOpen: false
+      });
+    }
+  }, {
+    key: 'handleLikeClick',
+    value: function handleLikeClick(e) {
+      var _this3 = this;
+
+      e.preventDefault();
+
+      if (e.button === 0) {
+        var cb = function cb(likeCounter) {
+          _this3.state.data.likeCounter = likeCounter;
+          var newData = _this3.state.data;
+          _this3.setState({
+            data: newData
+          });
+        };
+
+        if (!this.didUserLike(this.props.currentUser)) {
+          (0, _server.likePost)(this.state.data._id, this.props.currentUser, cb);
+        } else {
+          (0, _server.unLikePost)(this.state.data._id, this.props.currentUser, cb);
+        }
+      }
+    }
+  }, {
+    key: 'didUserLike',
+    value: function didUserLike(user) {
+      var likeCounter = this.state.data.likeCounter;
+
+      for (var i = 0; i < likeCounter.length; i++) {
+        if (likeCounter[i]._id === user) return true;
+      }
+      return false;
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      this.setState({
+        data: nextProps.data
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this4 = this;
+
+      var data = this.state.data;
+      var contents;
+      switch (data.type) {
+        case "general":
+          contents = data.contents;
+          break;
+        default:
+          throw new Error("Unknown FeedItem: " + data.type);
+      }
+
+      var imgs = [];
+      var images = [];
+
+      if (contents !== null && contents !== undefined) {
+        contents.img.map(function (element, index) {
+          imgs.push(_react2.default.createElement(
+            'div',
+            { style: { "width": "calc(" + 100 / (contents.img.length > 2 ? 2 : contents.img.length) + "% - 4px)" } },
+            _react2.default.createElement('img', { src: element, key: index, alt: '', style: { 'width': "100%" } })
+          ));
+          images.push({
+            src: element,
+            caption: contents.text
+          });
+        });
+      }
+
+      var time = moment(contents.postDate).calendar();
+
+      if (new Date().getTime() - contents.postDate <= 86400000) time = moment(contents.postDate).fromNow();
+
+      return _react2.default.createElement(
+        'div',
+        { className: 'panel panel-default' },
+        _react2.default.createElement(
+          'div',
+          { className: 'panel-heading' },
+          _react2.default.createElement(
+            'div',
+            { className: 'media' },
+            _react2.default.createElement(
+              'div',
+              { className: 'media-left' },
+              _react2.default.createElement(
+                _reactRouter.Link,
+                { to: "profile/" + contents.author._id },
+                _react2.default.createElement('img', { className: 'media-object', src: contents.author.avatar, height: '50px', alt: '...' })
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'media-body' },
+              _react2.default.createElement(
+                'h4',
+                { className: 'media-heading' },
+                contents.author.fullname,
+                ' '
+              ),
+              _react2.default.createElement(
+                'span',
+                { style: { "fontSize": "12" } },
+                time
+              ),
+              _react2.default.createElement(
+                'div',
+                { className: 'pull-right' },
+                _react2.default.createElement('span', { className: 'glyphicon glyphicon-map-marker' }),
+                Object.keys(contents.location).length > 0 ? contents.location.address_components[3].short_name + "," + contents.location.address_components[5].short_name : "Earth"
+              )
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'panel-body' },
+          _react2.default.createElement(
+            'p',
+            null,
+            contents.text
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'postImg' },
+            imgs
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'panel-footer' },
+          _react2.default.createElement(
+            'div',
+            { className: 'row' },
+            _react2.default.createElement(
+              'div',
+              { className: 'col-md-12' },
+              _react2.default.createElement(
+                'a',
+                { href: '#', onClick: function onClick(e) {
+                    return _this4.handleLikeClick(e);
+                  } },
+                _react2.default.createElement('span', { className: 'glyphicon glyphicon-heart',
+                  style: { "color": this.didUserLike(this.props.currentUser) === true ? "rgb(223, 61, 71)" : "grey" } }),
+                data.likeCounter.length
+              ),
+              _react2.default.createElement('span', { className: 'glyphicon glyphicon-comment' }),
+              data.comments.length,
+              _react2.default.createElement(
+                _postCommentThread2.default,
+                { onPostComment: function onPostComment(comment) {
+                    return _this4.handlePostComment(comment);
+                  } },
+                data.comments.map(function (comment, i) {
+                  return _react2.default.createElement(_postComment2.default, { key: i, data: comment });
+                })
+              )
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return PostFeedItem;
+}(_react2.default.Component);
+
+exports.default = PostFeedItem;

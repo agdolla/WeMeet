@@ -1,5 +1,4 @@
 import {} from './component/database.js';
-// var token = 'eyJpZCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMSJ9';
 var moment = require('moment');
 import {updateCredentials,getToken} from './credentials';
 

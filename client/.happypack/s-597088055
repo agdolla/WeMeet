@@ -1,0 +1,147 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _activityFeedItem = require('./activityFeedItem');
+
+var _activityFeedItem2 = _interopRequireDefault(_activityFeedItem);
+
+var _server = require('../server');
+
+var _reactRouter = require('react-router');
+
+var _credentials = require('../credentials');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var debug = require('react-debug');
+
+var ActivityFeed = function (_React$Component) {
+  _inherits(ActivityFeed, _React$Component);
+
+  function ActivityFeed(props) {
+    _classCallCheck(this, ActivityFeed);
+
+    var _this = _possibleConstructorReturn(this, (ActivityFeed.__proto__ || Object.getPrototypeOf(ActivityFeed)).call(this, props));
+
+    _this.state = {
+      contents: [],
+      notified: false
+    };
+    return _this;
+  }
+
+  _createClass(ActivityFeed, [{
+    key: 'getData',
+    value: function getData() {
+      var _this2 = this;
+
+      (0, _server.getAllActivities)(this.props.user, function (activityFeedData) {
+        _this2.setState({
+          contents: activityFeedData,
+          notified: false
+        });
+      });
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps() {
+      this.getData();
+    }
+  }, {
+    key: 'shouldComponentUpdate',
+    value: function shouldComponentUpdate(nextProps, nextState) {
+      if (nextState.contents === undefined || this.state.contents === undefined) {
+        return true;
+      } else if (nextState.contents.length !== this.state.contents.length) {
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: 'notifyMe',
+    value: function notifyMe(cb) {
+      if (!Notification) {
+        alert('Desktop notifications not available in your browser. Try Chromium.');
+        return;
+      }
+
+      if (Notification.permission !== "granted") Notification.requestPermission();else {
+        this.setState({
+          notified: true
+        });
+        var notification = new Notification('WeMeet', {
+          icon: 'https://www.w1meet.com/img/logo/mipmap-xxhdpi/ic_launcher.png',
+          body: "Hey there! You have new activities"
+        });
+        notification.onclick = function (event) {
+          event.preventDefault();
+          event.target.close();
+          _reactRouter.hashHistory.push('/activity');
+          cb();
+        };
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this3 = this;
+
+      if (this.state.contents.length === 0) {
+        return _react2.default.createElement(
+          'div',
+          { className: 'alert alert-info', role: 'alert' },
+          'No one has posted any activities yet. Post your first activity',
+          _react2.default.createElement(
+            _reactRouter.Link,
+            { to: 'postactivity' },
+            _react2.default.createElement(
+              'strong',
+              null,
+              ' here'
+            )
+          )
+        );
+      }
+      return _react2.default.createElement(
+        'div',
+        null,
+        this.state.contents.map(function (activityFeedItem) {
+          return _react2.default.createElement(_activityFeedItem2.default, { key: activityFeedItem._id, data: activityFeedItem, currentUser: _this3.props.user });
+        })
+      );
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this4 = this;
+
+      this.getData();
+      _credentials.socket.on('newActivity', function () {
+        if (!_this4.state.notified) {
+          _this4.notifyMe(function () {
+            _this4.getData();
+          });
+        }
+      });
+    }
+  }]);
+
+  return ActivityFeed;
+}(_react2.default.Component);
+
+exports.default = ActivityFeed;

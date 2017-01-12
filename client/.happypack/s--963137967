@@ -1,0 +1,126 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _server = require('../server');
+
+var _activityFeedItem = require('../activity/activityFeedItem');
+
+var _activityFeedItem2 = _interopRequireDefault(_activityFeedItem);
+
+var _searchFeedUserFeedItem = require('./searchFeedUserFeedItem');
+
+var _searchFeedUserFeedItem2 = _interopRequireDefault(_searchFeedUserFeedItem);
+
+var _postFeedItem = require('../post/postFeedItem');
+
+var _postFeedItem2 = _interopRequireDefault(_postFeedItem);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SearchEntry = function (_React$Component) {
+  _inherits(SearchEntry, _React$Component);
+
+  function SearchEntry(props) {
+    _classCallCheck(this, SearchEntry);
+
+    var _this = _possibleConstructorReturn(this, (SearchEntry.__proto__ || Object.getPrototypeOf(SearchEntry)).call(this, props));
+
+    _this.state = {
+      value: "",
+      searchDataResult: {},
+      title: ""
+    };
+    return _this;
+  }
+
+  _createClass(SearchEntry, [{
+    key: 'handleChange',
+    value: function handleChange(e) {
+      e.preventDefault();
+      this.setState({ value: e.target.value });
+    }
+  }, {
+    key: 'handleKeyUp',
+    value: function handleKeyUp(e) {
+      var _this2 = this;
+
+      e.preventDefault();
+      if (e.key === "Enter") {
+        var query = this.state.value.trim();
+        if (query !== "") {
+          (0, _server.searchquery)(this.props.user._id, query, function (searchData) {
+            return _this2.setState({
+              searchDataResult: searchData,
+              title: "Search result for " + query + ": "
+            });
+          });
+        }
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this3 = this;
+
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'div',
+          { className: 'panel panel-default' },
+          _react2.default.createElement(
+            'div',
+            { className: 'panel-heading' },
+            _react2.default.createElement(
+              'div',
+              { className: 'media' },
+              _react2.default.createElement(
+                'div',
+                { className: 'media-body' },
+                _react2.default.createElement('input', { type: 'text', className: 'form-control', placeholder: 'Welcome to We Meet, please search', onChange: function onChange(e) {
+                    return _this3.handleChange(e);
+                  },
+                  onKeyUp: function onKeyUp(e) {
+                    return _this3.handleKeyUp(e);
+                  } })
+              )
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'h4',
+          { style: { marginBottom: '10' } },
+          this.state.title
+        ),
+        this.state.searchDataResult.users === undefined ? [] : this.state.searchDataResult.users.map(function (users, i) {
+          return _react2.default.createElement(_searchFeedUserFeedItem2.default, { key: i, data: users, currentUser: _this3.props.user });
+        }),
+        this.state.searchDataResult.activities === undefined ? [] : this.state.searchDataResult.activities.map(function (activity, i) {
+          return _react2.default.createElement(_activityFeedItem2.default, { key: i, data: activity });
+        }),
+        this.state.searchDataResult.posts === undefined ? [] : this.state.searchDataResult.posts.map(function (post, i) {
+          return _react2.default.createElement(_postFeedItem2.default, { key: i, data: post, currentUser: _this3.props.user._id });
+        })
+      );
+    }
+  }]);
+
+  return SearchEntry;
+}(_react2.default.Component);
+
+exports.default = SearchEntry;

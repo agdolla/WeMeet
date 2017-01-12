@@ -175,23 +175,24 @@ MongoClient.connect(url, function(err, db) {
 	function postStatus(user, text, location, img) {
 		return new Promise(function(resolve,reject){
 			var time = new Date().getTime();
-
-			var regex = /^data:.+\/(.+);base64,(.*)$/;
-			var matches = img.match(regex);
-			var data = matches[2];
-			var buffer = new Buffer(data, 'base64');
 			//generate unique name
 			var name = uuidV1();
+
+			var imgPath = [];
+
+			for (var i = 0; i < img.length; i++) {
+				imgPath.push("img/status/"+name+i+".jpg");
+			}
 
 			var post = {
 					"likeCounter": [],
 					"type": "general",
 					"contents": {
-							"author": user,
-							"postDate": time,
-							"text": text,
-							"img": "img/status/"+name+".jpg",
-							"location": location
+						"author": user,
+						"postDate": time,
+						"text": text,
+						"img": imgPath,
+						"location": location
 					},
 					"comments": []
 			};
@@ -219,11 +220,19 @@ MongoClient.connect(url, function(err, db) {
 			})
 			.then(function(){
 				resolve(post);
-				Jimp.read(buffer)
-				.then(image =>{
-					image.quality(30)
-					.write("../client/build/img/status/" + name + ".jpg");
-				})
+				img.forEach(function(element, index) {
+					var regex = /^data:.+\/(.+);base64,(.*)$/;
+					var matches = element.match(regex);
+					var data = matches[2];
+					var buffer = new Buffer(data, 'base64');
+					
+					Jimp.read(buffer)
+					.then(image =>{
+						image.quality(30)
+						.write("../client/build/"+imgPath[index]);
+					})
+
+				});
 			})
 			.catch(function(err){
 				reject(err);

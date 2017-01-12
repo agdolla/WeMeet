@@ -1,0 +1,439 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _React = require('React');
+
+var _React2 = _interopRequireDefault(_React);
+
+var _ad_comment = require('./ad_comment');
+
+var _ad_comment2 = _interopRequireDefault(_ad_comment);
+
+var _ad_commentThread = require('./ad_commentThread');
+
+var _ad_commentThread2 = _interopRequireDefault(_ad_commentThread);
+
+var _ad_participates_item = require('./ad_participates_item');
+
+var _ad_participates_item2 = _interopRequireDefault(_ad_participates_item);
+
+var _ad_signeduser = require('./ad_signeduser');
+
+var _ad_signeduser2 = _interopRequireDefault(_ad_signeduser);
+
+var _server = require('../server');
+
+var _reactRouter = require('react-router');
+
+var _credentials = require('../credentials');
+
+var _util = require('../util');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var moment = require('moment');
+
+var debug = require('react-debug');
+
+var Ad_body = function (_React$Component) {
+  _inherits(Ad_body, _React$Component);
+
+  function Ad_body(props) {
+    _classCallCheck(this, Ad_body);
+
+    var _this = _possibleConstructorReturn(this, (Ad_body.__proto__ || Object.getPrototypeOf(Ad_body)).call(this, props));
+
+    _this.state = {
+      activity: {},
+      ishost: "",
+      joined: false,
+      success: false
+    };
+    return _this;
+  }
+
+  _createClass(Ad_body, [{
+    key: 'didUserLike',
+    value: function didUserLike(user) {
+      var likeCounter = this.state.activity.likeCounter;
+      for (var i = 0; i < likeCounter.length; i++) {
+        if (likeCounter[i]._id === user) return true;
+      }
+      return false;
+    }
+  }, {
+    key: 'handleLikeClick',
+    value: function handleLikeClick(e) {
+      var _this2 = this;
+
+      e.preventDefault();
+
+      if (e.button === 0) {
+        var cb = function cb(likeCounter) {
+          var activity = _this2.state.activity;
+          activity.likeCounter = likeCounter;
+          _this2.setState({ activity: activity });
+        };
+
+        if (!this.didUserLike(this.props.currentUser)) {
+          (0, _server.likeActivity)(this.state.activity._id, this.props.currentUser, cb);
+        } else {
+          (0, _server.unLikeActivity)(this.state.activity._id, this.props.currentUser, cb);
+        }
+      }
+    }
+  }, {
+    key: 'handlePostComment',
+    value: function handlePostComment(comment) {
+      var _this3 = this;
+
+      (0, _server.adpostComment)(this.state.activity._id, this.props.currentUser, comment, function (newFeedItem) {
+        _this3.setState({ activity: newFeedItem });
+      });
+    }
+  }, {
+    key: 'getData',
+    value: function getData() {
+      var _this4 = this;
+
+      (0, _server.getActivityDetail)(this.props.id, function (activitydata) {
+        _this4.setState({ activity: activitydata }, function () {
+          if (_this4.isHost()) {
+            _this4.setState({ ishost: "disabled" });
+          }
+          if (_this4.checkJoined()) {
+            _this4.setState({ ishost: "disabled" });
+            _this4.setState({ joined: true });
+          }
+        });
+      });
+    }
+  }, {
+    key: 'isHost',
+    value: function isHost() {
+      return this.props.currentUser === this.state.activity.author._id;
+    }
+  }, {
+    key: 'checkJoined',
+    value: function checkJoined() {
+      var _this5 = this;
+
+      if (this.state.activity.participants === undefined) {
+        return false;
+      }
+      return this.state.activity.participants.filter(function (user) {
+        if (user._id === _this5.props.currentUser) return true;else return false;
+      }).length > 0;
+    }
+  }, {
+    key: 'handleRequestJoin',
+    value: function handleRequestJoin(e) {
+      var _this6 = this;
+
+      e.preventDefault();
+      (0, _server.sendJoinActivityRequest)(this.props.currentUser, this.state.activity.author._id, this.state.activity._id, function (success) {
+        if (success) {
+          _credentials.socket.emit('notification', {
+            authorization: (0, _credentials.getToken)(),
+            sender: _this6.props.currentUser,
+            target: _this6.state.activity.author._id
+          });
+          _this6.setState({
+            success: true
+          });
+        }
+      });
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.getData();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this7 = this;
+
+      var buttonText;
+      if (this.state.ishost === "disabled" && this.state.joined != true) {
+        buttonText = "You are the host";
+      } else if (this.state.ishost === "disabled" && this.state.joined == true) {
+        buttonText = "You have joined";
+      } else {
+        buttonText = "Click to sign up";
+      }
+      var data = this.state.activity;
+      var contents;
+      var text;
+      var name;
+      var authorid;
+      switch (data.type) {
+        case "Event":
+          contents = data.contents;
+          name = this.state.activity.author.fullname;
+          authorid = this.state.activity.author._id;
+          text = contents.text.split("\n").map(function (line, i) {
+            return _React2.default.createElement(
+              'p',
+              { key: "line" + i },
+              line
+            );
+          });
+          break;
+        case "Entertainment":
+          contents = data.contents;
+          name = this.state.activity.author.fullname;
+          authorid = this.state.activity.author._id;
+          text = contents.text.split("\n").map(function (line, i) {
+            return _React2.default.createElement(
+              'p',
+              { key: "line" + i },
+              line
+            );
+          });
+          break;
+        case "Study":
+          contents = data.contents;
+          name = this.state.activity.author.fullname;
+          authorid = this.state.activity.author._id;
+          text = contents.text.split("\n").map(function (line, i) {
+            return _React2.default.createElement(
+              'p',
+              { key: "line" + i },
+              line
+            );
+          });
+          break;
+        default:
+          text = null;
+          name = null;
+      }
+
+      return _React2.default.createElement(
+        'div',
+        { className: 'activityDetail' },
+        _React2.default.createElement(
+          'div',
+          { className: 'modal fade', id: 'myModal', tabIndex: '-1', role: 'dialog' },
+          _React2.default.createElement(
+            'div',
+            { className: 'modal-dialog', role: 'document' },
+            _React2.default.createElement(
+              'div',
+              { className: 'modal-content' },
+              _React2.default.createElement(
+                'div',
+                { className: 'modal-header', style: { 'paddingBottom': '4px' } },
+                _React2.default.createElement(
+                  'button',
+                  { type: 'button', className: 'close', 'data-dismiss': 'modal', 'aria-label': 'Close' },
+                  _React2.default.createElement(
+                    'span',
+                    { 'aria-hidden': 'true' },
+                    '\xD7'
+                  )
+                ),
+                _React2.default.createElement(
+                  'h3',
+                  { className: 'modal-title', style: { 'paddingBottom': '10px' } },
+                  ' Participating users'
+                )
+              ),
+              _React2.default.createElement(
+                'div',
+                { className: 'modal-body' },
+                _React2.default.createElement(
+                  'ul',
+                  { className: 'media-list' },
+                  this.state.activity.participants === undefined ? 0 : this.state.activity.participants.length === 0 ? "No one has signed up yet!" : this.state.activity.participants.map(function (p, i) {
+                    return _React2.default.createElement(_ad_participates_item2.default, { key: i, data: p, currUser: _this7.props.currentUser, friends: _this7.props.friends });
+                  })
+                )
+              )
+            )
+          )
+        ),
+        _React2.default.createElement('div', { className: 'adbackground', style: { "backgroundImage": "url(" + this.state.activity.img + ")" } }),
+        _React2.default.createElement(
+          'div',
+          { className: 'container' },
+          _React2.default.createElement(
+            'div',
+            { className: 'row' },
+            _React2.default.createElement(
+              'div',
+              { className: 'col-lg-10 col-md-12 col-sm-12 col-xs-12 col-lg-offset-1' },
+              _React2.default.createElement(
+                'div',
+                { className: 'panel panel-default body-title' },
+                _React2.default.createElement(
+                  'div',
+                  { className: 'panel-heading' },
+                  _React2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _React2.default.createElement(
+                      'div',
+                      { className: 'col-md-8' },
+                      _React2.default.createElement(
+                        'h2',
+                        { style: { 'paddingLeft': '15px' } },
+                        this.state.activity.title
+                      ),
+                      _React2.default.createElement('span', { className: 'glyphicon glyphicon-time', style: { 'paddingRight': '10px', 'paddingLeft': '15px' } }),
+                      moment(this.state.activity.startTime).format('MMMM Do YYYY, h:mm:ss a'),
+                      _React2.default.createElement('br', null),
+                      _React2.default.createElement('span', { className: 'glyphicon glyphicon-map-marker',
+                        style: { 'paddingRight': '10px', 'paddingTop': '5px', 'paddingLeft': '15px' } }),
+                      this.state.activity.location,
+                      _React2.default.createElement('br', null),
+                      _React2.default.createElement('span', { className: 'glyphicon glyphicon-user',
+                        style: { 'paddingRight': '10px', 'paddingTop': '5px', 'paddingLeft': '15px' } }),
+                      _React2.default.createElement(
+                        _reactRouter.Link,
+                        { to: "profile/" + authorid },
+                        name
+                      )
+                    ),
+                    _React2.default.createElement(
+                      'div',
+                      { className: 'col-md-4', style: { 'paddingTop': '20px' } },
+                      _React2.default.createElement(
+                        'div',
+                        { className: 'col-md-12 col-sm-12 col-xs-12 body-title-signed-in', align: 'left' },
+                        this.state.activity.participants === undefined ? 0 : this.state.activity.participants.length,
+                        ' people ',
+                        _React2.default.createElement(
+                          'font',
+                          { style: { 'color': 'grey' } },
+                          'signed up'
+                        ),
+                        _React2.default.createElement(
+                          'font',
+                          { style: { 'color': '#61B4E4', 'fontSize': '10px', 'paddingLeft': '10px', 'cursor': 'pointer' },
+                            'data-toggle': 'modal', 'data-target': '#myModal' },
+                          'View All'
+                        ),
+                        _React2.default.createElement('br', null),
+                        this.state.activity.participants === undefined ? 0 : this.state.activity.participants.map(function (p, i) {
+                          return _React2.default.createElement(_ad_signeduser2.default, { key: i, data: p });
+                        })
+                      )
+                    )
+                  ),
+                  _React2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _React2.default.createElement(
+                      'div',
+                      { className: 'col-md-12 col-sm-12 col-xs-12 remain-places', style: { 'paddingTop': '25px', textAlign: "center" } },
+                      _React2.default.createElement(
+                        'div',
+                        { className: "alert alert-success" + (0, _util.hideElement)(!this.state.success), role: 'alert', align: 'center', style: {
+                            'marginLeft': '43%',
+                            marginRight: '43%',
+                            paddingTop: 8,
+                            paddingBottom: 8,
+                            marginBottom: 7
+                          } },
+                        _React2.default.createElement(
+                          'font',
+                          { className: (0, _util.hideElement)(!this.state.success), style: { fontSize: 13 } },
+                          'Request sent!'
+                        )
+                      ),
+                      _React2.default.createElement(
+                        'a',
+                        null,
+                        '  ',
+                        _React2.default.createElement(
+                          'span',
+                          { className: "btn btn-default sign-up-btn " + this.state.ishost, onClick: function onClick(e) {
+                              if (_this7.state.ishost !== "disabled") {
+                                _this7.handleRequestJoin(e);
+                              } else {
+                                return;
+                              }
+                            }, align: 'center' },
+                          buttonText
+                        )
+                      )
+                    )
+                  ),
+                  _React2.default.createElement(
+                    'div',
+                    { className: 'row' },
+                    _React2.default.createElement(
+                      'div',
+                      { className: 'col-md-12 col-sm-12 col-xs-12 body-title-icon', style: { textAlign: "right" } },
+                      _React2.default.createElement(
+                        'a',
+                        { href: '#', onClick: function onClick(e) {
+                            return _this7.handleLikeClick(e);
+                          } },
+                        _React2.default.createElement('span', { className: 'glyphicon glyphicon-heart', style: { 'marginRight': '5px' } }),
+                        this.state.activity.likeCounter === undefined ? 0 : this.state.activity.likeCounter.length
+                      ),
+                      _React2.default.createElement('span', { className: 'glyphicon glyphicon-comment', style: { 'marginRight': '5px', 'marginLeft': '20px' } }),
+                      this.state.activity.comments === undefined ? 0 : this.state.activity.comments.length
+                    )
+                  )
+                )
+              ),
+              _React2.default.createElement(
+                'div',
+                { className: 'panel panel-default' },
+                _React2.default.createElement(
+                  'div',
+                  { className: 'panel-heading' },
+                  _React2.default.createElement(
+                    'div',
+                    { className: 'container-fluid body-detail' },
+                    _React2.default.createElement(
+                      'h4',
+                      { style: { 'color': 'grey' } },
+                      'Activity Details'
+                    ),
+                    _React2.default.createElement(
+                      'div',
+                      { className: 'row' },
+                      _React2.default.createElement(
+                        'div',
+                        { className: 'col-md-12', style: { 'paddingTop': '20px' } },
+                        text
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        ),
+        _React2.default.createElement(
+          _ad_commentThread2.default,
+          { count: this.state.activity.comments === undefined ? 0 : this.state.activity.comments.length, user: this.props.currentUser, avatar: this.props.avatar, onPost: function onPost(comment) {
+              return _this7.handlePostComment(comment);
+            } },
+          this.state.activity.comments === undefined ? 0 : this.state.activity.comments.map(function (comment, i) {
+            return _React2.default.createElement(_ad_comment2.default, { key: i, data: comment });
+          })
+        )
+      );
+    }
+  }]);
+
+  return Ad_body;
+}(_React2.default.Component);
+
+exports.default = Ad_body;
