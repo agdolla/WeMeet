@@ -2,6 +2,7 @@ import React from 'react';
 import {Link} from 'react-router';
 import {hideElement} from '../util';
 // var debug = require('react-debug');
+var emojione = require('emojione');
 
 export default class PostEntry extends React.Component{
 
@@ -17,7 +18,7 @@ export default class PostEntry extends React.Component{
 
   handleChange(e){
     e.preventDefault();
-    this.setState({text:e.target.value});
+    this.setState({text:emojione.shortnameToUnicode(e.target.value)});
   }
 
   handlePost(e){
@@ -36,9 +37,8 @@ export default class PostEntry extends React.Component{
 
   uploadImg(e){
     e.preventDefault();
-    var files = e.target.files; // FileList object
+    var files = e.target.files;
 
-    // Loop through the FileList and render image files as thumbnails.
     for (var i = 0; i<files.length; i++) {
       var file = files[i];
 
@@ -47,7 +47,7 @@ export default class PostEntry extends React.Component{
           fileTooLarge:true
         })
       }
-      else if(!file.type.match('image.*')){
+      if(!file.type.match('image.*')){
         return this.setState({
           fileWrongType:true
         })
@@ -71,6 +71,14 @@ export default class PostEntry extends React.Component{
     }
   }
 
+  componentDidMount(){
+    $('#inputtext').jemoji({
+      folder: 'emojis/',
+      btn: $('#openEmoji'),
+      container:  $('#inputtext').parent()
+    });
+  }
+
   render(){
     return(
       <div className="panel panel-default post-send">
@@ -82,13 +90,14 @@ export default class PostEntry extends React.Component{
               </Link>
             </div>
             <div className="media-body">
-              <textarea name="name" rows="8" cols="40" placeholder="What's on your mind"
-                value={this.state.text} onChange={(e)=>this.handleChange(e)}></textarea>
+              <textarea name="name" id="inputtext" rows="8" cols="40" placeholder="What's on your mind"
+                value={this.state.text} onChange={(e)=>this.handleChange(e)} onFocus={(e)=>this.handleChange(e)}></textarea>
               <div className="btn-group" role="group" aria-label="...">
                 <label htmlFor="pic">
                   <a><i className="fa fa-camera" aria-hidden="true"></i></a>
                 </label>
                 <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onChange={(e)=>this.uploadImg(e)} multiple></input>
+                <a id="openEmoji"><span><i className="fa fa-lg fa-smile-o" aria-hidden="true"></i></span></a>
               </div>
               <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handlePost(e)}>Submit</button>
             </div>

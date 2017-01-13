@@ -1,5 +1,5 @@
 import React from 'react';
-
+var emojione = require('emojione')
 
 export default class ChatEntry extends React.Component{
   constructor(props){
@@ -11,7 +11,7 @@ export default class ChatEntry extends React.Component{
 
   handleChange(e){
     e.preventDefault();
-    this.setState({text: e.target.value})
+    this.setState({text: emojione.shortnameToUnicode(e.target.value)})
   }
 
   handleSubmit(e){
@@ -23,14 +23,30 @@ export default class ChatEntry extends React.Component{
       }
     }
   }
+  componentDidMount(){
+    $('#chattext').jemoji({
+      folder: 'emojis/',
+      btn: $('#openchatemoji'),
+      container:  $('#chattext').parent().parent()
+    });
+  }
 
   render(){
     return(
       <div className="panel-footer">
           <div className="row">
               <div className="col-md-10 col-xs-10 col-sm-10">
-                  <textarea className="form-control msg nohover non-active" name="name" rows="3" value={this.state.text}
-                    onChange={(e)=>this.handleChange(e)} cols="40" placeholder="please type text" onKeyUp={(e) => this.handleSubmit(e)}></textarea>
+                  <textarea id="chattext" className="form-control msg nohover non-active" name="name" rows="3" value={this.state.text}
+                    onChange={(e)=>this.handleChange(e)} onFocus={(e)=>this.handleChange(e)} cols="40" placeholder="please type text" 
+                    onKeyUp={(e) => this.handleSubmit(e)}></textarea>
+
+                <div className="btn-group" role="group" aria-label="...">
+                  <label htmlFor="pic" style={{marginRight:'20px'}}>
+                    <a><i className="fa fa-camera" aria-hidden="true"></i></a>
+                  </label>
+                  <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" multiple></input>
+                  <a id="openchatemoji"><span><i className="fa fa-lg fa-smile-o" aria-hidden="true"></i></span></a>
+                </div>
               </div>
               <div className="col-md-2 col-sm-2 col-xs-2 send">
                   <button type="button" className="btn btn-default btn-blue-grey pull-right" name="button"

@@ -34,6 +34,7 @@
     "zxcvbn": "^4.4.1"
   },
   "dependencies": {
+    "emojione": "^2.2.7",
     "sweetalert": "^1.1.3"
   }
 }

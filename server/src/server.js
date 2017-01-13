@@ -21,7 +21,7 @@ var url = 'mongodb://localhost:27017/Upao';
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
-// var certificate = fs.readFileSync(path.join(__dirname, '2_www.w1meet.com.crt'));
+// var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
 fda064351da14375118884b463b47a4c0699f67aed0094f339998f102d99bdfe479dbefae0
 6933592c86abd20c5447a5f9af1b275c909de4108ae2256bcb0285daad0aa890171849fb3c

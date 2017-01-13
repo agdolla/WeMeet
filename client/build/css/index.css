@@ -3,6 +3,9 @@
 {
 	background-color: #F5F5F5;
 }
+.jemoji-menu{
+	width: 100% !important;
+}
 
 *::-webkit-scrollbar
 {
