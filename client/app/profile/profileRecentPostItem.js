@@ -1,13 +1,17 @@
 import React from 'react';
 import {likePost, unLikePost} from '../server';
-
+import Lightbox from 'react-images';
 var moment = require('moment');
 
 export default class ProfileRecentPostItem extends React.Component{
 
   constructor(props){
     super(props);
-    this.state = props.data;
+    this.state = {
+      data: props.data,
+      isOpen:false,
+      currentImage:0
+    };
   }
 
   handleLikeClick(e){
@@ -19,17 +23,30 @@ export default class ProfileRecentPostItem extends React.Component{
       };
 
       if(!this.didUserLike(this.props.currentUser)){
-        likePost(this.state._id,this.props.currentUser,cb);
+        likePost(this.state.data._id,this.props.currentUser,cb);
       }
       else{
-        unLikePost(this.state._id,this.props.currentUser,cb);
+        unLikePost(this.state.data._id,this.props.currentUser,cb);
       }
     }
 
   }
+  handleImgClick(index,e){
+    e.preventDefault();
+    this.setState({
+      currentImage:index,
+      isOpen:true
+    });
+  }
+  closeLightbox(e){
+    e.preventDefault();
+    this.setState({
+      isOpen:false
+    })
+  }
 
   didUserLike(user) {
-    var likeCounter = this.state.likeCounter;
+    var likeCounter = this.state.data.likeCounter;
 
     for (var i = 0; i < likeCounter.length; i++) {
       if (likeCounter[i]._id === user)
@@ -39,7 +56,7 @@ export default class ProfileRecentPostItem extends React.Component{
   }
 
   render(){
-    var data = this.state;
+    var data = this.state.data;
     var contents;
     switch(data.type){
       case "general":
@@ -48,12 +65,21 @@ export default class ProfileRecentPostItem extends React.Component{
       default:
         throw new Error("Unknown FeedItem: " + data.type);
     }
-
-    var img = <img src={contents.img} width="100%" height="100%" alt="" />;
-
-    if(contents.img === null)
-      img = null;
-
+    var imgs = [];
+    var images = [];
+    imgs = contents.img;
+    var display = [];
+    imgs.map((obj,i)=>{
+      display.push(
+          <a onClick={(e)=>this.handleImgClick(i,e)} key={i} style={{"width":"calc("+(100/(imgs.length>2?2:imgs.length))+"% - 4px)"}}>
+            <img src={obj} style={{'width':"100%"}}/>
+          </a>
+        );
+      images.push({
+        src: obj,
+        caption: contents.text
+      })
+    });
     var time = moment(contents.postDate).calendar();
 
     if((new Date().getTime()) - contents.postDate <= 86400000)
@@ -85,7 +111,33 @@ export default class ProfileRecentPostItem extends React.Component{
               </div>
             </div>
             <div className="panel-body">
-              <center>{img}</center>
+              <div className="postImg">
+                {
+                    <Lightbox
+                    images={images}
+                    isOpen={this.state.isOpen}
+                    currentImage={this.state.currentImage}
+                    onClose={(e)=>this.closeLightbox(e)}
+                    showThumbnails={true}
+                    onClickThumbnail={(index)=>{
+                      this.setState({
+                        currentImage: index
+                      })
+                    }}
+                    onClickPrev={()=>{
+                      this.setState({
+                        currentImage: (this.state.currentImage+images.length-1)%images.length
+                      })
+                    }}
+                    onClickNext={()=>{
+                      this.setState({
+                        currentImage: (this.state.currentImage+1)%images.length
+                      })
+                    }}
+                    />
+                }
+                {display}
+              </div>
             </div>
             <div className="panel-footer">
               <div className="row">

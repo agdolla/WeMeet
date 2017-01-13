@@ -7,7 +7,7 @@ import {unLikePost} from '../server';
 import {Link} from 'react-router';
 import Lightbox from 'react-images';
 var moment = require('moment');
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export default class PostFeedItem extends React.Component{
 

@@ -1,7 +1,7 @@
 import {} from './component/database.js';
 var moment = require('moment');
-import {updateCredentials,getToken} from './credentials';
-
+import {updateCredentials,getToken,logout} from './credentials';
+var swal = require('sweetalert');
 /**
 * Properly configure+send an XMLHttpRequest with error handling,
 * authorization token, and other needed properties.
@@ -17,6 +17,12 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   // Response received from server. It could be a failure, though!
   xhr.addEventListener('load', function() {
     var statusCode = xhr.status;
+    if(statusCode===401){
+      return logout();
+    }
+    if(statusCode===500){
+      swal("Oops...Something Went Wrong", "Please Try Again Later", "error");
+    }
     // var statusText = xhr.statusText;
     if (statusCode >= 200 && statusCode < 300) {
       // Success: Status code is in the [200, 300) range.
