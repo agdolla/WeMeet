@@ -27,7 +27,8 @@ export default class ChatEntry extends React.Component{
     $('#chattext').jemoji({
       folder: 'emojis/',
       btn: $('#openchatemoji'),
-      container:  $('#chattext').parent().parent()
+      container:  $('#chattext').parent().parent(),
+      navigation:false
     });
   }
 

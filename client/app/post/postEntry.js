@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 import {hideElement} from '../util';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 var emojione = require('emojione');
 
 export default class PostEntry extends React.Component{
@@ -52,7 +52,6 @@ export default class PostEntry extends React.Component{
           fileWrongType:true
         })
       }
-
       var reader = new FileReader();
 
       // Closure to capture the file information.
