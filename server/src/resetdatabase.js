@@ -230,7 +230,7 @@ var initialData = {
         //unix time
         "postDate": 1478129314000,
         "text": "What's up there",
-        "img": "img/tmp.jpg"
+        "img": ["img/tmp.jpg"]
       },
       "comments": [
         {
