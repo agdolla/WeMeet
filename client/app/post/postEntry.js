@@ -103,9 +103,9 @@ export default class PostEntry extends React.Component{
                 {
                   this.state.img.map((element, index) =>{
                     return(
-                        <div style={{"width":"calc("+(100/(this.state.img.length>2?2:this.state.img.length))+"% - 4px)"}}>
+                        <a style={{"width":"calc("+(100/(this.state.img.length>2?2:this.state.img.length))+"% - 4px)"}}>
                           <img src={element} key={index} alt="" style={{'width':"100%"}}/>
-                        </div>
+                        </a>
                       )
                   })
                 }

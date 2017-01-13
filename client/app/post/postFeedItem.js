@@ -7,7 +7,7 @@ import {unLikePost} from '../server';
 import {Link} from 'react-router';
 import Lightbox from 'react-images';
 var moment = require('moment');
-// var debug = require('react-debug');
+var debug = require('react-debug');
 
 export default class PostFeedItem extends React.Component{
 
@@ -15,7 +15,8 @@ export default class PostFeedItem extends React.Component{
     super(props);
     this.state = {
       data: props.data,
-      isOpen:false
+      isOpen:false,
+      currentImage:0
     };
   }
 
@@ -27,9 +28,10 @@ export default class PostFeedItem extends React.Component{
     })
   }
 
-  handleImgClick(e){
+  handleImgClick(index,e){
     e.preventDefault();
     this.setState({
+      currentImage:index,
       isOpen:true
     });
   }
@@ -90,12 +92,21 @@ export default class PostFeedItem extends React.Component{
         throw new Error("Unknown FeedItem: " + data.type);
     }
 
-    // var img = <a onClick={(e)=>this.handleImgClick(e)}><img src={contents.img} width="100%" height="100%" alt="" /></a>;
-
-    // if(contents.img === null)
-    //   img = null;
-
-    
+    var imgs = [];
+    var images = [];
+    imgs = contents.img;
+    var display = [];
+    imgs.map((obj,i)=>{
+      display.push(
+          <a onClick={(e)=>this.handleImgClick(i,e)} key={i} style={{"width":"calc("+(100/(imgs.length>2?2:imgs.length))+"% - 4px)"}}>
+            <img src={obj} style={{'width':"100%"}}/>
+          </a>
+        );
+      images.push({
+        src: obj,
+        caption: contents.text
+      })
+    });
     var time = moment(contents.postDate).calendar();
 
     if((new Date().getTime()) - contents.postDate <= 86400000)
@@ -127,14 +138,32 @@ export default class PostFeedItem extends React.Component{
             {contents.text}
           </p>
           {
-            img===null?null:
-            <Lightbox
-              images={[{ src: contents.img, caption: contents.text}]}
+              <Lightbox
+              images={images}
               isOpen={this.state.isOpen}
+              currentImage={this.state.currentImage}
               onClose={(e)=>this.closeLightbox(e)}
+              showThumbnails={true}
+              onClickThumbnail={(index)=>{
+                this.setState({
+                  currentImage: index
+                })
+              }}
+              onClickPrev={()=>{
+                this.setState({
+                  currentImage: (this.state.currentImage+images.length-1)%images.length
+                })
+              }}
+              onClickNext={()=>{
+                this.setState({
+                  currentImage: (this.state.currentImage+1)%images.length
+                })
+              }}
               />
           }
-          {img}
+          <div className="postImg">
+            {display}
+          </div>
         </div>
         <div className="panel-footer">
           <div className="row">
