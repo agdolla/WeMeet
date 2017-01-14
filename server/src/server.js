@@ -20,6 +20,7 @@ var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/Upao';
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+var mcache = require('memory-cache');
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -33,6 +34,24 @@ f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571b
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 app.use(compression());
+var cache = (duration) => {
+  return (req, res, next) => {
+    var key = '__express__' + req.originalUrl || req.url
+    var cachedBody = mcache.get(key)
+    if (cachedBody) {
+      res.send(cachedBody)
+      return
+    } else {
+      res.sendResponse = res.send
+      res.send = (body) => {
+        mcache.put(key, body, duration * 1000);
+        res.sendResponse(body)
+      }
+      next()
+    }
+  }
+}
+
 
 MongoClient.connect(url, function(err, db) {
 	app.use(bodyParser.json());
@@ -157,7 +176,7 @@ MongoClient.connect(url, function(err, db) {
 		});
 	}
 
-	app.get('/user/:userId/feed', function(req, res) {
+	app.get('/user/:userId/feed',cache(10),function(req, res) {
 			var userId = req.params.userId;
 			getPostFeedData(new ObjectID(userId))
 			.then(feedData => {
@@ -419,7 +438,7 @@ MongoClient.connect(url, function(err, db) {
 	})
 
 	//get user data
-	app.get('/user/:userId', function(req, res) {
+	app.get('/user/:userId',cache(100),function(req, res) {
 			var userId = req.params.userId;
 			getUserData(new ObjectID(userId), function(err, userData) {
 					if (err)
@@ -582,7 +601,7 @@ MongoClient.connect(url, function(err, db) {
 		.catch((err)=>{callback(err)});
 	}
 
-	app.get('/user/:userId/activities',function(req,res){
+	app.get('/user/:userId/activities',cache(10),function(req,res){
 		var userId = req.params.userId;
 		var fromUser = getUserIdFromToken(req.get('Authorization'));
 		if(userId === fromUser){
@@ -599,7 +618,7 @@ MongoClient.connect(url, function(err, db) {
 		}
 	});
 
-	app.get('/user/:userId/posts/:time',function(req,res){
+	app.get('/user/:userId/posts/:time',cache(10),function(req,res){
 		var userId = req.params.userId;
 		var time = parseInt(req.params.time);
 		var fromUser = getUserIdFromToken(req.get('Authorization'));
@@ -761,7 +780,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	// get activity Feed data
-	app.get('/user/:userid/activity', function(req, res) {
+	app.get('/user/:userid/activity',cache(10), function(req, res) {
 			var userId = new ObjectID(req.params.userid);
 			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			// if(userId === fromUser){
@@ -830,7 +849,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	//get activity detail
-	app.get('/activityItem/:activityId', function(req, res) {
+	app.get('/activityItem/:activityId',cache(100), function(req, res) {
 			var activityId = new ObjectID(req.params.activityId);
 			getActivityFeedItem(activityId, function(err, activityData) {
 					res.status(201);
@@ -1256,54 +1275,54 @@ MongoClient.connect(url, function(err, db) {
 		var body = req.body;
 		var time = (new Date()).getTime();
 		if (userid === fromUser) {
-				var senderid = body.sender;
-				var targetid = body.target;
-				var text = body.text;
-				var lastmessage = {
-						"sender": new ObjectID(senderid),
-						"target": new ObjectID(targetid),
-						"date": time,
-						"text": text
-				}
-				getSessionContentsID(new ObjectID(id), function(err, contentsid) {
-						if (err)
-								sendDatabaseError(res, err);
-						else {
-								db.collection('message').updateOne({
-										_id: new ObjectID(contentsid)
-								}, {
-										$push: {
-												messages: lastmessage
-										}
-								}, function(err) {
-										if (err)
-												sendDatabaseError(res.err);
-										else {
-												getMessage(time+1,contentsid, function(err, messages) {
-														if (err)
-																sendDatabaseError(res, err);
-														else {
-																//seting lastmessage;
-																lastmessage.isread = false;
-																db.collection("messageSession").updateOne({
-																		_id: new ObjectID(id)
-																}, {
-																		$set: {
-																				"lastmessage": lastmessage
-																		}
-																}, function(err) {
-																		if (err)
-																				sendDatabaseError(res, err);
+			var senderid = body.sender;
+			var targetid = body.target;
+			var text = body.text;
+			var lastmessage = {
+					"sender": new ObjectID(senderid),
+					"target": new ObjectID(targetid),
+					"date": time,
+					"text": text
+			}
+			getSessionContentsID(new ObjectID(id), function(err, contentsid) {
+					if (err)
+							sendDatabaseError(res, err);
+					else {
+							db.collection('message').updateOne({
+									_id: new ObjectID(contentsid)
+							}, {
+									$push: {
+											messages: lastmessage
+									}
+							}, function(err) {
+									if (err)
+											sendDatabaseError(res.err);
+									else {
+											getMessage(time+1,contentsid, function(err, messages) {
+													if (err)
+															sendDatabaseError(res, err);
+													else {
+															//seting lastmessage;
+															lastmessage.isread = false;
+															db.collection("messageSession").updateOne({
+																	_id: new ObjectID(id)
+															}, {
+																	$set: {
+																			"lastmessage": lastmessage
+																	}
+															}, function(err) {
+																	if (err)
+																			sendDatabaseError(res, err);
 
-																		else res.send(messages);
-																});
-														}
-												});
-										}
-								})
+																	else res.send(messages);
+															});
+													}
+											});
+									}
+							})
 
-						}
-				});
+					}
+			});
 		} else {
 				res.status(401).end();
 		}
@@ -1343,7 +1362,7 @@ function getMessage(time,sessionId, cb) {
 	});
 }
 
-	app.get('/getsession/:userid/:targetid', function(req, res) {
+	app.get('/getsession/:userid/:targetid', cache(30), function(req, res) {
 			var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var userid = req.params.userid;
 			if (userid == fromUser) {
@@ -1437,37 +1456,28 @@ function getMessage(time,sessionId, cb) {
 	 * Get the user ID from a token. Returns -1 (an invalid ID)
 	 * if it fails.
 	 */
-	 function getUserIdFromToken(authorizationLine) {
-		 try {
-			 // Cut off "Bearer " from the header value.
-			 var token = authorizationLine.slice(7);
-			 // Verify the token. Throws if the token is invalid or expired.
-			 var tokenObj = jwt.verify(token, secretKey);
-			 var id = tokenObj['id'];
-			 // Check that id is a string.
-			 if (typeof id === 'string') {
-				 return id;
-			 } else {
-				 // Not a string. Return "", an invalid ID.
-				 // This should technically be impossible unless
-				 // the server accidentally
-				 // generates a token with a number for an id!
-				 return "";
-			 }
-		 } catch (e) {
-			 // Return an invalid ID.
-			 return "";
-		 }
-	 }
-
-	// var ResetDatabase = require('./resetdatabase');
-	// // Reset database.
-	// app.post('/resetdb', function(req, res) {
-	//     console.log("Resetting database...");
-	//     ResetDatabase(db, function() {
-	//         res.send();
-	//     });
-	// });
+		function getUserIdFromToken(authorizationLine) {
+			try {
+				// Cut off "Bearer " from the header value.
+				var token = authorizationLine.slice(7);
+				// Verify the token. Throws if the token is invalid or expired.
+				var tokenObj = jwt.verify(token, secretKey);
+				var id = tokenObj['id'];
+				// Check that id is a string.
+				if (typeof id === 'string') {
+				return id;
+				} else {
+				// Not a string. Return "", an invalid ID.
+				// This should technically be impossible unless
+				// the server accidentally
+				// generates a token with a number for an id!
+				return "";
+			}
+		} catch (e) {
+			// Return an invalid ID.
+			return "";
+		}
+	}
 
 	/**
 	 * Translate JSON Schema Validation failures into error 400s.
@@ -1478,7 +1488,8 @@ function getMessage(time,sessionId, cb) {
 						res.status(400).end();
 				} else {
 						// It's some other sort of error; pass it to next error middleware handler
-						next(err);
+						console.log(err.stack);
+						res.status(500).send({"Error" : err.stack});
 				}
 		});
 
@@ -1496,7 +1507,7 @@ function getMessage(time,sessionId, cb) {
 	});
 
 	// get search result.
-	app.get('/search/userid/:userid/querytext/:querytext',function(req,res){
+	app.get('/search/userid/:userid/querytext/:querytext',cache(10),function(req,res){
 		var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var querytext = req.params.querytext.toLowerCase();
 		var userid = req.params.userid
@@ -1556,6 +1567,7 @@ function getMessage(time,sessionId, cb) {
 			res.status(401).end();
 		}
 	});
+
 
 	app.post('/signup',validate({body:userSchema}),function(req,res){
 		var user = req.body;
