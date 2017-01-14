@@ -17,13 +17,17 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   // Response received from server. It could be a failure, though!
   xhr.addEventListener('load', function() {
     var statusCode = xhr.status;
+    var statusText = xhr.statusText;
     if(statusCode===401){
+      errorCb(401);
       return logout();
     }
     if(statusCode===500){
-      swal("Oops...Something Went Wrong", "Please Try Again Later", "error");
+      swal(statusText, "Please Try Again Later", "error");
     }
-    // var statusText = xhr.statusText;
+    if(statusCode===400){
+      swal(statusText, "Please Try Again Later", "error");
+    }
     if (statusCode >= 200 && statusCode < 300) {
       // Success: Status code is in the [200, 300) range.
       // Call the callback with the final XHR object.

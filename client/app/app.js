@@ -14,7 +14,7 @@ import {hideElement} from './util';
 import {signup,login} from './server.js';
 import {getUserId,isUserLoggedIn,socket} from './credentials';
 var zxcvbn = require('zxcvbn');
-// var debug = require('react-debug');
+var debug = require('react-debug');
 
 class ActivityPage extends React.Component{
   render(){
@@ -257,29 +257,31 @@ class LandingPage extends React.Component{
     this.setState(update);
   }
 
-  hanleSignIn(e){
+  handleSignIn(e){
     e.preventDefault();
-    this.setState({
-      submitted:true
-    });
 
-    login(this.state.signInEmail,this.state.signInPass,(success)=>{
-      if(success){
-        this.setState({
-          signInPass:"",
-          signInEmail:"",
-          failedLogin:false,
-          submitted:false
-        });
-        hashHistory.push('/activity');
-      }
-      else{
-        this.setState({
-          failedLogin:true,
-          submitted:false
-        });
-      }
-    });
+    if(this.state.signInPass!==""&&this.state.signInEmail!==""&& (e.key==="Enter"||e.button===0)){
+      this.setState({
+        submitted:true
+      });
+      login(this.state.signInEmail,this.state.signInPass,(success)=>{
+        if(success){
+          this.setState({
+            signInPass:"",
+            signInEmail:"",
+            failedLogin:false,
+            submitted:false
+          });
+          hashHistory.push('/activity');
+        }
+        else{
+          this.setState({
+            failedLogin:true,
+            submitted:false
+          });
+        }
+      });
+    }
 
   }
   componentDidMount(){
@@ -296,16 +298,12 @@ class LandingPage extends React.Component{
 
   handleSignUp(e){
     e.preventDefault();
-    // if(this.state.passwordStrength!==4){
-    //    return this.setState({
-    //     passwordTooSimple:true
-    //   })
-    // }
     if(this.state.signUpName.trim()!==""&&
     this.state.signUpEmail!==""&&
     this.state.signUpPass!==""&&
     this.state.passwordStrength>=80&&
-    this.state.signUpPass===this.state.signUpPass2){
+    this.state.signUpPass===this.state.signUpPass2&&(e.key==="Enter"||e.button===0)){
+      debug("here");
       this.setState({
         submitted:true
       });
@@ -341,21 +339,15 @@ class LandingPage extends React.Component{
         }
       });
     }
-    else if(this.state.passwordStrength<80 && this.state.signUpPass!==""){
+    else if(this.state.passwordStrength<80 && this.state.signUpPass!==""&&(e.key==="Enter"||e.button===0)){
       this.setState({
         passwordTooSimple:true,
         submitted:false
       })
     }
-    else if(this.state.signUpPass2!==this.state.signUpPass){
+    else if(this.state.signUpPass2!==this.state.signUpPass&&(e.key==="Enter"||e.button===0)){
       this.setState({
         passwordError:true,
-        submitted:false
-      })
-    }
-    else{
-      this.setState({
-        failedSignUp:true,
         submitted:false
       })
     }
@@ -373,7 +365,7 @@ class LandingPage extends React.Component{
             <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-dark btn-lg">Sign in</a>
           </div>
         </div>
-        <form className="container index LandingPage">
+        <div className="container index LandingPage">
           <div className="row">
             <div className="col-md-6 signin">
               <div className={"alert alert-danger " + hideElement(!this.state.failedLogin)} role="alert"><strong>Invalid email address or password.</strong> Please try a different email address or password, and try logging in again.</div>
@@ -385,14 +377,14 @@ class LandingPage extends React.Component{
                   <div className="row">
                     <div className="col-md-7 col-md-offset-2">
                       <div className="md-form">
-                        <input disabled={this.state.submitted} type="text" className="form-control"
+                        <input onKeyUp={(e)=>this.handleSignIn(e)} disabled={this.state.submitted} type="text" className="form-control"
                           onChange={(e)=>this.handleChange("signInEmail",e)} required/>
                         <label>Email</label>
                       </div>
                     </div>
                     <div className="col-md-7 col-md-offset-2">
                       <div className="md-form">
-                        <input disabled={this.state.submitted} type="password" className="form-control"
+                        <input onKeyUp={(e)=>this.handleSignIn(e)} disabled={this.state.submitted} type="password" className="form-control"
                           onChange={(e)=>this.handleChange("signInPass",e)}
                           required/>
                         <label>Password</label>
@@ -403,7 +395,7 @@ class LandingPage extends React.Component{
                 <div className="panel-footer">
                   <div className="row">
                     <div className="col-md-12">
-                      <button disabled={this.state.submitted} type="submit" className="btn btn-amber pull-right" onClick={(e)=>this.hanleSignIn(e)}>
+                      <button disabled={this.state.submitted} type="submit" className="btn btn-amber pull-right" onClick={(e)=>this.handleSignIn(e)}>
                         Welcome back!
                       </button>
                     </div>
@@ -433,19 +425,19 @@ class LandingPage extends React.Component{
               <div className="row">
                 <div className="col-md-7 col-md-offset-2">
                   <div className="md-form">
-                    <input type="text" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpName",e)}/>
+                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="text" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpName",e)}/>
                     <label>Username</label>
                   </div>
                 </div>
                 <div className="col-md-7 col-md-offset-2">
                   <div className="md-form">
-                    <input type="email" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpEmail",e)}/>
+                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="email" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpEmail",e)}/>
                     <label>Email</label>
                   </div>
                 </div>
                 <div className="col-md-7 col-md-offset-2">
                   <div className="md-form">
-                    <input type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass",e)}/>
+                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass",e)}/>
                     <label>Password</label>
                   </div>
                   <div className="progress" style={{height:'6', marginTop:'-15',borderRadius:'0'}}>
@@ -459,7 +451,7 @@ class LandingPage extends React.Component{
                 </div>
                 <div className="col-md-7 col-md-offset-2">
                   <div className="md-form">
-                    <input type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass2",e)}/>
+                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass2",e)}/>
                     <label>Repeat password</label>
                   </div>
                 </div>
@@ -478,7 +470,7 @@ class LandingPage extends React.Component{
         </div>
 
       </div>
-    </form>
+    </div>
   </div>
     );
   }

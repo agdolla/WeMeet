@@ -59,7 +59,9 @@ export function isUserLoggedIn() {
  * You will implement this during the workshop.
  */
  export function logout() {
+  if(user!==null){
    socket.emit('logout',user._id);
    localStorage.removeItem('user');
    localStorage.removeItem('token');
+  }
  }
