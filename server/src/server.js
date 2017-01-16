@@ -25,6 +25,7 @@ var cookieSession = require('cookie-session')
 var passport = require('passport');
 var cookieParser = require('cookie-parser')
 var localStrategy = require('passport-local').Strategy;
+var facebookStrategy = require('passport-facebook').Strategy;
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -56,6 +57,7 @@ var cache = (duration) => {
 }
 
 function isLoggedIn(req, res, next) {
+	// console.log(req.isAuthenticated());
     if (req.isAuthenticated()){
       return next();
     }
@@ -75,12 +77,6 @@ MongoClient.connect(url, function(err, db) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use('/mongo_express', mongo_express(mongo_express_config));
-
-	if (err)
-			console.log(err);
-	else {
-			console.log("connected to database")
-	}
 
 	//schemas
 	var statusUpdateSchema = require('./schemas/statusUpdate.json');
@@ -111,53 +107,52 @@ MongoClient.connect(url, function(err, db) {
 			usernameField: 'email',
 			passwordField: 'password',
       passReqToCallback : true
-    },
-    function(req, username, password, done) {
-			process.nextTick(function() {
-				var user = req.body;
-				var password = user.password;
-				var email = user.email.trim().toLowerCase();
-				if(!validateEmail(email)){
-					return done(null,false);
-				}
-				user.email = email;
-				bcrypt.hashAsync(password,10)
-				.then(hash=>{
-					user.password = hash;
-					user.nickname = "";
-					user.avatar = "img/user.png";
-					user.description = "";
-					user.location = null;
-					user.friends = [new ObjectID("000000000000000000000001")];
-					user.sessions = [];
-					user.birthday = 147812931;
-					user.online = false;
-					return user;
-				})
-				.then(user=>{
-					Promise.join(
-					db.collection('users').insertOneAsync(user),
-					db.collection('postFeeds').insertOneAsync({contents:[]}),
-					db.collection('notifications').insertOneAsync({contents:[]}),
-					db.collection('activities').insertOneAsync({contents:[]}),
-					function(user,post,noti,act){
-						db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
-							$addToSet:{
-								friends:user.insertedId
-							}
-						});
-						db.collection('users').updateOneAsync({_id:user.insertedId},{
-							$set: {
-								activity:act.insertedId,
-								notification: noti.insertedId,
-								post:post.insertedId
-							}
-						});
-						return done(null,user.insertedId);
+    },function(req, username, password, done) {
+				process.nextTick(function() {
+					var user = req.body;
+					var password = user.password;
+					var email = user.email.trim().toLowerCase();
+					if(!validateEmail(email)){
+						return done(null,false);
+					}
+					user.email = email;
+					bcrypt.hashAsync(password,10)
+					.then(hash=>{
+						user.password = hash;
+						user.nickname = "";
+						user.avatar = "img/user.png";
+						user.description = "";
+						user.location = null;
+						user.friends = [new ObjectID("000000000000000000000001")];
+						user.sessions = [];
+						user.birthday = 147812931;
+						user.online = false;
+						return user;
 					})
-				})
-				.catch(err=>{done(err)})
-     });
+					.then(user=>{
+						Promise.join(
+						db.collection('users').insertOneAsync(user),
+						db.collection('postFeeds').insertOneAsync({contents:[]}),
+						db.collection('notifications').insertOneAsync({contents:[]}),
+						db.collection('activities').insertOneAsync({contents:[]}),
+						function(user,post,noti,act){
+							db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
+								$addToSet:{
+									friends:user.insertedId
+								}
+							});
+							db.collection('users').updateOneAsync({_id:user.insertedId},{
+								$set: {
+									activity:act.insertedId,
+									notification: noti.insertedId,
+									post:post.insertedId
+								}
+							});
+							return done(null,user.insertedId);
+						})
+					})
+					.catch(err=>{done(err)})
+	    });
    }));
 
 	passport.use('login',new localStrategy({
@@ -177,7 +172,7 @@ MongoClient.connect(url, function(err, db) {
 						if(success){
 							jwt.sign({
 								id:user._id
-							},secretKey,{expiresIn:'7 days'},function(token){
+							},secretKey,{expiresIn:'1 day'},function(token){
 								delete user.password;
 								return done(null,user._id,{
 									user:user,
@@ -193,6 +188,71 @@ MongoClient.connect(url, function(err, db) {
 			})
 			.catch(err=>{done(err)})
 	}));
+
+	passport.use('facebook', new facebookStrategy({
+    clientID        : '228378300899099',
+    clientSecret    : 'f3e7619971ab2fc9bb8eba4969b606f4',
+    callbackURL     : 'http://localhost:3000/auth/facebook/callback',
+    profileFields: ['id', 'displayName', 'link', 'photos', 'emails']
+	},function(token, refreshToken, profile, done){
+			console.log(profile);
+			db.collection('users').findOneAsync({facebookID: profile.id})
+			.then(user=>{
+				if(user===null){
+					user = {};
+					user.fullname = profile.displayName;
+					user.email = profile.emails===undefined?"":profile.emails[0].value;
+					user.nickname = "";
+					user.avatar = profile.photos[0].value;
+					user.description = "";
+					user.location = null;
+					user.friends = [new ObjectID("000000000000000000000001")];
+					user.sessions = [];
+					user.birthday = 147812931;
+					user.online = false;
+					user.facebookID = profile.id;				
+					Promise.join(
+					db.collection('users').insertOneAsync(user),
+					db.collection('postFeeds').insertOneAsync({contents:[]}),
+					db.collection('notifications').insertOneAsync({contents:[]}),
+					db.collection('activities').insertOneAsync({contents:[]}),
+					function(user,post,noti,act){
+						db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
+							$addToSet:{
+								friends:user.insertedId
+							}
+						});
+						db.collection('users').updateOneAsync({_id:user.insertedId},{
+							$set: {
+								activity:act.insertedId,
+								notification: noti.insertedId,
+								post:post.insertedId
+							}
+						});
+						jwt.sign({
+							id:user.insertedId
+						},secretKey,{expiresIn:'1 day'},function(token){
+							return done(null,user.insertedId,{
+								user:user,
+								token:token
+							});
+						});
+					});
+				}
+				else{
+						jwt.sign({
+							id:user._id
+						},secretKey,{expiresIn:'1 day'},function(token){
+							user.avatar = encodeURIComponent(user.avatar);
+							return done(null,user._id,{
+								user:user,
+								token:token
+							});
+						});
+				}
+			})
+			.catch(err=>{done(err)});
+	}))
 
 	function getAllPosts(time){
 		return new Promise((resolve,reject)=>{
@@ -557,9 +617,10 @@ MongoClient.connect(url, function(err, db) {
 	})
 
 	//get user data
-	app.get('/user/:userId',cache(100),isLoggedIn,function(req, res) {
+	app.get('/user/:userId',isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
 			getUserData(new ObjectID(userId), function(err, userData) {
+				console.log(userData);
 					if (err)
 							return sendDatabaseError(res, err);
 					res.send(userData);
@@ -1686,6 +1747,23 @@ function getMessage(time,sessionId, cb) {
 				res.send(info);
 			})
 		})(req,res,next);
+	});
+	
+	app.get('/auth/facebook', passport.authenticate('facebook',{ scope: ['email']}));
+	app.get('/auth/facebook/callback',function(req,res,next){
+		passport.authenticate('facebook', { scope: ['email']},function(err, user, info) {
+    if (err) { return sendDatabaseError(res,err); }
+    if (!user) { return res.status(400).end(); }
+			req.login(user,()=>{
+				res.redirect('/#/activity/?data='+JSON.stringify(info));
+			})
+		})(req,res,next);
+	})
+
+	app.get('/logout', function(req, res){
+		console.log('here');
+		req.logout();
+		res.redirect('/');
 	});
 
 	app.get('/activityNotification',isLoggedIn,function(req,res){

@@ -23,6 +23,7 @@
     "mongo-express": "^0.30.40",
     "mongodb": "^2.1.14",
     "passport": "^0.3.2",
+    "passport-facebook": "^2.1.1",
     "passport-local": "^1.0.0",
     "socket.io": "^1.7.2",
     "uuid": "^3.0.1"
