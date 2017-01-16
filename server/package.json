@@ -10,6 +10,8 @@
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.0",
     "compression": "^1.6.2",
+    "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-alpha.2",
     "eslint": "^2.4.0",
     "eslint-plugin-node": "^1.0.0",
     "express": "^4.13.4",
@@ -20,6 +22,8 @@
     "moment": "2.16.0",
     "mongo-express": "^0.30.40",
     "mongodb": "^2.1.14",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
     "socket.io": "^1.7.2",
     "uuid": "^3.0.1"
   }

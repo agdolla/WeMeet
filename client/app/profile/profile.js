@@ -65,8 +65,8 @@ export default class Profile extends React.Component{
             <div className="col-md-4">
               Your posts
               <div className="row sidebar">
-                <ProfileRecentActivityFeed user={this.props.user} />
-                <ProfileRecentPostFeed user={this.props.user} />
+                <ProfileRecentActivityFeed user={this.props.user} currentUser={this.props.currUser}/>
+                <ProfileRecentPostFeed user={this.props.user} currentUser={this.props.currUser}/>
               </div>
             </div>
           </div>

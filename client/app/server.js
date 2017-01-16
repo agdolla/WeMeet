@@ -10,6 +10,7 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   var xhr = new XMLHttpRequest();
   xhr.open(verb, resource);
   xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
+  xhr.withCredentials = true;
   // The below comment tells ESLint that AppError is a global.
   // Otherwise, ESLint would complain about it! (See what happens in Atom if
   // you remove the comment...)
@@ -17,16 +18,10 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   // Response received from server. It could be a failure, though!
   xhr.addEventListener('load', function() {
     var statusCode = xhr.status;
-    var statusText = xhr.statusText;
+    // var statusText = xhr.statusText;
     if(statusCode===401){
       errorCb(401);
       return logout();
-    }
-    if(statusCode===500){
-      swal(statusText, "Please Try Again Later", "error");
-    }
-    if(statusCode===400){
-      swal(statusText, "Please Try Again Later", "error");
     }
     if (statusCode >= 200 && statusCode < 300) {
       // Success: Status code is in the [200, 300) range.

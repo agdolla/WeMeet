@@ -18,9 +18,13 @@ var MongoDB = Promise.promisifyAll(require('mongodb'));
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/Upao';
-var bcrypt = require('bcryptjs');
+var bcrypt = Promise.promisifyAll(require('bcryptjs'));
 var jwt = require('jsonwebtoken');
 var mcache = require('memory-cache');
+var cookieSession = require('cookie-session')
+var passport = require('passport');
+var cookieParser = require('cookie-parser')
+var localStrategy = require('passport-local').Strategy;
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -30,7 +34,6 @@ a332ca4da03fc80b9228f56cad935b6b9fd33ce6437a4b1f96648546a122a718720452b7cf
 38acc120c64b4a1622399bd6984460e4f4387db1a164c6dd4c80993930c57444905f6b46e7
 a7f1dba60f898302c4865cfee74b82517852e5bd5890a547d59071319b5dfc0faa92ce4f01
 f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571be9aef`;
-
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 app.use(compression());
@@ -52,11 +55,25 @@ var cache = (duration) => {
   }
 }
 
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated()){
+      return next();
+    }
+    res.status(401).end();
+}
 
 MongoClient.connect(url, function(err, db) {
 	app.use(bodyParser.json());
 	app.use(bodyParser.text());
+	app.use(cookieParser());
 	app.use(express.static('../client/build'));
+	app.use(cookieSession({
+		name: 'session',
+		keys: [secretKey],
+		maxAge: 24 * 60 * 60 * 1000 // 24 hours
+	}));
+	app.use(passport.initialize());
+	app.use(passport.session());
 	app.use('/mongo_express', mongo_express(mongo_express_config));
 
 	if (err)
@@ -74,6 +91,108 @@ MongoClient.connect(url, function(err, db) {
 	var userSchema = require('./schemas/user.json');
 	var loginSchema = require('./schemas/login.json');
 	var validate = require('express-jsonschema').validate;
+
+  passport.serializeUser(function(user, done) {
+    done(null, user);
+  });
+
+  // used to deserialize the user
+  passport.deserializeUser(function(id, done) {
+    db.collection('users').findOneAsync(new ObjectID(id))
+    .then(user=>{
+      done(null, user);
+    })
+    .catch(err=>{
+			done(err);
+    });
+  });
+
+	passport.use('signup', new localStrategy({
+			usernameField: 'email',
+			passwordField: 'password',
+      passReqToCallback : true
+    },
+    function(req, username, password, done) {
+			process.nextTick(function() {
+				var user = req.body;
+				var password = user.password;
+				var email = user.email.trim().toLowerCase();
+				if(!validateEmail(email)){
+					return done(null,false);
+				}
+				user.email = email;
+				bcrypt.hashAsync(password,10)
+				.then(hash=>{
+					user.password = hash;
+					user.nickname = "";
+					user.avatar = "img/user.png";
+					user.description = "";
+					user.location = null;
+					user.friends = [new ObjectID("000000000000000000000001")];
+					user.sessions = [];
+					user.birthday = 147812931;
+					user.online = false;
+					return user;
+				})
+				.then(user=>{
+					Promise.join(
+					db.collection('users').insertOneAsync(user),
+					db.collection('postFeeds').insertOneAsync({contents:[]}),
+					db.collection('notifications').insertOneAsync({contents:[]}),
+					db.collection('activities').insertOneAsync({contents:[]}),
+					function(user,post,noti,act){
+						db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
+							$addToSet:{
+								friends:user.insertedId
+							}
+						});
+						db.collection('users').updateOneAsync({_id:user.insertedId},{
+							$set: {
+								activity:act.insertedId,
+								notification: noti.insertedId,
+								post:post.insertedId
+							}
+						});
+						return done(null,user.insertedId);
+					})
+				})
+				.catch(err=>{done(err)})
+     });
+   }));
+
+	passport.use('login',new localStrategy({
+      usernameField : 'email',
+      passwordField : 'password',
+      passReqToCallback : true
+    },function(req,email,password,done){
+			email.trim().toLowerCase();
+			db.collection('users').findOneAsync({email:email})
+			.then(user=>{
+				if(user===null){
+					return done(null,false);
+				}
+				else{
+					bcrypt.compareAsync(password,user.password)
+					.then(success=>{
+						if(success){
+							jwt.sign({
+								id:user._id
+							},secretKey,{expiresIn:'7 days'},function(token){
+								delete user.password;
+								return done(null,user._id,{
+									user:user,
+									token:token
+								})
+							});
+						}
+						else{
+							return done(null,false);
+						}
+					})
+				}
+			})
+			.catch(err=>{done(err)})
+	}));
 
 	function getAllPosts(time){
 		return new Promise((resolve,reject)=>{
@@ -176,7 +295,7 @@ MongoClient.connect(url, function(err, db) {
 		});
 	}
 
-	app.get('/user/:userId/feed',cache(10),function(req, res) {
+	app.get('/user/:userId/feed',cache(10),isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
 			getPostFeedData(new ObjectID(userId))
 			.then(feedData => {
@@ -259,10 +378,10 @@ MongoClient.connect(url, function(err, db) {
 		});
 	}
 	//create post
-	app.post('/postItem', validate({body: statusUpdateSchema}), function(req, res) {
+	app.post('/postItem', validate({body: statusUpdateSchema}), isLoggedIn,function(req, res) {
 			var body = req.body;
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
-			if (fromUser === body.userId) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
+			// if (fromUser === body.userId) {
 				postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
 				.then(function(newPost){
 					res.status(201);
@@ -271,18 +390,18 @@ MongoClient.connect(url, function(err, db) {
 				.catch(err => {
 					sendDatabaseError(res, err);
 				})
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//like post
-	app.put('/postItem/:postItemId/likelist/:userId', function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.put('/postItem/:postItemId/likelist/:userId', isLoggedIn,function(req, res) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var postItemId = req.params.postItemId;
 			var userId = req.params.userId;
 
-			if (userId === fromUser) {
+			// if (userId === fromUser) {
 				db.collection('postFeedItems').updateOneAsync({
 					_id: new ObjectID(postItemId)
 				}, {
@@ -299,17 +418,17 @@ MongoClient.connect(url, function(err, db) {
 				.catch(function(err){
 					sendDatabaseError(res, err);
 				})
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//unlike post
-	app.delete('/postItem/:postItemId/likelist/:userId', function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.delete('/postItem/:postItemId/likelist/:userId', isLoggedIn,function(req, res) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var postItemId = req.params.postItemId;
 			var userId = req.params.userId;
-			if (userId === fromUser) {
+			// if (userId === fromUser) {
 				db.collection('postFeedItems').updateOneAsync({
 					_id: new ObjectID(postItemId)
 				}, {
@@ -326,9 +445,9 @@ MongoClient.connect(url, function(err, db) {
 				.catch(function(err){
 					sendDatabaseError(res, err);
 				})
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	function resolveUserObjects(userList, callback) {
@@ -425,7 +544,7 @@ MongoClient.connect(url, function(err, db) {
 			.catch(err => {callback(err)})
 	}
 
-	app.get('/chatNotification/:userid',function(req,res){
+	app.get('/chatNotification/:userid',isLoggedIn,function(req,res){
 		var userid = req.params.userid;
 		getUserData(new ObjectID(userid),function(err,userdata){
 			if(err)
@@ -438,7 +557,7 @@ MongoClient.connect(url, function(err, db) {
 	})
 
 	//get user data
-	app.get('/user/:userId',cache(100),function(req, res) {
+	app.get('/user/:userId',cache(100),isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
 			getUserData(new ObjectID(userId), function(err, userData) {
 					if (err)
@@ -448,12 +567,12 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	//post comments
-	app.post('/postItem/:postItemId/commentThread/comment', validate({body: commentSchema}), function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/postItem/:postItemId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
 			var postItemId = req.params.postItemId;
 			var userId = body.author;
-			if (fromUser === userId) {
+			// if (fromUser === userId) {
 					db.collection('postFeedItems').updateOneAsync({
 							_id: new ObjectID(postItemId)
 					}, {
@@ -472,18 +591,18 @@ MongoClient.connect(url, function(err, db) {
 						})
 					})
 					.catch(err => {sendDatabaseError(res,err)})
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//change user info
-	app.put('/settings/user/:userId', validate({body: userInfoSchema}), function(req, res) {
+	app.put('/settings/user/:userId', validate({body: userInfoSchema}), isLoggedIn, function(req, res) {
 			var data = req.body;
 			var moment = require('moment');
 			var userId = new ObjectID(req.params.userId);
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
-			if (fromUser.str === userId.str) {
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+			// if (fromUser.str === userId.str) {
 					db.collection('users').updateOne({
 							_id: userId
 					}, {
@@ -503,9 +622,9 @@ MongoClient.connect(url, function(err, db) {
 									res.send(userData);
 							});
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	function getActivityFeedItem(activityId, callback) {
@@ -601,10 +720,10 @@ MongoClient.connect(url, function(err, db) {
 		.catch((err)=>{callback(err)});
 	}
 
-	app.get('/user/:userId/activities',cache(10),function(req,res){
+	app.get('/user/:userId/activities',cache(10),isLoggedIn,function(req,res){
 		var userId = req.params.userId;
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
-		if(userId === fromUser){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
+		// if(userId === fromUser){
 			getAllActivities(function(err, activityData) {
 				if (err)
 				sendDatabaseError(res, err);
@@ -612,13 +731,13 @@ MongoClient.connect(url, function(err, db) {
 					res.send(activityData);
 				}
 			});
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
-	app.get('/user/:userId/posts/:time',cache(10),function(req,res){
+	app.get('/user/:userId/posts/:time',cache(10),isLoggedIn,function(req,res){
 		var userId = req.params.userId;
 		var time = parseInt(req.params.time);
 		var fromUser = getUserIdFromToken(req.get('Authorization'));
@@ -691,11 +810,11 @@ MongoClient.connect(url, function(err, db) {
 			return re.test(email);
 	}
 
-	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), function(req, res) {
+	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), isLoggedIn,function(req, res) {
 			var data = req.body;
 			var userId = new ObjectID(req.params.userId);
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
-			if (fromUser.str === userId.str) {
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+			// if (fromUser.str === userId.str) {
 					getUserData(userId, function(err, userData) {
 							if (err)
 									return sendDatabaseError(res, err);
@@ -717,16 +836,16 @@ MongoClient.connect(url, function(err, db) {
 									res.send(true);
 							}
 					});
-			} else {
-					res.statsus(401).end();
-			}
+			// } else {
+					// res.statsus(401).end();
+			// }
 	});
 
-	app.put('/settings/avatar/user/:userId', function(req, res) {
+	app.put('/settings/avatar/user/:userId', isLoggedIn, function(req, res) {
 			var userId = new ObjectID(req.params.userId);
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var body = req.body;
-			if (fromUser.str === userId.str) {
+			// if (fromUser.str === userId.str) {
 				var regex = /^data:.+\/(.+);base64,(.*)$/;
 				var matches = body.img.match(regex);
 				var data = matches[2];
@@ -753,16 +872,16 @@ MongoClient.connect(url, function(err, db) {
 						})
 					})
 					.catch(err=>{throw(err)})
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
-	app.put('/settings/location/user/:userId', function(req, res) {
+	app.put('/settings/location/user/:userId', isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
-			if (fromUser === userId) {
+			// if (fromUser === userId) {
 					db.collection('users').updateOne({
 							_id: new ObjectID(userId)
 					}, {
@@ -776,11 +895,11 @@ MongoClient.connect(url, function(err, db) {
 									res.send(true);
 							}
 					});
-			}
+			// }
 	});
 
 	// get activity Feed data
-	app.get('/user/:userid/activity',cache(10), function(req, res) {
+	app.get('/user/:userid/activity',cache(10), isLoggedIn,function(req, res) {
 			var userId = new ObjectID(req.params.userid);
 			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			// if(userId === fromUser){
@@ -832,10 +951,10 @@ MongoClient.connect(url, function(err, db) {
 			});
 	}
 	//post activity
-	app.post('/postActivity', validate({body: activitySchema}), function(req, res) {
+	app.post('/postActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
 			var body = req.body;
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
-			if (fromUser === body.author) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
+			// if (fromUser === body.author) {
 				postActivity(body,function(err,activityData){
 					if(err)
 						return sendDatabaseError(res,err);
@@ -843,13 +962,13 @@ MongoClient.connect(url, function(err, db) {
 						res.send(activityData);
 					}
 				});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//get activity detail
-	app.get('/activityItem/:activityId',cache(100), function(req, res) {
+	app.get('/activityItem/:activityId',cache(100), isLoggedIn, function(req, res) {
 			var activityId = new ObjectID(req.params.activityId);
 			getActivityFeedItem(activityId, function(err, activityData) {
 					res.status(201);
@@ -858,7 +977,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	//like activity
-	app.put('/activityItem/:activityId/likelist/:userId', function(req, res) {
+	app.put('/activityItem/:activityId/likelist/:userId', isLoggedIn, function(req, res) {
 			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var activityId = new ObjectID(req.params.activityId);
 			var userId = req.params.userId;
@@ -897,7 +1016,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	//unlike activity
-	app.delete('/activityItem/:activityId/likelist/:userId', function(req, res) {
+	app.delete('/activityItem/:activityId/likelist/:userId', isLoggedIn,function(req, res) {
 			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var activityId = new ObjectID(req.params.activityId);
 			var userId = req.params.userId;
@@ -936,12 +1055,12 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	//post ADcomments
-	app.post('/activityItem/:activityId/commentThread/comment', validate({body: commentSchema}), function(req, res) {
+	app.post('/activityItem/:activityId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
 			var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
-			var activityItemId = new ObjectID(req.params.activityId);
+			// var activityItemId = new ObjectID(req.params.activityId);
 			var userId = body.author;
-			if (fromUser === userId) {
+			// if (fromUser === userId) {
 					db.collection('activityItems').updateOne({
 							_id: activityItemId
 					}, {
@@ -965,9 +1084,9 @@ MongoClient.connect(url, function(err, db) {
 									});
 							}
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	function getNotificationItem(notificationId, callback) {
@@ -1036,10 +1155,10 @@ MongoClient.connect(url, function(err, db) {
 	}
 
 	//get notification
-	app.get('/user/:userId/notification', function(req, res) {
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+	app.get('/user/:userId/notification', isLoggedIn,function(req, res) {
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var userId = new ObjectID(req.params.userId);
-			if (fromUser.str === userId.str) {
+			// if (fromUser.str === userId.str) {
 					db.collection('users').findOne({
 							_id: userId
 					}, function(err, userData) {
@@ -1055,9 +1174,9 @@ MongoClient.connect(url, function(err, db) {
 									});
 							}
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	function deleteNotification(notificationId, userId, callback) {
@@ -1101,11 +1220,11 @@ MongoClient.connect(url, function(err, db) {
 	}
 
 	//acceptRequest friend request
-	app.put('/notification/:notificationId/:userId', function(req, res) {
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+	app.put('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var userId = new ObjectID(req.params.userId);
 			var notificationId = new ObjectID(req.params.notificationId);
-			if (fromUser.str === userId.str) {
+			// if (fromUser.str === userId.str) {
 					getNotificationItem(notificationId, function(err, notification) {
 							if (err)
 									return sendDatabaseError(res, err);
@@ -1142,17 +1261,17 @@ MongoClient.connect(url, function(err, db) {
 									})
 							}
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//deleteNotification
-	app.delete('/notification/:notificationId/:userId', function(req, res) {
-			var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+	app.delete('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
+			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var userId = new ObjectID(req.params.userId);
 			var notificationId = new ObjectID(req.params.notificationId);
-			if (fromUser.str === userId.str) {
+			// if (fromUser.str === userId.str) {
 					deleteNotification(notificationId, userId, function(err, notificationData) {
 							if (err)
 									sendDatabaseError(res, err);
@@ -1160,17 +1279,17 @@ MongoClient.connect(url, function(err, db) {
 									res.send(notificationData);
 							}
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	//accept activity request
-	app.put('/acceptactivity/:notificationId/:fromuser',function(req,res){
-		var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
+	app.put('/acceptactivity/:notificationId/:fromuser',isLoggedIn,function(req,res){
+		// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 		var user = new ObjectID(req.params.fromuser);
 		var notificationId = new ObjectID(req.params.notificationId);
-		if(fromUser.str === user.str){
+		// if(fromUser.str === user.str){
 			getNotificationItem(notificationId,function(err,notification){
 				if(err)
 					return sendDatabaseError(res, err);
@@ -1210,20 +1329,20 @@ MongoClient.connect(url, function(err, db) {
 				}
 			});
 
-	}
-	else {
-			res.status(401).end();
-	}
+	// }
+	// else {
+			// res.status(401).end();
+	// }
 
 });
 
 	//getMessage
-	app.get('/user/:userId/chatsession/:id/:time', function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.get('/user/:userId/chatsession/:id/:time', isLoggedIn,function(req, res) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var id = req.params.id;
 			var userid = req.params.userId;
 			var time = req.params.time;
-			if (userid == fromUser) {
+			// if (userid == fromUser) {
 					db.collection('messageSession').findOne({
 							_id: new ObjectID(id)
 					}, function(err, message) {
@@ -1264,17 +1383,17 @@ MongoClient.connect(url, function(err, db) {
 
 							}
 					})
-			}
+			// }
 	});
 
 	//post message
-	app.post('/user/:userid/chatsession/:id', function(req, res) {
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/user/:userid/chatsession/:id', isLoggedIn,function(req, res) {
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var id = req.params.id;
 		var userid = req.params.userid;
 		var body = req.body;
 		var time = (new Date()).getTime();
-		if (userid === fromUser) {
+		// if (userid === fromUser) {
 			var senderid = body.sender;
 			var targetid = body.target;
 			var text = body.text;
@@ -1323,9 +1442,9 @@ MongoClient.connect(url, function(err, db) {
 
 					}
 			});
-		} else {
-				res.status(401).end();
-		}
+		// } else {
+				// res.status(401).end();
+		// }
 });
 
 function getMessage(time,sessionId, cb) {
@@ -1362,10 +1481,10 @@ function getMessage(time,sessionId, cb) {
 	});
 }
 
-	app.get('/getsession/:userid/:targetid', cache(30), function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.get('/getsession/:userid/:targetid', cache(30), isLoggedIn,function(req, res) {
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var userid = req.params.userid;
-			if (userid == fromUser) {
+			// if (userid == fromUser) {
 					var targetid = req.params.targetid;
 					getSession(new ObjectID(userid), new ObjectID(targetid), function(err, session) {
 							if (err)
@@ -1385,9 +1504,9 @@ function getMessage(time,sessionId, cb) {
 									res.send(session);
 							}
 					});
-			} else {
-					res.status(401).end();
-			}
+			// } else {
+					// res.status(401).end();
+			// }
 	});
 
 	function getSession(userid, targetid, cb) {
@@ -1483,36 +1602,24 @@ function getMessage(time,sessionId, cb) {
 	 * Translate JSON Schema Validation failures into error 400s.
 	 */
 	app.use(function(err, req, res, next) {
-				if (err.name === 'JsonSchemaValidation') {
-						// Set a bad request http response status
-						res.status(400).end();
-				} else {
-						// It's some other sort of error; pass it to next error middleware handler
-						console.log(err.stack);
-						res.status(500).send({"Error" : err.stack});
-				}
-		});
-
-	/**
-	* Translate JSON Schema Validation failures into error 400s.
-	*/
-	app.use(function(err, req, res, next) {
 		if (err.name === 'JsonSchemaValidation') {
-			// Set a bad request http response status
-			res.status(400).end();
+				// Set a bad request http response status
+				res.status(400).end();
 		} else {
-			// It's some other sort of error; pass it to next error middleware handler
-			next(err);
+				// It's some other sort of error; pass it to next error middleware handler
+				console.log(err.stack);
+				res.status(500).send({"Error" : err.stack});
+				next(err);
 		}
 	});
 
 	// get search result.
-	app.get('/search/userid/:userid/querytext/:querytext',cache(10),function(req,res){
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.get('/search/userid/:userid/querytext/:querytext',cache(10),isLoggedIn,function(req,res){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var querytext = req.params.querytext.toLowerCase();
 		var userid = req.params.userid
 		var data={};
-		if(userid === fromUser){
+		// if(userid === fromUser){
 			db.collection('users').findAsync({
 				$or:
 					[
@@ -1562,149 +1669,48 @@ function getMessage(time,sessionId, cb) {
 				})
 			})
 			.catch(err => {sendDatabaseError(res,err)});
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
+	app.post('/signup',validate({body:userSchema}),function(req,res,next){
+		passport.authenticate('signup', function(err, user, info) {
+    if (err) { return sendDatabaseError(res,err); }
+    if (!user) { return res.status(400).end(); }
+    return res.send();
+		})(req,res,next);
+	})
+	
 
-	app.post('/signup',validate({body:userSchema}),function(req,res){
-		var user = req.body;
-		var password = user.password;
-		var email = user.email.trim().toLowerCase();
-		if(!validateEmail(email)){
-			return res.status(400).end();
-		}
-		user.email = email;
-		bcrypt.hash(password,10,function(err,hash){
-			if(err)
-				sendDatabaseError(res,err);
-			else{
-				user.password = hash;
-				user.nickname = "";
-				user.avatar = "img/user.png";
-				user.description = "";
-				user.location = null;
-				user.friends = [new ObjectID("000000000000000000000001")];
-				user.sessions = [];
-				user.birthday = 147812931;
-				user.online = false;
-
-				db.collection('users').insertOne(user,function(err,result){
-					if(err)
-						sendDatabaseError(res,err);
-					else{
-						var userId = result.insertedId;
-						db.collection('users').updateOne({_id:new ObjectID("000000000000000000000001")},{
-							$addToSet:{
-								friends:userId
-							}
-						});
-
-						db.collection('postFeeds').insertOne({
-							contents:[]
-						},function(err,result){
-							if(err)
-								sendDatabaseError(res,err);
-							else{
-								var postId = result.insertedId;
-
-								db.collection('notifications').insertOne({
-									contents:[]
-								},function(err,result){
-									if(err)
-										sendDatabaseError(res,err);
-									else{
-										var notificationId = result.insertedId;
-
-										db.collection('activities').insertOne({
-											contents:[]
-										},function(err,result){
-											if(err)
-												sendDatabaseError(res,err);
-											else{
-												var activityId = result.insertedId;
-
-												db.collection('users').updateOne({_id:userId},{
-													$set: {
-														activity:activityId,
-														notification: notificationId,
-														post:postId
-													}
-												},function(err){
-													if(err)
-														sendDatabaseError(res,err);
-													else{
-														res.send();
-													}
-												});
-											}
-										});
-									}
-								});
-							}
-						});
-					}
-				});
-			}
-		});
+	app.post('/login',validate({body:loginSchema}),function(req,res,next){
+		passport.authenticate('login', function(err, user, info) {
+    if (err) { return sendDatabaseError(res,err); }
+    if (!user) { return res.status(400).end(); }
+			req.login(user,()=>{
+				res.send(info);
+			})
+		})(req,res,next);
 	});
 
-	app.post('/login',validate({body:loginSchema}),function(req,res){
-		var body = req.body;
-		var password = body.password;
-
-		var email = body.email.trim().toLowerCase();
-
-		db.collection('users').findOne({email:email},function(err,user){
-				if(err)
-					res.sendDatabaseError(res,err);
-				else if(user===null){
-					res.status(401).end();
-				}
-				else{
-					bcrypt.compare(password,user.password,function(err,success){
-						if(err){
-							res.status(500).end();
-						}
-						else if(success){
-							jwt.sign({
-								id:user._id
-							},secretKey,{expiresIn:'7 days'},function(token){
-								delete user.password;
-								res.send({
-									user:user,
-									token:token
-								})
-							});
-						}
-						else{
-							res.status(401).end();
-						}
-					});
-				}
-		});
-
-	});
-
-	app.get('/activityNotification',function(req,res){
+	app.get('/activityNotification',isLoggedIn,function(req,res){
 		db.collection('activityItems').count(function(err,count){
 			res.send({result:count});
 		});
 	});
 
-	app.get('/postNotification',function(req,res){
+	app.get('/postNotification',isLoggedIn,function(req,res){
 		db.collection('postFeedItems').count(function(err,count){
 			res.send({result:count});
 		});
 	});
 
-	app.post('/friendRequest/:sender/:target',function(req,res){
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/friendRequest/:sender/:target',isLoggedIn,function(req,res){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
-		if(fromUser === sender){
+		// if(fromUser === sender){
 			db.collection('notificationItems').insertOne({
 				sender: new ObjectID(sender),
 				target: new ObjectID(target),
@@ -1733,18 +1739,18 @@ function getMessage(time,sessionId, cb) {
 
 				}
 			});
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
-	app.post('/activityJoinRequest/:sender/:target/:activityid',function(req,res){
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/activityJoinRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
 		var activityid = req.params.activityid;
-		if(fromUser === sender){
+		// if(fromUser === sender){
 			db.collection('notificationItems').insertOne({
 				sender: new ObjectID(sender),
 				target: new ObjectID(target),
@@ -1777,18 +1783,18 @@ function getMessage(time,sessionId, cb) {
 					});
 				}
 			});
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
-	app.post('/activityInviteRequest/:sender/:target/:activityid',function(req,res){
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/activityInviteRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
 		var activityid = req.params.activityid;
-		if(fromUser === sender){
+		// if(fromUser === sender){
 			db.collection('notificationItems').insertOne({
 				sender: new ObjectID(sender),
 				target: new ObjectID(target),
@@ -1821,10 +1827,10 @@ function getMessage(time,sessionId, cb) {
 					});
 				}
 			});
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
 

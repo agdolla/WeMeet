@@ -19,7 +19,9 @@ export default class ProfileRecentPostItem extends React.Component{
 
     if(e.button === 0){
       var cb = (likeCounter) => {
-        this.setState({likeCounter:likeCounter});
+        var newData = this.state.data;
+        newData.likeCounter = likeCounter;
+        this.setState({data:newData});
       };
 
       if(!this.didUserLike(this.props.currentUser)){

@@ -15,6 +15,7 @@ import {signup,login} from './server.js';
 import {getUserId,isUserLoggedIn,socket} from './credentials';
 var zxcvbn = require('zxcvbn');
 var debug = require('react-debug');
+var swal = require('sweetalert')
 
 class ActivityPage extends React.Component{
   render(){
@@ -273,6 +274,7 @@ class LandingPage extends React.Component{
             submitted:false
           });
           hashHistory.push('/activity');
+          swal("Success", "login success", "success");
         }
         else{
           this.setState({
@@ -303,7 +305,6 @@ class LandingPage extends React.Component{
     this.state.signUpPass!==""&&
     this.state.passwordStrength>=80&&
     this.state.signUpPass===this.state.signUpPass2&&(e.key==="Enter"||e.button===0)){
-      debug("here");
       this.setState({
         submitted:true
       });

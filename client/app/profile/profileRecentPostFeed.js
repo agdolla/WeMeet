@@ -27,7 +27,7 @@ export default class ProfileRecentPostFeed extends React.Component{
     return(
       <div>
         {this.state.contents.map((postItem)=>{
-          return <ProfileRecentPostItem key={postItem._id} data={postItem} currentUser={this.props.user}/>
+          return <ProfileRecentPostItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
         })}
       </div>
     );
