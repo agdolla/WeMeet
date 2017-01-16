@@ -20,7 +20,7 @@ export default class PostFeed extends React.Component{
 
 
   getData(){
-    getAllPosts((new Date()).getTime(), this.props.userId, (postFeedData)=>{
+    getAllPosts((new Date()).getTime(), (postFeedData)=>{
       this.setState({
         contents:postFeedData,
         notified:false

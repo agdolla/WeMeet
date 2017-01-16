@@ -17,7 +17,7 @@ export default class ActivityFeed extends React.Component{
   }
 
   getData(){
-    getAllActivities(this.props.user, (activityFeedData)=>{
+    getAllActivities((activityFeedData)=>{
       this.setState({
         contents:activityFeedData,
         notified:false

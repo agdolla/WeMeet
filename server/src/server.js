@@ -465,13 +465,12 @@ MongoClient.connect(url, function(err, db) {
 							})
 					};
 					// Resolve 'like' counter
-					db.collection('users').find(query).toArray(function(err, users) {
-							if (err) {
-									return callback(err);
-							}
-							// Build a map from ID to user object.
-							// (so userMap["4"] will give the user with ID 4)
-							var userMap = {};
+					db.collection('users').findAsync(query)
+					.then(cursor=>{
+						return cursor.toArrayAsync();
+					})
+					.then(users=>{
+						var userMap = {};
 							users.forEach((user) => {
 									delete user.password;
 									delete user.sessions;
@@ -481,8 +480,9 @@ MongoClient.connect(url, function(err, db) {
 									delete user.activity;
 									userMap[user._id] = user;
 							});
-							callback(null, userMap);
-					});
+						callback(null, userMap);
+					})
+					.catch(err => callback(err))
 			}
 	}
 
@@ -720,8 +720,8 @@ MongoClient.connect(url, function(err, db) {
 		.catch((err)=>{callback(err)});
 	}
 
-	app.get('/user/:userId/activities',cache(10),isLoggedIn,function(req,res){
-		var userId = req.params.userId;
+	app.get('/activities',cache(10),isLoggedIn,function(req,res){
+		// var userId = req.params.userId;
 		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		// if(userId === fromUser){
 			getAllActivities(function(err, activityData) {
@@ -737,11 +737,11 @@ MongoClient.connect(url, function(err, db) {
 		// }
 	});
 
-	app.get('/user/:userId/posts/:time',cache(10),isLoggedIn,function(req,res){
-		var userId = req.params.userId;
+	app.get('/posts/:time',cache(10),isLoggedIn,function(req,res){
+		// var userId = req.params.userId;
 		var time = parseInt(req.params.time);
-		var fromUser = getUserIdFromToken(req.get('Authorization'));
-		if(userId === fromUser){
+		// var fromUser = getUserIdFromToken(req.get('Authorization'));
+		// if(userId === fromUser){
 			getAllPosts(time)
 			.then((postData)=>{
 				res.send(postData);
@@ -749,10 +749,10 @@ MongoClient.connect(url, function(err, db) {
 			.catch(err => {
 				sendDatabaseError(res, err);
 			})
-		}
-		else{
-			res.status(401).end();
-		}
+		// }
+		// else{
+			// res.status(401).end();
+		// }
 	});
 
 	function getActivityFeedData(userId, callback) {
@@ -775,25 +775,25 @@ MongoClient.connect(url, function(err, db) {
 				var resolvedContents = [];
 
 				function processNextFeedItem(i) {
-						// Asynchronously resolve a feed item.
-						getActivityFeedItem(activity.contents[i], function(err, feedItem) {
-								if (err) {
-										// Pass an error to the callback.
-										callback(err);
+					// Asynchronously resolve a feed item.
+					getActivityFeedItem(activity.contents[i], function(err, feedItem) {
+						if (err) {
+								// Pass an error to the callback.
+								callback(err);
+						} else {
+								// Success!
+								resolvedContents.push(feedItem);
+								if (resolvedContents.length === activity.contents.length) {
+										// I am the final feed item; all others are resolved.
+										// Pass the resolved feed document back to the callback.
+										activity.contents = resolvedContents;
+										callback(null, activity);
 								} else {
-										// Success!
-										resolvedContents.push(feedItem);
-										if (resolvedContents.length === activity.contents.length) {
-												// I am the final feed item; all others are resolved.
-												// Pass the resolved feed document back to the callback.
-												activity.contents = resolvedContents;
-												callback(null, activity);
-										} else {
-												// Process the next feed item.
-												processNextFeedItem(i + 1);
-										}
+										// Process the next feed item.
+										processNextFeedItem(i + 1);
 								}
-						});
+						}
+					});
 				}
 
 				if (activity.contents.length === 0) {
@@ -810,7 +810,7 @@ MongoClient.connect(url, function(err, db) {
 			return re.test(email);
 	}
 
-	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), isLoggedIn,function(req, res) {
+	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), isLoggedIn, function(req, res) {
 			var data = req.body;
 			var userId = new ObjectID(req.params.userId);
 			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
@@ -917,38 +917,32 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	function postActivity(data,callback) {
-			data.participants=[];
-			data.likeCounter=[];
-			data.comments=[];
-			data.author = new ObjectID(data.author);
-			delete data.cropperOpen;
-			db.collection('activityItems').insertOne(data,function(err,result){
-				if(err)
-					return callback(err);
-				else{
-					data._id=result.insertedId;
-					db.collection('users').findOne({_id:new ObjectID(data.author)},function(err,userData){
-						if(err)
-							return callback(err);
-						else{
-							db.collection('activities').updateOne({_id:userData.activity},{
-								$push: {
-									contents: {
-										$each: [data._id],
-										$position: 0
-									}
-								}
-							},function(err){
-								if(err)
-								callback(err);
-								else{
-									callback(null,data);
-								}
-							});
-						}
-					});
+		data.participants=[];
+		data.likeCounter=[];
+		data.comments=[];
+		data.author = new ObjectID(data.author);
+		delete data.cropperOpen;
+		db.collection('activityItems').insertOneAsync(data)
+		.then(result=>{
+			data._id=result.insertedId;
+		})
+		.then(()=>{
+			return db.collection('users').findOneAsync({_id:new ObjectID(data.author)})
+		})
+		.then(userData=>{
+				db.collection('activities').updateOne({_id:userData.activity},{
+				$push: {
+					contents: {
+						$each: [data._id],
+						$position: 0
+					}
 				}
 			});
+		})
+		.then(()=>{
+			callback(null,data);
+		})
+		.catch(err=>{callback(err);})
 	}
 	//post activity
 	app.post('/postActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
@@ -1056,9 +1050,9 @@ MongoClient.connect(url, function(err, db) {
 
 	//post ADcomments
 	app.post('/activityItem/:activityId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
-			var fromUser = getUserIdFromToken(req.get('Authorization'));
+			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
-			// var activityItemId = new ObjectID(req.params.activityId);
+			var activityItemId = new ObjectID(req.params.activityId);
 			var userId = body.author;
 			// if (fromUser === userId) {
 					db.collection('activityItems').updateOne({
@@ -1575,28 +1569,28 @@ function getMessage(time,sessionId, cb) {
 	 * Get the user ID from a token. Returns -1 (an invalid ID)
 	 * if it fails.
 	 */
-		function getUserIdFromToken(authorizationLine) {
-			try {
-				// Cut off "Bearer " from the header value.
-				var token = authorizationLine.slice(7);
-				// Verify the token. Throws if the token is invalid or expired.
-				var tokenObj = jwt.verify(token, secretKey);
-				var id = tokenObj['id'];
-				// Check that id is a string.
-				if (typeof id === 'string') {
-				return id;
-				} else {
-				// Not a string. Return "", an invalid ID.
-				// This should technically be impossible unless
-				// the server accidentally
-				// generates a token with a number for an id!
-				return "";
-			}
-		} catch (e) {
-			// Return an invalid ID.
-			return "";
-		}
-	}
+	// 	function getUserIdFromToken(authorizationLine) {
+	// 		try {
+	// 			// Cut off "Bearer " from the header value.
+	// 			var token = authorizationLine.slice(7);
+	// 			// Verify the token. Throws if the token is invalid or expired.
+	// 			var tokenObj = jwt.verify(token, secretKey);
+	// 			var id = tokenObj['id'];
+	// 			// Check that id is a string.
+	// 			if (typeof id === 'string') {
+	// 			return id;
+	// 			} else {
+	// 			// Not a string. Return "", an invalid ID.
+	// 			// This should technically be impossible unless
+	// 			// the server accidentally
+	// 			// generates a token with a number for an id!
+	// 			return "";
+	// 		}
+	// 	} catch (e) {
+	// 		// Return an invalid ID.
+	// 		return "";
+	// 	}
+	// }
 
 	/**
 	 * Translate JSON Schema Validation failures into error 400s.

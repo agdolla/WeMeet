@@ -9,7 +9,7 @@ var swal = require('sweetalert');
 function sendXHR(verb, resource, body, cb, errorCb) {
   var xhr = new XMLHttpRequest();
   xhr.open(verb, resource);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
+  // xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
   xhr.withCredentials = true;
   // The below comment tells ESLint that AppError is a global.
   // Otherwise, ESLint would complain about it! (See what happens in Atom if
@@ -232,17 +232,17 @@ export function getActivityFeedData(user,cb){
   });
 }
 
-export function getAllActivities(user,cb){
+export function getAllActivities(cb){
   // We don't need to send a body, so pass in 'undefined' for the body.
-  sendXHR('GET', '/user/' + user + '/activities', undefined, (xhr) => {
+  sendXHR('GET', '/activities', undefined, (xhr) => {
     // Call the callback with the data.
     cb(JSON.parse(xhr.responseText));
   });
 }
 
-export function getAllPosts(time,user,cb){
+export function getAllPosts(time,cb){
   // We don't need to send a body, so pass in 'undefined' for the body.
-  sendXHR('GET', '/user/' + user + '/posts/'+time, undefined, (xhr) => {
+  sendXHR('GET', '/posts/'+time, undefined, (xhr) => {
     // Call the callback with the data.
     cb(JSON.parse(xhr.responseText));
   });
