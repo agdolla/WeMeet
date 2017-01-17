@@ -61,7 +61,17 @@ export function isUserLoggedIn() {
  export function logout() {
   if(user!==null){
    socket.emit('logout',user._id);
+   user=null;
    localStorage.removeItem('user');
    localStorage.removeItem('token');
+  }
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", '/logout');
+  xhr.send();
+ }
+
+ export function getUserData(){
+  if(isUserLoggedIn()){
+    return user;
   }
  }

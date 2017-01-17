@@ -13,7 +13,7 @@ export default class NavBody extends React.Component {
     }
 
     getLastmessage(friendId){
-      var filterResult = this.state.data.sessions.filter((session) => {
+      var filterResult = this.state.sessions.filter((session) => {
         if(session.users.indexOf(friendId)!==-1){
           return true;
         }
@@ -41,13 +41,13 @@ export default class NavBody extends React.Component {
                     'marginBottom': '0'
                 }}>
                 {
-                  this.state.data === undefined ? null:
-                  (this.state.data.friends===undefined || this.state.data.friends.length===0 ? alert : this.state.data.friends.map((friend)=>{
+                  this.state.userData === undefined ? null:
+                  (this.state.userData.friends===undefined || this.state.userData.friends.length===0 ? alert : this.state.userData.friends.map((friend)=>{
                     return <NavChatItem
                       key={friend._id}
                       data={friend}
                       activeFriend = {this.props.activeFriend}
-                      currentUser={this.state.data._id}
+                      currentUser={this.state.userData._id}
                       switchUser={this.props.switchUser}
                       lastmessage={this.getLastmessage(friend._id)}/>
                     }))

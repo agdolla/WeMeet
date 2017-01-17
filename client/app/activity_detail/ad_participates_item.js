@@ -3,14 +3,13 @@ import {hashHistory} from 'react-router';
 import {addFriend} from '../server';
 import {hideElement} from '../util';
 import {socket,getToken} from '../credentials';
- var debug = require('react-debug');
+ // var debug = require('react-debug');
 
 
 export default class Ad_participates_item extends React.Component{
   constructor(props){
     super(props);
     this.state = {
-      data: props.data,
       success:false
     }
   }
@@ -25,7 +24,7 @@ export default class Ad_participates_item extends React.Component{
       return false;
     }
     return this.props.friends.filter((friend)=>{
-      if(friend._id===this.props.data._id)
+      if(friend===this.props.data._id)
         return true;
       else return false;
     }).length>0;
@@ -37,7 +36,6 @@ export default class Ad_participates_item extends React.Component{
       if(success){
         socket.emit('notification',{
           authorization:getToken(),
-
           sender: this.props.currUser,
           target: this.props.data._id
         });

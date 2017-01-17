@@ -12,34 +12,45 @@ import Activity_detail from './activity_detail/activity_detail';
 import { IndexRoute, Router, Route, hashHistory } from 'react-router';
 import {hideElement} from './util';
 import {signup,login} from './server.js';
-import {getUserId,isUserLoggedIn,socket} from './credentials';
+import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
 var zxcvbn = require('zxcvbn');
-var debug = require('react-debug');
+// var debug = require('react-debug');
 var swal = require('sweetalert')
 
 class ActivityPage extends React.Component{
   render(){
-    if(isUserLoggedIn()){
-      var userId = getUserId();
-      window.onload = ()=>{
-        socket.emit('user',userId);
+    if(this.props.location.query.data===undefined){
+      if(isUserLoggedIn()){
+        var user = getUserData();
+        window.onload = ()=>{
+          socket.emit('user',user._id);
+        }
+        return(<Activity user={user}/>);
       }
-      return(<Activity user={userId}/>);
+      else{
+        hashHistory.push('/');
+        location.reload();
+      }
     }
+    //facebook login
     else{
-      hashHistory.push('/');
-      location.reload();
+     var data = JSON.parse(this.props.location.query.data);
+      updateCredentials(data.user, data.token);
+      window.onload = ()=>{
+        socket.emit('user',data.user._id);
+      }
+      return(<Activity user={data.user}/>);
     }
   }
 }
 class ThrendPage extends React.Component{
   render(){
     if(isUserLoggedIn()){
-      var userId = getUserId();
+      var user = getUserData();
       window.onload = ()=>{
-        socket.emit('user',userId);
+        socket.emit('user',user._id);
       }
-      return (<Post user={userId}/>);
+      return (<Post user={user}/>);
     }
     else{
       hashHistory.push('/');
@@ -97,12 +108,12 @@ class ChatPage extends React.Component{
 class NotificationPage extends React.Component{
   render(){
     if(isUserLoggedIn()){
-      var userId = getUserId();
+      var user = getUserData();
       window.onload = ()=>{
-        socket.emit('user',userId);
+        socket.emit('user',user._id);
       }
       return(
-        <Notification user={userId} id={this.props.params.id}/>
+        <Notification user={user} id={this.props.params.id}/>
       );
     }
     else{
@@ -112,15 +123,15 @@ class NotificationPage extends React.Component{
   }
 }
 
-class Activity_detailPage extends React.Component{
+class ActivityDetailPage extends React.Component{
   render(){
     if(isUserLoggedIn()){
-      var userId = getUserId();
+      var user = getUserData();
       window.onload = ()=>{
-        socket.emit('user',userId);
+        socket.emit('user',user._id);
       }
       return(
-        <Activity_detail user={userId} id={this.props.params.id}/>
+        <Activity_detail user={user} id={this.props.params.id}/>
       )
     }
     else{
@@ -132,12 +143,12 @@ class Activity_detailPage extends React.Component{
 class SearchPage extends React.Component{
    render(){
      if(isUserLoggedIn()){
-       var userId = getUserId();
+       var user = getUserData();
        window.onload = ()=>{
-         socket.emit('user',userId);
+         socket.emit('user',user._id);
        }
        return(
-         <Search user={userId}/>
+         <Search user={user}/>
        );
      }
      else{
@@ -274,7 +285,6 @@ class LandingPage extends React.Component{
             submitted:false
           });
           hashHistory.push('/activity');
-          swal("Success", "login success", "success");
         }
         else{
           this.setState({
@@ -362,8 +372,11 @@ class LandingPage extends React.Component{
             <h1 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="70px"/></span> WeMeet</h1>
             <h2 style={{color:'white'}}>Join nearby activities and make friends!</h2>
             <br/>
-            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-dark btn-lg">Sign up free today</a>
-            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-dark btn-lg">Sign in</a>
+            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-mdb btn-lg">Sign up free today</a>
+            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-info btn-lg">Log in</a>
+            <a href="/auth/facebook" style={{background: '#3b5998'}} className="btn btn-dark btn-lg">
+              <i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px'}}></i>FACEBOOK
+            </a>
           </div>
         </div>
         <div className="container index LandingPage">
@@ -372,7 +385,7 @@ class LandingPage extends React.Component{
               <div className={"alert alert-danger " + hideElement(!this.state.failedLogin)} role="alert"><strong>Invalid email address or password.</strong> Please try a different email address or password, and try logging in again.</div>
               <div className="panel panel-primary">
                 <div className="panel-heading">
-                  <h4>Sign in</h4>
+                  <h4>Log in</h4>
                 </div>
                 <div className="panel-body">
                   <div className="row">
@@ -483,7 +496,7 @@ ReactDOM.render((
     <Route path="/" component={App}>
       <IndexRoute component={LandingPage} />
       <Route path="post" component={ThrendPage} />
-      <Route path="activity" component={ActivityPage} />
+      <Route path="activity/:data" component={ActivityPage} />
       <Route path="settings" component={SettingsPage} />
       <Route path="chat" component={ChatPage} />
       <Route path="notification" component={NotificationPage}>
@@ -492,8 +505,8 @@ ReactDOM.render((
       <Route path="profile" component={ProfilePage}>
         <Route path="/profile/:user" component={ProfilePage} />
       </Route>
-      <Route path="activity_detail" component={Activity_detailPage}>
-        <Route path="/activity_detail/:id" component={Activity_detailPage}/>
+      <Route path="activity_detail" component={ActivityDetailPage}>
+        <Route path="/activity_detail/:id" component={ActivityDetailPage}/>
       </Route>
       <Route path="search" component={SearchPage}/>
       <Route path="postactivity" component={PostActivityPage} />

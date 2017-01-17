@@ -6,7 +6,7 @@ var emailAlert = null;
 var moment = require('moment');
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-
+var debug = require('react-debug');
 
 export default class Settings extends React.Component{
 
@@ -81,6 +81,12 @@ export default class Settings extends React.Component{
     if(this.state.img !== null){
       ChangeAvatar(this.state.userData._id,this.state.img,(userData)=>{
         this.setState({userData: userData});
+        var user = {};
+        user._id = userData._id;
+        user.avatar = userData.avatar;
+        user.friends = userData.friends;
+        user.fullname = userData.fullname;
+        localStorage.setItem('user', JSON.stringify(user));
       });
     }
   }

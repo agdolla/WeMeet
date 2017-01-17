@@ -5,7 +5,8 @@ import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-var debug = require('react-debug');
+// var debug = require('react-debug');
+var swal = require('sweetalert');
 import {socket,getToken} from '../credentials';
 
 export default class PostActivity extends React.Component {
@@ -50,7 +51,7 @@ export default class PostActivity extends React.Component {
       };
       reader.readAsDataURL(file);
       this.setState({sizealert:false});
-        this.setState({fileWrongType:false});
+      this.setState({fileWrongType:false});
     }
     else{
       this.setState({sizealert:true});
@@ -105,11 +106,8 @@ export default class PostActivity extends React.Component {
         this.state.detail.trim()!==""
     ){
       //activity created succesfully
-      var id;
       createActivity(this.state,(data)=>{
-        id=data._id;
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
-        //for (var i=0;i<this.state.invitedlist.length;i++)
         this.state.invitedlist.map((targetid)=>{
             sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
               if(success){
@@ -122,14 +120,21 @@ export default class PostActivity extends React.Component {
             });
         });
       });
-
-      //handle invited userData
-
+      swal({
+        title: "Go Check It Out!",
+        type: "success",
+        showCancelButton: false,
+        confirmButtonColor: "#30E4A2",
+        confirmButtonText: "Go",
+        closeOnConfirm: true
+      },
+      function(){
+        hashHistory.push('/activity');
+      });
     }
     else{
       this.setState({alert:true})
     }
-    hashHistory.push('/activity');
   }
 
   componentDidMount(){

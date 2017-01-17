@@ -22,7 +22,7 @@ export default class SearchFeedUserFeedItem extends React.Component{
 
   checkFriendsOfUser(){
     return this.props.currentUser.friends.filter((friend)=>{
-      if(friend._id===this.state.data._id)
+      if(friend===this.state.data._id)
         return true;
       else return false;
     }).length>0;

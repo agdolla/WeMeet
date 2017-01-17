@@ -41,15 +41,15 @@ app.use(compression());
 var cache = (duration) => {
   return (req, res, next) => {
     var key = '__express__' + req.originalUrl || req.url
-    var cachedBody = mcache.get(key)
+    var cachedBody = mcache.get(key);
     if (cachedBody) {
-      res.send(cachedBody)
-      return
+      res.send(cachedBody);
+      return;
     } else {
-      res.sendResponse = res.send
+      res.sendResponse = res.send;
       res.send = (body) => {
         mcache.put(key, body, duration * 1000);
-        res.sendResponse(body)
+        res.sendResponse(body);
       }
       next()
     }
@@ -89,7 +89,7 @@ MongoClient.connect(url, function(err, db) {
 	var validate = require('express-jsonschema').validate;
 
   passport.serializeUser(function(user, done) {
-    done(null, user);
+    done(null, user._id);
   });
 
   // used to deserialize the user
@@ -108,51 +108,51 @@ MongoClient.connect(url, function(err, db) {
 			passwordField: 'password',
       passReqToCallback : true
     },function(req, username, password, done) {
-				process.nextTick(function() {
-					var user = req.body;
-					var password = user.password;
-					var email = user.email.trim().toLowerCase();
-					if(!validateEmail(email)){
-						return done(null,false);
-					}
-					user.email = email;
-					bcrypt.hashAsync(password,10)
-					.then(hash=>{
-						user.password = hash;
-						user.nickname = "";
-						user.avatar = "img/user.png";
-						user.description = "";
-						user.location = null;
-						user.friends = [new ObjectID("000000000000000000000001")];
-						user.sessions = [];
-						user.birthday = 147812931;
-						user.online = false;
-						return user;
+			process.nextTick(function() {
+				var user = req.body;
+				var password = user.password;
+				var email = user.email.trim().toLowerCase();
+				if(!validateEmail(email)){
+					return done(null,false);
+				}
+				user.email = email;
+				bcrypt.hashAsync(password,10)
+				.then(hash=>{
+					user.password = hash;
+					user.nickname = "";
+					user.avatar = "img/user.png";
+					user.description = "";
+					user.location = null;
+					user.friends = [new ObjectID("000000000000000000000001")];
+					user.sessions = [];
+					user.birthday = 147812931;
+					user.online = false;
+					return user;
+				})
+				.then(user=>{
+					Promise.join(
+					db.collection('users').insertOneAsync(user),
+					db.collection('postFeeds').insertOneAsync({contents:[]}),
+					db.collection('notifications').insertOneAsync({contents:[]}),
+					db.collection('activities').insertOneAsync({contents:[]}),
+					function(user,post,noti,act){
+						db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
+							$addToSet:{
+								friends:user.insertedId
+							}
+						});
+						db.collection('users').updateOneAsync({_id:user.insertedId},{
+							$set: {
+								activity:act.insertedId,
+								notification: noti.insertedId,
+								post:post.insertedId
+							}
+						});
+						return done(null,user.insertedId);
 					})
-					.then(user=>{
-						Promise.join(
-						db.collection('users').insertOneAsync(user),
-						db.collection('postFeeds').insertOneAsync({contents:[]}),
-						db.collection('notifications').insertOneAsync({contents:[]}),
-						db.collection('activities').insertOneAsync({contents:[]}),
-						function(user,post,noti,act){
-							db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
-								$addToSet:{
-									friends:user.insertedId
-								}
-							});
-							db.collection('users').updateOneAsync({_id:user.insertedId},{
-								$set: {
-									activity:act.insertedId,
-									notification: noti.insertedId,
-									post:post.insertedId
-								}
-							});
-							return done(null,user.insertedId);
-						})
-					})
-					.catch(err=>{done(err)})
-	    });
+				})
+				.catch(err=>{done(err)})
+			});
    }));
 
 	passport.use('login',new localStrategy({
@@ -173,9 +173,13 @@ MongoClient.connect(url, function(err, db) {
 							jwt.sign({
 								id:user._id
 							},secretKey,{expiresIn:'1 day'},function(token){
-								delete user.password;
-								return done(null,user._id,{
-									user:user,
+								var newUserObj = {}
+								newUserObj._id = user._id;
+								newUserObj.avatar = user.avatar;
+								newUserObj.fullname = user.fullname;
+								newUserObj.friends = user.friends;
+								return done(null,newUserObj,{
+									user:newUserObj,
 									token:token
 								})
 							});
@@ -190,12 +194,11 @@ MongoClient.connect(url, function(err, db) {
 	}));
 
 	passport.use('facebook', new facebookStrategy({
-    clientID        : '228378300899099',
-    clientSecret    : 'f3e7619971ab2fc9bb8eba4969b606f4',
+    clientID        : '228542127549383',
+    clientSecret    : 'de414785354473b5715fa05dab6dae86',
     callbackURL     : 'http://localhost:3000/auth/facebook/callback',
     profileFields: ['id', 'displayName', 'link', 'photos', 'emails']
 	},function(token, refreshToken, profile, done){
-			console.log(profile);
 			db.collection('users').findOneAsync({facebookID: profile.id})
 			.then(user=>{
 				if(user===null){
@@ -203,7 +206,7 @@ MongoClient.connect(url, function(err, db) {
 					user.fullname = profile.displayName;
 					user.email = profile.emails===undefined?"":profile.emails[0].value;
 					user.nickname = "";
-					user.avatar = profile.photos[0].value;
+					user.avatar = "https://graph.facebook.com/"+profile.id+"/picture?type=large";
 					user.description = "";
 					user.location = null;
 					user.friends = [new ObjectID("000000000000000000000001")];
@@ -216,13 +219,13 @@ MongoClient.connect(url, function(err, db) {
 					db.collection('postFeeds').insertOneAsync({contents:[]}),
 					db.collection('notifications').insertOneAsync({contents:[]}),
 					db.collection('activities').insertOneAsync({contents:[]}),
-					function(user,post,noti,act){
+					function(userAsync,post,noti,act){
 						db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
 							$addToSet:{
-								friends:user.insertedId
+								friends:userAsync.insertedId
 							}
 						});
-						db.collection('users').updateOneAsync({_id:user.insertedId},{
+						db.collection('users').updateOneAsync({_id:userAsync.insertedId},{
 							$set: {
 								activity:act.insertedId,
 								notification: noti.insertedId,
@@ -230,10 +233,15 @@ MongoClient.connect(url, function(err, db) {
 							}
 						});
 						jwt.sign({
-							id:user.insertedId
+							id:userAsync.insertedId
 						},secretKey,{expiresIn:'1 day'},function(token){
-							return done(null,user.insertedId,{
-								user:user,
+							var newUserObj = {}
+							newUserObj._id = userAsync.insertedId;
+							newUserObj.avatar = encodeURIComponent(user.avatar);
+							newUserObj.fullname = user.fullname;
+							newUserObj.friends = user.friends;
+							return done(null,newUserObj,{
+								user:newUserObj,
 								token:token
 							});
 						});
@@ -243,9 +251,13 @@ MongoClient.connect(url, function(err, db) {
 						jwt.sign({
 							id:user._id
 						},secretKey,{expiresIn:'1 day'},function(token){
-							user.avatar = encodeURIComponent(user.avatar);
-							return done(null,user._id,{
-								user:user,
+							var newUserObj = {}
+							newUserObj._id = user._id;
+							newUserObj.fullname = user.fullname;
+							newUserObj.avatar = encodeURIComponent(user.avatar);
+							newUserObj.friends = user.friends;
+							return done(null,newUserObj,{
+								user:newUserObj,
 								token:token
 							});
 						});
@@ -419,11 +431,7 @@ MongoClient.connect(url, function(err, db) {
 			.then(function(){
 				resolve(post);
 				img.forEach(function(element, index) {
-					var regex = /^data:.+\/(.+);base64,(.*)$/;
-					var matches = element.match(regex);
-					var data = matches[2];
-					var buffer = new Buffer(data, 'base64');
-					
+					var buffer = new Buffer(element.split(",")[1], 'base64');
 					Jimp.read(buffer)
 					.then(image =>{
 						image.quality(30)
@@ -440,74 +448,58 @@ MongoClient.connect(url, function(err, db) {
 	//create post
 	app.post('/postItem', validate({body: statusUpdateSchema}), isLoggedIn,function(req, res) {
 			var body = req.body;
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
-			// if (fromUser === body.userId) {
-				postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
-				.then(function(newPost){
-					res.status(201);
-					res.send(newPost);
-				})
-				.catch(err => {
-					sendDatabaseError(res, err);
-				})
-			// } else {
-					// res.status(401).end();
-			// }
+			postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
+			.then(function(newPost){
+				res.status(201);
+				res.send(newPost);
+			})
+			.catch(err => {
+				sendDatabaseError(res, err);
+			})
 	});
 
 	//like post
 	app.put('/postItem/:postItemId/likelist/:userId', isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var postItemId = req.params.postItemId;
 			var userId = req.params.userId;
-
-			// if (userId === fromUser) {
-				db.collection('postFeedItems').updateOneAsync({
-					_id: new ObjectID(postItemId)
-				}, {
-					$addToSet: {
-						likeCounter: new ObjectID(userId)
-					}
-				})
-				.then(function(){
-					return getPostFeedItem(new ObjectID(postItemId))
-				})
-				.then(postItem => {
-					res.send(postItem.likeCounter);
-				})
-				.catch(function(err){
-					sendDatabaseError(res, err);
-				})
-			// } else {
-					// res.status(401).end();
-			// }
+			db.collection('postFeedItems').updateOneAsync({
+				_id: new ObjectID(postItemId)
+			}, {
+				$addToSet: {
+					likeCounter: new ObjectID(userId)
+				}
+			})
+			.then(function(){
+				return getPostFeedItem(new ObjectID(postItemId))
+			})
+			.then(postItem => {
+				res.send(postItem.likeCounter);
+			})
+			.catch(function(err){
+				sendDatabaseError(res, err);
+			})
 	});
 
 	//unlike post
 	app.delete('/postItem/:postItemId/likelist/:userId', isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var postItemId = req.params.postItemId;
 			var userId = req.params.userId;
-			// if (userId === fromUser) {
-				db.collection('postFeedItems').updateOneAsync({
-					_id: new ObjectID(postItemId)
-				}, {
-					$pull: {
-						likeCounter: new ObjectID(userId)
-					}
-				})
-				.then(function(){
-					return getPostFeedItem(new ObjectID(postItemId))
-				})
-				.then(postItem => {
-					res.send(postItem.likeCounter);
-				})
-				.catch(function(err){
-					sendDatabaseError(res, err);
-				})
-			// } else {
-					// res.status(401).end();
-			// }
+			db.collection('postFeedItems').updateOneAsync({
+				_id: new ObjectID(postItemId)
+			}, {
+				$pull: {
+					likeCounter: new ObjectID(userId)
+				}
+			})
+			.then(function(){
+				return getPostFeedItem(new ObjectID(postItemId))
+			})
+			.then(postItem => {
+				res.send(postItem.likeCounter);
+			})
+			.catch(function(err){
+				sendDatabaseError(res, err);
+			})
 	});
 
 	function resolveUserObjects(userList, callback) {
@@ -538,6 +530,7 @@ MongoClient.connect(url, function(err, db) {
 									delete user.post;
 									delete user.notification;
 									delete user.activity;
+									delete user.location;
 									userMap[user._id] = user;
 							});
 						callback(null, userMap);
@@ -592,23 +585,53 @@ MongoClient.connect(url, function(err, db) {
 				else {
 					resolveUserObjects(userData.friends, function(err, userMap) {
 						userData.friends = userData.friends.map((id) => userMap[id]);
-						resolveSessionObject(userData.sessions)
-						.then(sessionMap => {
-							userData.sessions = userData.sessions.map((id) => sessionMap[id]);
-							delete userData.password;
-							callback(null, userData);
-						})
+						delete userData.password;
+						delete userData.notification;
+						delete userData.post;
+						delete userData.activity;
+						delete userData.sessions;
+						callback(null, userData);
 					});
 				}
 			})
 			.catch(err => {callback(err)})
+	}	
+
+	function getSessions(userId) {
+		return new Promise(function(resolve,reject){
+			db.collection('users').findOneAsync({
+					_id: userId
+			})
+			.then(userData => {
+				if(userData===null){
+					resolve(null)
+				}
+				else {
+					resolveSessionObject(userData.sessions)
+					.then(sessionMap => {
+						var sessions = userData.sessions.map((id) => sessionMap[id]);
+						resolve(sessions);
+					})
+				}
+			})
+			.catch(err => {reject(err)})
+		})
 	}
+
+	app.get('/user/:userId/sessions',isLoggedIn, function(req,res){
+		var userId = new ObjectID(req.params.userId);
+		getSessions(userId)
+		.then(sessions=>{
+			res.send(sessions);
+		})
+		.catch(err=>sendDatabaseError(res,err));
+	});
 
 	app.get('/chatNotification/:userid',isLoggedIn,function(req,res){
 		var userid = req.params.userid;
 		getUserData(new ObjectID(userid),function(err,userdata){
 			if(err)
-			sendDatabaseError(res,err);
+				sendDatabaseError(res,err);
 			else {
 
 				res.send(userdata.sessions);
@@ -617,10 +640,9 @@ MongoClient.connect(url, function(err, db) {
 	})
 
 	//get user data
-	app.get('/user/:userId',isLoggedIn,function(req, res) {
+	app.get('/user/:userId',isLoggedIn,cache(10),function(req, res) {
 			var userId = req.params.userId;
 			getUserData(new ObjectID(userId), function(err, userData) {
-				console.log(userData);
 					if (err)
 							return sendDatabaseError(res, err);
 					res.send(userData);
@@ -629,63 +651,53 @@ MongoClient.connect(url, function(err, db) {
 
 	//post comments
 	app.post('/postItem/:postItemId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
 			var postItemId = req.params.postItemId;
 			var userId = body.author;
-			// if (fromUser === userId) {
-					db.collection('postFeedItems').updateOneAsync({
-							_id: new ObjectID(postItemId)
-					}, {
-							$push: {
-									comments: {
-											"author": new ObjectID(userId),
-											"text": body.text,
-											"postDate": (new Date()).getTime()
-									}
+			db.collection('postFeedItems').updateOneAsync({
+					_id: new ObjectID(postItemId)
+			}, {
+					$push: {
+							comments: {
+									"author": new ObjectID(userId),
+									"text": body.text,
+									"postDate": (new Date()).getTime()
 							}
-					})
-					.then(() => {
-						getPostFeedItem(new ObjectID(postItemId))
-						.then(postItem => {
-							res.send(postItem);
-						})
-					})
-					.catch(err => {sendDatabaseError(res,err)})
-			// } else {
-					// res.status(401).end();
-			// }
-	});
+					}
+			})
+			.then(() => {
+				getPostFeedItem(new ObjectID(postItemId))
+				.then(postItem => {
+					res.send(postItem);
+				})
+			})
+			.catch(err => {sendDatabaseError(res,err)})
+});
 
 	//change user info
 	app.put('/settings/user/:userId', validate({body: userInfoSchema}), isLoggedIn, function(req, res) {
 			var data = req.body;
 			var moment = require('moment');
 			var userId = new ObjectID(req.params.userId);
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
-			// if (fromUser.str === userId.str) {
-					db.collection('users').updateOne({
-							_id: userId
-					}, {
-							$set: {
-									fullname:data.fullname,
-									nickname: data.nickname,
-									description: data.description,
-									location: data.location,
-									birthday: moment(data.birthday).valueOf()
-							}
-					}, function(err) {
+			db.collection('users').updateOne({
+					_id: userId
+			}, {
+					$set: {
+							fullname:data.fullname,
+							nickname: data.nickname,
+							description: data.description,
+							location: data.location,
+							birthday: moment(data.birthday).valueOf()
+					}
+			}, function(err) {
+					if (err)
+							return sendDatabaseError(res, err);
+					getUserData(userId, function(err, userData) {
 							if (err)
 									return sendDatabaseError(res, err);
-							getUserData(userId, function(err, userData) {
-									if (err)
-											return sendDatabaseError(res, err);
-									res.send(userData);
-							});
+							res.send(userData);
 					});
-			// } else {
-					// res.status(401).end();
-			// }
+			});
 	});
 
 	function getActivityFeedItem(activityId, callback) {
@@ -748,10 +760,14 @@ MongoClient.connect(url, function(err, db) {
 		});
 	}
 
-	function getAllActivities(callback){
-		db.collection('activityItems').findAsync()
+	function getAllActivities(time,callback){
+		db.collection('activityItems').findAsync({
+			postDate:{
+				$lt:time
+			}
+		})
 		.then(cursor =>{
-			return cursor.toArrayAsync();
+			return cursor.limit(5).sort({postDate:-1}).toArrayAsync();
 		})
 		.then(collection => {
 			var resolvedActivities = [];
@@ -763,7 +779,6 @@ MongoClient.connect(url, function(err, db) {
 					if (resolvedActivities.length === collection.length) {
 						// I am the final feed item; all others are resolved.
 						// Pass the resolved feed document back to the callback.
-						collection = resolvedActivities.reverse();
 						callback(null, collection);
 					} else {
 						// Process the next feed item.
@@ -781,39 +796,26 @@ MongoClient.connect(url, function(err, db) {
 		.catch((err)=>{callback(err)});
 	}
 
-	app.get('/activities',cache(10),isLoggedIn,function(req,res){
-		// var userId = req.params.userId;
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
-		// if(userId === fromUser){
-			getAllActivities(function(err, activityData) {
-				if (err)
+	app.get('/activities/:time',isLoggedIn,cache(10),function(req,res){
+		var time = parseInt(req.params.time);
+		getAllActivities(time,function(err, activityData) {
+			if (err)
 				sendDatabaseError(res, err);
-				else {
-					res.send(activityData);
-				}
-			});
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+			else {
+				res.send(activityData);
+			}
+		});
 	});
 
 	app.get('/posts/:time',cache(10),isLoggedIn,function(req,res){
-		// var userId = req.params.userId;
-		var time = parseInt(req.params.time);
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
-		// if(userId === fromUser){
-			getAllPosts(time)
-			.then((postData)=>{
-				res.send(postData);
-			})
-			.catch(err => {
-				sendDatabaseError(res, err);
-			})
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+	var time = parseInt(req.params.time);
+		getAllPosts(time)
+		.then((postData)=>{
+			res.send(postData);
+		})
+		.catch(err => {
+			sendDatabaseError(res, err);
+		})
 	});
 
 	function getActivityFeedData(userId, callback) {
@@ -874,110 +876,104 @@ MongoClient.connect(url, function(err, db) {
 	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), isLoggedIn, function(req, res) {
 			var data = req.body;
 			var userId = new ObjectID(req.params.userId);
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
-			// if (fromUser.str === userId.str) {
-					getUserData(userId, function(err, userData) {
-							if (err)
-									return sendDatabaseError(res, err);
-							else if (userData.email === data.oldEmail && validateEmail(data.newEmail)) {
-									db.collection('users').updateOne({
-											_id: userId
-									}, {
-											$set: {
-													email: data.newEmail
-											}
-									}, function(err) {
-											if (err)
-													return sendDatabaseError(res, err);
-											else {
-													res.send(false);
-											}
-									});
-							} else {
-									res.send(true);
-							}
-					});
-			// } else {
-					// res.statsus(401).end();
-			// }
+			getUserData(userId, function(err, userData) {
+					if (err)
+							return sendDatabaseError(res, err);
+					else if (userData.email === data.oldEmail && validateEmail(data.newEmail)) {
+							db.collection('users').updateOne({
+									_id: userId
+							}, {
+									$set: {
+											email: data.newEmail
+									}
+							}, function(err) {
+									if (err)
+											return sendDatabaseError(res, err);
+									else {
+											res.send(false);
+									}
+							});
+					} else {
+							res.send(true);
+					}
+			});
 	});
 
 	app.put('/settings/avatar/user/:userId', isLoggedIn, function(req, res) {
 			var userId = new ObjectID(req.params.userId);
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var body = req.body;
-			// if (fromUser.str === userId.str) {
-				var regex = /^data:.+\/(.+);base64,(.*)$/;
-				var matches = body.img.match(regex);
-				var data = matches[2];
-				var buffer = new Buffer(data, 'base64');
-
-					db.collection('users').findAndModifyAsync({
-							_id: userId
-					}, [
-							['_id', 'asc']
-					], {
-							$set: {
-									avatar: "img/avatar/"+userId+".jpg"
-							}
-					}, {
-							"new": true
-					})
-					.then(result => {
-							res.send(result.value);
-							Jimp.read(buffer)
-							.then(image => {
-							image.quality(10)
-							.cover(512,512,Jimp.HORIZONTAL_ALIGN_CENTER,Jimp.VERTICAL_ALIGN_MIDDLE)
-							.write("../client/build/img/avatar/" + userId + ".jpg");
-						})
-					})
-					.catch(err=>{throw(err)})
-			// } else {
-					// res.status(401).end();
-			// }
+			db.collection('users').findAndModifyAsync({
+					_id: userId
+			}, [
+					['_id', 'asc']
+			], {
+					$set: {
+							avatar: "img/avatar/"+userId+".jpg"
+					}
+			}, {
+					"new": true
+			})
+			.then(result => {
+					delete result.value.password;
+					delete result.value.notification;
+					delete result.value.post;
+					delete result.value.activity;
+					delete result.value.sessions;
+					res.send(result.value);
+					var buffer = new Buffer(body.img.split(',')[1], 'base64');
+					Jimp.read(buffer)
+					.then(image => {
+					image.quality(10)
+					.cover(512,512,Jimp.HORIZONTAL_ALIGN_CENTER,Jimp.VERTICAL_ALIGN_MIDDLE)
+					.write("../client/build/img/avatar/" + userId + ".jpg");
+				})
+			})
+			.catch(err=>{throw(err)})
 	});
 
 	app.put('/settings/location/user/:userId', isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
-			// if (fromUser === userId) {
-					db.collection('users').updateOne({
-							_id: new ObjectID(userId)
-					}, {
-							$set: {
-									location: body
-							}
-					}, function(err) {
-							if (err)
-									return sendDatabaseError(res, err);
-							else {
-									res.send(true);
-							}
-					});
-			// }
+			db.collection('users').updateOne({
+					_id: new ObjectID(userId)
+			}, {
+					$set: {
+							location: body
+					}
+			}, function(err) {
+					if (err)
+							return sendDatabaseError(res, err);
+					else {
+							res.send(true);
+					}
+			});
 	});
 
 	// get activity Feed data
-	app.get('/user/:userid/activity',cache(10), isLoggedIn,function(req, res) {
-			var userId = new ObjectID(req.params.userid);
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
-			// if(userId === fromUser){
-			getActivityFeedData(userId, function(err, activityData) {
-					if (err)
-							sendDatabaseError(res, err);
-					else {
-							res.send(activityData);
-					}
-			});
-			// }
-			// else{
-			// res.status(401).end();
-			// }
+	app.get('/user/:userid/activity',cache(30), isLoggedIn,function(req, res) {
+		var userId = new ObjectID(req.params.userid);
+		getActivityFeedData(userId, function(err, activityData) {
+				if (err)
+						sendDatabaseError(res, err);
+				else {
+						res.send(activityData);
+				}
+		});
 	});
 
 	function postActivity(data,callback) {
+
+		if(data.img!=="./img/default.png"){
+			var name = uuidV1();
+			var img = data.img;
+			data.img = "img/activity/"+name+'.jpg';
+			var buffer = new Buffer(img.split(",")[1], 'base64');
+			Jimp.read(buffer)
+			.then(image => {
+				image.quality(30)
+				.write("../client/build/img/activity/" + name + ".jpg");
+			})
+		}
 		data.participants=[];
 		data.likeCounter=[];
 		data.comments=[];
@@ -1007,23 +1003,18 @@ MongoClient.connect(url, function(err, db) {
 	}
 	//post activity
 	app.post('/postActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
-			var body = req.body;
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
-			// if (fromUser === body.author) {
-				postActivity(body,function(err,activityData){
-					if(err)
-						return sendDatabaseError(res,err);
-					else{
-						res.send(activityData);
-					}
-				});
-			// } else {
-					// res.status(401).end();
-			// }
+		var body = req.body;
+			postActivity(body,function(err,activityData){
+				if(err)
+					return sendDatabaseError(res,err);
+				else{
+					res.send(activityData);
+				}
+			});
 	});
 
 	//get activity detail
-	app.get('/activityItem/:activityId',cache(100), isLoggedIn, function(req, res) {
+	app.get('/activityItem/:activityId',cache(60), isLoggedIn, function(req, res) {
 			var activityId = new ObjectID(req.params.activityId);
 			getActivityFeedItem(activityId, function(err, activityData) {
 					res.status(201);
@@ -1033,115 +1024,98 @@ MongoClient.connect(url, function(err, db) {
 
 	//like activity
 	app.put('/activityItem/:activityId/likelist/:userId', isLoggedIn, function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var activityId = new ObjectID(req.params.activityId);
 			var userId = req.params.userId;
-			// if (userId === fromUser) {
-					var update = {
-							$addToSet: {}
-					};
-					update.$addToSet["likeCounter"] = new ObjectID(userId);
-					db.collection('activityItems').findAndModify({
-							_id: activityId
-					}, [
-							['_id', 'asc']
-					], update, {
-							"new": true
-					}, function(err, result) {
-							if (err) {
-									return sendDatabaseError(res, err);
-							} else if (result.value === null) {
-									// Filter didn't match anything: Bad request.
-									res.status(400).end();
-							} else {
-									resolveUserObjects(result.value.likeCounter, function(err, userMap) {
-											if (err) {
-													sendDatabaseError(res, err);
-											} else {
-													result.value.likeCounter = result.value.likeCounter.map((id) => userMap[id]);
-													res.send(result.value.likeCounter);
-											}
-									});
-							}
-					});
-			// } else {
-			//     // Unauthorized.
-			//     res.status(401).end();
-			// }
+			var update = {
+					$addToSet: {}
+			};
+			update.$addToSet["likeCounter"] = new ObjectID(userId);
+			db.collection('activityItems').findAndModify({
+					_id: activityId
+			}, [
+					['_id', 'asc']
+			], update, {
+					"new": true
+			}, function(err, result) {
+					if (err) {
+							return sendDatabaseError(res, err);
+					} else if (result.value === null) {
+							// Filter didn't match anything: Bad request.
+							res.status(400).end();
+					} else {
+							resolveUserObjects(result.value.likeCounter, function(err, userMap) {
+									if (err) {
+											sendDatabaseError(res, err);
+									} else {
+											result.value.likeCounter = result.value.likeCounter.map((id) => userMap[id]);
+											res.send(result.value.likeCounter);
+									}
+							});
+					}
+			});
 	});
 
 	//unlike activity
 	app.delete('/activityItem/:activityId/likelist/:userId', isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var activityId = new ObjectID(req.params.activityId);
 			var userId = req.params.userId;
-			// if (userId === fromUser) {
-					var update = {
-							$pull: {}
-					};
-					update.$pull["likeCounter"] = new ObjectID(userId);
-					db.collection('activityItems').findAndModify({
-							_id: activityId
-					}, [
-							['_id', 'asc']
-					], update, {
-							"new": true
-					}, function(err, result) {
-							if (err) {
-									return sendDatabaseError(res, err);
-							} else if (result.value === null) {
-									// Filter didn't match anything: Bad request.
-									res.status(400).end();
-							} else {
-									resolveUserObjects(result.value.likeCounter, function(err, userMap) {
-											if (err) {
-													sendDatabaseError(res, err);
-											} else {
-													result.value.likeCounter = result.value.likeCounter.map((id) => userMap[id]);
-													res.send(result.value.likeCounter);
-											}
-									});
-							}
-					});
-			// } else {
-			//     // Unauthorized.
-			//     res.status(401).end();
-			// }
-	});
+			var update = {
+					$pull: {}
+			};
+			update.$pull["likeCounter"] = new ObjectID(userId);
+			db.collection('activityItems').findAndModify({
+					_id: activityId
+			}, [
+					['_id', 'asc']
+			], update, {
+					"new": true
+			}, function(err, result) {
+					if (err) {
+							return sendDatabaseError(res, err);
+					} else if (result.value === null) {
+							// Filter didn't match anything: Bad request.
+							res.status(400).end();
+					} else {
+							resolveUserObjects(result.value.likeCounter, function(err, userMap) {
+									if (err) {
+											sendDatabaseError(res, err);
+									} else {
+											result.value.likeCounter = result.value.likeCounter.map((id) => userMap[id]);
+											res.send(result.value.likeCounter);
+									}
+							});
+					}
+			});
+});
 
 	//post ADcomments
 	app.post('/activityItem/:activityId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var body = req.body;
 			var activityItemId = new ObjectID(req.params.activityId);
 			var userId = body.author;
-			// if (fromUser === userId) {
-					db.collection('activityItems').updateOne({
-							_id: activityItemId
-					}, {
-							$push: {
-									comments: {
-											"author": new ObjectID(userId),
-											"postDate": (new Date()).getTime(),
-											"text": body.text
+			db.collection('activityItems').updateOne({
+					_id: activityItemId
+			}, {
+					$push: {
+							comments: {
+									"author": new ObjectID(userId),
+									"postDate": (new Date()).getTime(),
+									"text": body.text
+							}
+					}
+			}, function(err) {
+					if (err) {
+							sendDatabaseError(res.err);
+					} else {
+							getActivityFeedItem(activityItemId, function(err, activityData) {
+									if (err) {
+											sendDatabaseError(res, err);
+									} else {
+											res.send(activityData);
 									}
-							}
-					}, function(err) {
-							if (err) {
-									sendDatabaseError(res.err);
-							} else {
-									getActivityFeedItem(activityItemId, function(err, activityData) {
-											if (err) {
-													sendDatabaseError(res, err);
-											} else {
-													res.send(activityData);
-											}
-									});
-							}
-					});
-			// } else {
-					// res.status(401).end();
-			// }
+							});
+					}
+			});
 	});
 
 	function getNotificationItem(notificationId, callback) {
@@ -1211,27 +1185,22 @@ MongoClient.connect(url, function(err, db) {
 
 	//get notification
 	app.get('/user/:userId/notification', isLoggedIn,function(req, res) {
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
-			var userId = new ObjectID(req.params.userId);
-			// if (fromUser.str === userId.str) {
-					db.collection('users').findOne({
-							_id: userId
-					}, function(err, userData) {
-							if (err)
-									return sendDatabaseError(res, err);
-							else if (userData === null)
-									return res.status(400).end();
-							else {
-									getNotificationData(userData.notification, function(err, notificationData) {
-											if (err)
-													return sendDatabaseError(res, err);
-											res.send(notificationData);
-									});
-							}
-					});
-			// } else {
-					// res.status(401).end();
-			// }
+		var userId = new ObjectID(req.params.userId);
+		db.collection('users').findOne({
+				_id: userId
+		}, function(err, userData) {
+				if (err)
+						return sendDatabaseError(res, err);
+				else if (userData === null)
+						return res.status(400).end();
+				else {
+						getNotificationData(userData.notification, function(err, notificationData) {
+								if (err)
+										return sendDatabaseError(res, err);
+								res.send(notificationData);
+						});
+				}
+		});
 	});
 
 	function deleteNotification(notificationId, userId, callback) {
@@ -1276,179 +1245,153 @@ MongoClient.connect(url, function(err, db) {
 
 	//acceptRequest friend request
 	app.put('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var userId = new ObjectID(req.params.userId);
 			var notificationId = new ObjectID(req.params.notificationId);
-			// if (fromUser.str === userId.str) {
-					getNotificationItem(notificationId, function(err, notification) {
-							if (err)
-									return sendDatabaseError(res, err);
-							else {
-									db.collection('users').updateOne({
-											_id: userId
-									}, {
-											$addToSet: {
-													friends: notification.sender._id
-											}
-									}, function(err) {
-											if (err)
-													return sendDatabaseError(res, err);
-											else {
-												db.collection('users').updateOne({
-														_id: notification.sender._id
-												}, {
-														$addToSet: {
-																friends: userId
-														}
-												}, function(err) {
-													if(err)
-														return sendDatabaseError(res,err);
+			getNotificationItem(notificationId, function(err, notification) {
+					if (err)
+							return sendDatabaseError(res, err);
+					else {
+							db.collection('users').updateOne({
+									_id: userId
+							}, {
+									$addToSet: {
+											friends: notification.sender._id
+									}
+							}, function(err) {
+									if (err)
+											return sendDatabaseError(res, err);
+									else {
+										db.collection('users').updateOne({
+												_id: notification.sender._id
+										}, {
+												$addToSet: {
+														friends: userId
+												}
+										}, function(err) {
+											if(err)
+												return sendDatabaseError(res,err);
 
-													deleteNotification(notificationId, userId, function(err, notificationData) {
-														if (err)
-														sendDatabaseError(res, err);
-														else {
-															res.send(notificationData);
-														}
-													});
-												});
-											}
-									})
-							}
-					});
-			// } else {
-					// res.status(401).end();
-			// }
+											deleteNotification(notificationId, userId, function(err, notificationData) {
+												if (err)
+												sendDatabaseError(res, err);
+												else {
+													res.send(notificationData);
+												}
+											});
+										});
+									}
+							})
+					}
+			});
 	});
 
 	//deleteNotification
 	app.delete('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
-			// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 			var userId = new ObjectID(req.params.userId);
 			var notificationId = new ObjectID(req.params.notificationId);
-			// if (fromUser.str === userId.str) {
-					deleteNotification(notificationId, userId, function(err, notificationData) {
-							if (err)
-									sendDatabaseError(res, err);
-							else {
-									res.send(notificationData);
-							}
-					});
-			// } else {
-					// res.status(401).end();
-			// }
+			deleteNotification(notificationId, userId, function(err, notificationData) {
+					if (err)
+							sendDatabaseError(res, err);
+					else {
+							res.send(notificationData);
+					}
+			});
 	});
 
 	//accept activity request
 	app.put('/acceptactivity/:notificationId/:fromuser',isLoggedIn,function(req,res){
-		// var fromUser = new ObjectID(getUserIdFromToken(req.get('Authorization')));
 		var user = new ObjectID(req.params.fromuser);
 		var notificationId = new ObjectID(req.params.notificationId);
-		// if(fromUser.str === user.str){
 			getNotificationItem(notificationId,function(err,notification){
 				if(err)
 					return sendDatabaseError(res, err);
 				else{
+					var userToAdd;
+					if(notification.RequestOrInvite==="request"){
+						userToAdd = notification.sender._id
+					}
+					else{
+						userToAdd = notification.target._id
+					}
 
-						var userToAdd;
-						if(notification.RequestOrInvite==="request"){
-							userToAdd = notification.sender._id
+					db.collection('activityItems').updateOne({
+						_id:notification.activityid
+					},{
+						$addToSet:{
+							participants:userToAdd
 						}
-						else{
-							userToAdd = notification.target._id
-						}
-
-						db.collection('activityItems').updateOne({
-							_id:notification.activityid
-						},{
-							$addToSet:{
-								participants:userToAdd
+					},function(err){
+							if(err){
+								return sendDatabaseError(res,err);
 							}
-						},function(err){
-								if(err){
-								console.log(user)
-									return sendDatabaseError(res,err);
+
+							deleteNotification(notificationId,user,function(err,notificationData){
+
+								if(err)
+								sendDatabaseError(res,err);
+								else{
+									res.status(201);
+									res.send(notificationData);
 								}
-
-								deleteNotification(notificationId,user,function(err,notificationData){
-
-									if(err)
-									sendDatabaseError(res,err);
-									else{
-										res.status(201);
-										res.send(notificationData);
-									}
-								})
-							}
-						)
-				}
-			});
-
-	// }
-	// else {
-			// res.status(401).end();
-	// }
-
+							})
+						}
+					)
+			}
+		});
 });
 
 	//getMessage
 	app.get('/user/:userId/chatsession/:id/:time', isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
 			var id = req.params.id;
 			var userid = req.params.userId;
 			var time = req.params.time;
-			// if (userid == fromUser) {
-					db.collection('messageSession').findOne({
-							_id: new ObjectID(id)
-					}, function(err, message) {
-							if (err)
-									sendDatabaseError(res, err);
-							else if(message == null){
-								res.status(400);
-								res.send();
-							}
-							else {
-								if(message.lastmessage===undefined?false:
-									(message.lastmessage.target===undefined?"":message.lastmessage.target.str===userid.str)){
-									db.collection('messageSession').updateOne({_id:new ObjectID(id)},{
-										$set:{
-											"lastmessage.isread":true
-										}
-									},function(err){
-										if(err)
-											return sendDatabaseError(res,err);
-											getMessage(time, message.contents, function(err, messages) {
-												if (err)
-													sendDatabaseError(res, err);
-												else {
-													res.status(201);
-													res.send(messages);
-												}
-											});
-									})
+			db.collection('messageSession').findOne({
+					_id: new ObjectID(id)
+			}, function(err, message) {
+					if (err)
+							sendDatabaseError(res, err);
+					else if(message == null){
+						res.status(400);
+						res.send();
+					}
+					else {
+						if(message.lastmessage===undefined?false:
+							(message.lastmessage.target===undefined?"":message.lastmessage.target.str===userid.str)){
+							db.collection('messageSession').updateOne({_id:new ObjectID(id)},{
+								$set:{
+									"lastmessage.isread":true
 								}
-								else getMessage(time,message.contents, function(err, messages) {
-									if (err)
-									sendDatabaseError(res, err);
-									else {
-										res.status(201);
-										res.send(messages);
-									}
-								});
-
+							},function(err){
+								if(err)
+									return sendDatabaseError(res,err);
+									getMessage(time, message.contents, function(err, messages) {
+										if (err)
+											sendDatabaseError(res, err);
+										else {
+											res.status(201);
+											res.send(messages);
+										}
+									});
+							})
+						}
+						else getMessage(time,message.contents, function(err, messages) {
+							if (err)
+							sendDatabaseError(res, err);
+							else {
+								res.status(201);
+								res.send(messages);
 							}
-					})
-			// }
+						});
+
+					}
+			})
 	});
 
 	//post message
-	app.post('/user/:userid/chatsession/:id', isLoggedIn,function(req, res) {
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.post('/chatsession/:id', isLoggedIn,function(req, res) {
 		var id = req.params.id;
-		var userid = req.params.userid;
 		var body = req.body;
 		var time = (new Date()).getTime();
-		// if (userid === fromUser) {
 			var senderid = body.sender;
 			var targetid = body.target;
 			var text = body.text;
@@ -1459,47 +1402,44 @@ MongoClient.connect(url, function(err, db) {
 					"text": text
 			}
 			getSessionContentsID(new ObjectID(id), function(err, contentsid) {
-					if (err)
-							sendDatabaseError(res, err);
-					else {
-							db.collection('message').updateOne({
-									_id: new ObjectID(contentsid)
-							}, {
-									$push: {
-											messages: lastmessage
-									}
-							}, function(err) {
-									if (err)
-											sendDatabaseError(res.err);
-									else {
-											getMessage(time+1,contentsid, function(err, messages) {
-													if (err)
-															sendDatabaseError(res, err);
-													else {
-															//seting lastmessage;
-															lastmessage.isread = false;
-															db.collection("messageSession").updateOne({
-																	_id: new ObjectID(id)
-															}, {
-																	$set: {
-																			"lastmessage": lastmessage
-																	}
-															}, function(err) {
-																	if (err)
-																			sendDatabaseError(res, err);
+				if (err)
+						sendDatabaseError(res, err);
+				else {
+						db.collection('message').updateOne({
+								_id: new ObjectID(contentsid)
+						}, {
+								$push: {
+										messages: lastmessage
+								}
+						}, function(err) {
+								if (err)
+										sendDatabaseError(res.err);
+								else {
+										getMessage(time+1,contentsid, function(err, messages) {
+												if (err)
+														sendDatabaseError(res, err);
+												else {
+														//seting lastmessage;
+														lastmessage.isread = false;
+														db.collection("messageSession").updateOne({
+																_id: new ObjectID(id)
+														}, {
+																$set: {
+																		"lastmessage": lastmessage
+																}
+														}, function(err) {
+																if (err)
+																		sendDatabaseError(res, err);
 
-																	else res.send(messages);
-															});
-													}
-											});
-									}
-							})
+																else res.send(messages);
+														});
+												}
+										});
+								}
+						})
 
-					}
-			});
-		// } else {
-				// res.status(401).end();
-		// }
+				}
+		});
 });
 
 function getMessage(time,sessionId, cb) {
@@ -1536,32 +1476,27 @@ function getMessage(time,sessionId, cb) {
 	});
 }
 
-	app.get('/getsession/:userid/:targetid', cache(30), isLoggedIn,function(req, res) {
-			// var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.get('/getsession/:userid/:targetid', cache(600), isLoggedIn,function(req, res) {
 			var userid = req.params.userid;
-			// if (userid == fromUser) {
-					var targetid = req.params.targetid;
-					getSession(new ObjectID(userid), new ObjectID(targetid), function(err, session) {
-							if (err)
-									sendDatabaseError(res, err);
-							else if(session===null){
-								createSession(new ObjectID(userid), new ObjectID(targetid),function(err,newSession){
-									if(err)
-										sendDatabaseError(res,err);
-									else{
-										res.status(201);
-										res.send(newSession);
-									}
-								})
+			var targetid = req.params.targetid;
+			getSession(new ObjectID(userid), new ObjectID(targetid), function(err, session) {
+					if (err)
+							sendDatabaseError(res, err);
+					else if(session===null){
+						createSession(new ObjectID(userid), new ObjectID(targetid),function(err,newSession){
+							if(err)
+								sendDatabaseError(res,err);
+							else{
+								res.status(201);
+								res.send(newSession);
 							}
-							else {
-									res.status(201);
-									res.send(session);
-							}
-					});
-			// } else {
-					// res.status(401).end();
-			// }
+						})
+					}
+					else {
+							res.status(201);
+							res.send(session);
+					}
+			});
 	});
 
 	function getSession(userid, targetid, cb) {
@@ -1627,33 +1562,6 @@ function getMessage(time,sessionId, cb) {
 	}
 
 	/**
-	 * Get the user ID from a token. Returns -1 (an invalid ID)
-	 * if it fails.
-	 */
-	// 	function getUserIdFromToken(authorizationLine) {
-	// 		try {
-	// 			// Cut off "Bearer " from the header value.
-	// 			var token = authorizationLine.slice(7);
-	// 			// Verify the token. Throws if the token is invalid or expired.
-	// 			var tokenObj = jwt.verify(token, secretKey);
-	// 			var id = tokenObj['id'];
-	// 			// Check that id is a string.
-	// 			if (typeof id === 'string') {
-	// 			return id;
-	// 			} else {
-	// 			// Not a string. Return "", an invalid ID.
-	// 			// This should technically be impossible unless
-	// 			// the server accidentally
-	// 			// generates a token with a number for an id!
-	// 			return "";
-	// 		}
-	// 	} catch (e) {
-	// 		// Return an invalid ID.
-	// 		return "";
-	// 	}
-	// }
-
-	/**
 	 * Translate JSON Schema Validation failures into error 400s.
 	 */
 	app.use(function(err, req, res, next) {
@@ -1669,69 +1577,62 @@ function getMessage(time,sessionId, cb) {
 	});
 
 	// get search result.
-	app.get('/search/userid/:userid/querytext/:querytext',cache(10),isLoggedIn,function(req,res){
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
+	app.get('/search/:querytext',cache(60),isLoggedIn,function(req,res){
 		var querytext = req.params.querytext.toLowerCase();
-		var userid = req.params.userid
 		var data={};
-		// if(userid === fromUser){
-			db.collection('users').findAsync({
-				$or:
-					[
-						{fullname:{$regex:querytext,$options:'i'}}
-					]
-			})
-			.then(cursor => {
-				return cursor.toArrayAsync();
-			})
-			.then(items => {
-				data["users"]=items;
+		db.collection('users').findAsync({
+			$or:
+				[
+					{fullname:{$regex:querytext,$options:'i'}}
+				]
+		})
+		.then(cursor => {
+			return cursor.toArrayAsync();
+		})
+		.then(items => {
+			data["users"]=items;
 
-				db.collection('activityItems').find({
-					description:{$regex:querytext,$options:'i'}
-				}).toArray(function(err, activityitems) {
+			db.collection('activityItems').find({
+				description:{$regex:querytext,$options:'i'}
+			}).toArray(function(err, activityitems) {
+				if (err) {
+					return sendDatabaseError(res, err);
+				}
+				data["activities"]=activityitems;
+
+				db.collection('postFeedItems').find({
+					['contents.text']:{$regex:querytext,$options:'i'}
+				}).toArray(function(err, postitems) {
 					if (err) {
 						return sendDatabaseError(res, err);
 					}
-					data["activities"]=activityitems;
 
-					db.collection('postFeedItems').find({
-						['contents.text']:{$regex:querytext,$options:'i'}
-					}).toArray(function(err, postitems) {
-						if (err) {
-							return sendDatabaseError(res, err);
-						}
+					var resolvedPosts = [];
 
-						var resolvedPosts = [];
-
-						if (postitems.length === 0) {
-							return res.send(data);
-						}
-						postitems.forEach((c) => {
-							resolvePostItem(c)
-							.then(postItem => {
-								resolvedPosts.push(postItem);
-								if (resolvedPosts.length === postitems.length) {
-									data["posts"] = resolvedPosts;
-									return res.send(data);
-								}
-							})
-							.catch(err => {sendDatabaseError(res,err)})
+					if (postitems.length === 0) {
+						return res.send(data);
+					}
+					postitems.forEach((c) => {
+						resolvePostItem(c)
+						.then(postItem => {
+							resolvedPosts.push(postItem);
+							if (resolvedPosts.length === postitems.length) {
+								data["posts"] = resolvedPosts;
+								return res.send(data);
+							}
 						})
-
+						.catch(err => {sendDatabaseError(res,err)})
 					})
 
 				})
+
 			})
-			.catch(err => {sendDatabaseError(res,err)});
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+		})
+		.catch(err => {sendDatabaseError(res,err)});
 	});
 
 	app.post('/signup',validate({body:userSchema}),function(req,res,next){
-		passport.authenticate('signup', function(err, user, info) {
+		passport.authenticate('signup', function(err, user) {
     if (err) { return sendDatabaseError(res,err); }
     if (!user) { return res.status(400).end(); }
     return res.send();
@@ -1748,20 +1649,19 @@ function getMessage(time,sessionId, cb) {
 			})
 		})(req,res,next);
 	});
-	
+
 	app.get('/auth/facebook', passport.authenticate('facebook',{ scope: ['email']}));
 	app.get('/auth/facebook/callback',function(req,res,next){
 		passport.authenticate('facebook', { scope: ['email']},function(err, user, info) {
     if (err) { return sendDatabaseError(res,err); }
     if (!user) { return res.status(400).end(); }
-			req.login(user,()=>{
-				res.redirect('/#/activity/?data='+JSON.stringify(info));
-			})
+		req.login(user,()=>{
+			res.redirect('/#/activity/?data='+JSON.stringify(info));
+		})
 		})(req,res,next);
 	})
 
 	app.get('/logout', function(req, res){
-		console.log('here');
 		req.logout();
 		res.redirect('/');
 	});
@@ -1779,130 +1679,112 @@ function getMessage(time,sessionId, cb) {
 	});
 
 	app.post('/friendRequest/:sender/:target',isLoggedIn,function(req,res){
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
-		// if(fromUser === sender){
-			db.collection('notificationItems').insertOne({
-				sender: new ObjectID(sender),
-				target: new ObjectID(target),
-				type:"FR"
-			},function(err,result){
-				if(err)
-					sendDatabaseError(res,err);
-				else{
-					getUserData(new ObjectID(target),function(err,userData){
-						if(err)
+		db.collection('notificationItems').insertOne({
+			sender: new ObjectID(sender),
+			target: new ObjectID(target),
+			type:"FR"
+		},function(err,result){
+			if(err)
+				sendDatabaseError(res,err);
+			else{
+				getUserData(new ObjectID(target),function(err,userData){
+					if(err)
+						sendDatabaseError(res,err);
+					else{
+						db.collection('notifications').updateOne({_id:userData.notification},{
+							$addToSet:{
+								contents: result.insertedId
+							}
+						},function(err){
+							if(err)
 							sendDatabaseError(res,err);
-						else{
-							db.collection('notifications').updateOne({_id:userData.notification},{
-								$addToSet:{
-									contents: result.insertedId
-								}
-							},function(err){
-								if(err)
-								sendDatabaseError(res,err);
-								else {
-									res.send();
-								}
-							});
-						}
-					});
+							else {
+								res.send();
+							}
+						});
+					}
+				});
 
-				}
-			});
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+			}
+		});
 	});
 
 	app.post('/activityJoinRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
 		var activityid = req.params.activityid;
-		// if(fromUser === sender){
-			db.collection('notificationItems').insertOne({
-				sender: new ObjectID(sender),
-				target: new ObjectID(target),
-				type:"AN",
-				RequestOrInvite:"request",
-				activityid: new ObjectID(activityid)
-			},function(err,result){
-				if(err){
-					sendDatabaseError(res,err);
-				}
-				else{
-					getUserData(new ObjectID(target),function(err,userData){
-						if(err){
-							sendDatabaseError(res,err);
-						}
-						else{
-							db.collection('notifications').updateOne({_id:userData.notification},{
-								$addToSet:{
-									contents: result.insertedId
-								}
-							},function(err){
-								if(err){
-									sendDatabaseError(res,err);
-								}
-								else{
-									res.send();
-								}
-							});
-						}
-					});
-				}
-			});
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+		db.collection('notificationItems').insertOne({
+			sender: new ObjectID(sender),
+			target: new ObjectID(target),
+			type:"AN",
+			RequestOrInvite:"request",
+			activityid: new ObjectID(activityid)
+		},function(err,result){
+			if(err){
+				sendDatabaseError(res,err);
+			}
+			else{
+				getUserData(new ObjectID(target),function(err,userData){
+					if(err){
+						sendDatabaseError(res,err);
+					}
+					else{
+						db.collection('notifications').updateOne({_id:userData.notification},{
+							$addToSet:{
+								contents: result.insertedId
+							}
+						},function(err){
+							if(err){
+								sendDatabaseError(res,err);
+							}
+							else{
+								res.send();
+							}
+						});
+					}
+				});
+			}
+		});
 	});
 
 	app.post('/activityInviteRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
-		// var fromUser = getUserIdFromToken(req.get('Authorization'));
 		var sender = req.params.sender;
 		var target = req.params.target;
 		var activityid = req.params.activityid;
-		// if(fromUser === sender){
-			db.collection('notificationItems').insertOne({
-				sender: new ObjectID(sender),
-				target: new ObjectID(target),
-				type:"AN",
-				RequestOrInvite:"invite",
-				activityid: new ObjectID(activityid)
-			},function(err,result){
-				if(err){
-					sendDatabaseError(res,err);
-				}
-				else{
-					getUserData(new ObjectID(target),function(err,userData){
-						if(err){
-							sendDatabaseError(res,err);
-						}
-						else{
-							db.collection('notifications').updateOne({_id:userData.notification},{
-								$addToSet:{
-									contents: result.insertedId
-								}
-							},function(err){
-								if(err){
-									sendDatabaseError(res,err);
-								}
-								else{
-									res.send();
-								}
-							});
-						}
-					});
-				}
-			});
-		// }
-		// else{
-			// res.status(401).end();
-		// }
+		db.collection('notificationItems').insertOne({
+			sender: new ObjectID(sender),
+			target: new ObjectID(target),
+			type:"AN",
+			RequestOrInvite:"invite",
+			activityid: new ObjectID(activityid)
+		},function(err,result){
+			if(err){
+				sendDatabaseError(res,err);
+			}
+			else{
+				getUserData(new ObjectID(target),function(err,userData){
+					if(err){
+						sendDatabaseError(res,err);
+					}
+					else{
+						db.collection('notifications').updateOne({_id:userData.notification},{
+							$addToSet:{
+								contents: result.insertedId
+							}
+						},function(err){
+							if(err){
+								sendDatabaseError(res,err);
+							}
+							else{
+								res.send();
+							}
+						});
+					}
+				});
+			}
+		});
 	});
 
 

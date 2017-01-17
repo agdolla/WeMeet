@@ -20,7 +20,10 @@ function sendXHR(verb, resource, body, cb, errorCb) {
     var statusCode = xhr.status;
     // var statusText = xhr.statusText;
     if(statusCode===401){
-      errorCb(401);
+      if (errorCb) {
+        // We were given a custom error handler.
+        errorCb(statusCode);
+      }
       return logout();
     }
     if (statusCode >= 200 && statusCode < 300) {
@@ -49,10 +52,10 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   //   ": Could not connect to the server.");
   // });
   // Network failure: request took too long to complete.
-  // xhr.addEventListener('timeout', function() {
-  //   window.AppError('Could not ' + verb + " " + resource +
-  //   ": Request timed out.");
-  // });
+  xhr.addEventListener('timeout', function() {
+    swal('Could not ' + verb + " " + resource +
+    ": Request timed out.","error");
+  });
   switch (typeof(body)) {
     case 'undefined':
       // No body to send.
@@ -196,15 +199,16 @@ export function postStatus(user, text, img, cb){
 
 export function createActivity(data,cb){
     sendXHR('POST','/postActivity',{
-         "type": data.type,
-         "author":data.userData._id,
-         "title": data.title,
-         "description":data.description,
-         "img":data.img === null ? "./img/default.png" : data.img,
-         "startTime": moment(data.startTime).valueOf(),
-         "endTime": moment(data.endTime).valueOf(),
-         "location": data.location,
-         "contents": {
+        postDate: new Date().getTime(),
+         type: data.type,
+         author:data.userData._id,
+         title: data.title,
+         description:data.description,
+         img:data.img === null ? "./img/default.png" : data.img,
+         startTime: moment(data.startTime).valueOf(),
+         endTime: moment(data.endTime).valueOf(),
+         location: data.location,
+         contents: {
            "text": data.detail
           }
       }
@@ -232,9 +236,9 @@ export function getActivityFeedData(user,cb){
   });
 }
 
-export function getAllActivities(cb){
+export function getAllActivities(time,cb){
   // We don't need to send a body, so pass in 'undefined' for the body.
-  sendXHR('GET', '/activities', undefined, (xhr) => {
+  sendXHR('GET', '/activities/'+time, undefined, (xhr) => {
     // Call the callback with the data.
     cb(JSON.parse(xhr.responseText));
   });
@@ -250,6 +254,12 @@ export function getAllPosts(time,cb){
 
 export function getUserData(user,cb){
   sendXHR('GET','/user/'+user,undefined,(xhr)=>{
+    cb(JSON.parse(xhr.responseText));
+  })
+}
+
+export function getSessions(user,cb){
+  sendXHR('GET','/user/'+user+'/sessions',undefined,(xhr)=>{
     cb(JSON.parse(xhr.responseText));
   })
 }
@@ -276,7 +286,7 @@ export function getMessages(time,userid,id,cb){
 }
 
 export function postMessage(sessionId,sender,target, text, cb){
-  sendXHR('POST','/user/'+sender+'/chatsession/'+sessionId,{
+  sendXHR('POST','/chatsession/'+sessionId,{
     sender:sender,
     target:target,
     text:text
@@ -293,8 +303,8 @@ export function getSessionId(userid,targetid,cb){
 
 
 
-export function searchquery(userid,querytext,cb){
-  sendXHR('GET','/search/userid/'+userid+'/querytext/'+querytext, undefined, (xhr) => {
+export function searchquery(querytext,cb){
+  sendXHR('GET','/search/'+querytext, undefined, (xhr) => {
     cb(JSON.parse(xhr.responseText));
   });
 }
@@ -322,7 +332,7 @@ export function searchquery(userid,querytext,cb){
     // Error callback: Login failed.
     cb(false);
   });
-}
+} 
 
 export function addFriend(sender,target,cb){
   sendXHR('POST','/friendRequest/'+sender+"/"+target,undefined,()=>{

@@ -11,9 +11,7 @@ import {Link} from 'react-router';
 var moment = require('moment');
 import {socket,getToken} from '../credentials';
 import {hideElement} from '../util';
-var debug = require('react-debug');
-
-
+// var debug = require('react-debug');
 
 export default class Ad_body extends React.Component{
   constructor(props){
@@ -22,7 +20,7 @@ export default class Ad_body extends React.Component{
       activity: {},
       ishost: "",
       joined: false,
-      success:false,
+      success:false
     };
   }
 
@@ -181,13 +179,13 @@ export default class Ad_body extends React.Component{
               </div>
               <div className="modal-body">
                 <ul className="media-list">
-                  {this.state.activity.participants === undefined ? 0:
-                    (this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
+                  {this.state.activity.participants === undefined ||
+                    this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
                     this.state.activity.participants.map((p,i)=>{
                     return (
                       <Ad_participates_item key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
                     )
-                  }))}
+                  })}
                 </ul>
               </div>
             </div>

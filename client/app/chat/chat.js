@@ -2,8 +2,10 @@ import React from 'react';
 import Navbar from '../component/navbar';
 import NavBody from './navbody';
 import ChatWindow from './chatwindow';
-import {getUserData,getMessages,postMessage,getSessionId} from '../server';
+import {getUserData,getMessages,postMessage,getSessionId,getSessions} from '../server';
 import {socket} from '../credentials';
+var debug = require('react-debug');
+
 
 export default class Chat extends React.Component {
 
@@ -12,6 +14,7 @@ export default class Chat extends React.Component {
     this.state = {
       user: {},
       message :[],
+      sessions: [],
       friend: "",
       sessionId:"",
       btnText:"load earier messages"
@@ -45,9 +48,9 @@ export default class Chat extends React.Component {
             this.setState({
               message:message
             },()=>{
-              getUserData(this.props.user, (userData) => {
+              getSessions(this.props.user, (sessions) => {
                 this.setState({
-                  user:userData,
+                  sessions:sessions,
                   btnText:"load earier messages"
                 });
               });
@@ -63,31 +66,39 @@ export default class Chat extends React.Component {
       this.setState({
         user:userData
       },()=>{
-        this.setState({friend:this.state.user.friends[0]._id},()=>{
-          getSessionId(this.props.user,this.state.friend,(session)=>{
-            this.setState({
-              sessionId:session._id
-            },
-            ()=>{
-              getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
-                this.setState({
-                  message:message,
-                  btnText:"load earier messages"
-                })
+        getSessions(this.props.user,(sessions)=>{
+          this.setState({
+            sessions:sessions,
+            friend:this.state.user.friends[0]._id
+          },()=>{
+            getSessionId(this.props.user,this.state.friend,(session)=>{
+              this.setState({
+                sessionId:session._id
+              },
+              ()=>{
+                getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
+                  this.setState({
+                    message:message,
+                    btnText:"load earier messages"
+                  })
+                });
               });
             });
-          });})
-        })
-      });
-    }
+          });
+        });
+      })
+    });
+  }
 
   handlePostMessage(message){
     socket.emit('chat',{currUser:this.props.user,friend:this.state.friend});
     postMessage(this.state.sessionId, this.props.user, this.state.friend ,message, (newMessage)=>{
+      debug(newMessage);
       this.setState({message:newMessage},()=>{
-        getUserData(this.props.user, (userData) => {
+        getSessions(this.props.user, (sessions) => {
+          debug(sessions);
           this.setState({
-            user:userData,
+            sessions:sessions,
             btnText:"load earier messages"
           })
         });
@@ -107,9 +118,10 @@ export default class Chat extends React.Component {
               this.setState({
                 message:message
               },()=>{
-                getUserData(this.props.user, (userData) => {
+                getSessions(this.props.user, (sessions) => {
+                  debug('here');
                   this.setState({
-                    user:userData,
+                    sessions:sessions,
                     btnText:"load earier messages"
                   })
                 })
@@ -167,7 +179,8 @@ export default class Chat extends React.Component {
                         </li>
                       </ul>
                     </div>
-                    <NavBody data={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
+                    <NavBody sessions={this.state.sessions} 
+                    userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
                   </div>
                 </div>
                 {chatwindow}

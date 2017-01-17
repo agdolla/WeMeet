@@ -23,7 +23,7 @@ export default class SearchEntry extends React.Component{
     if (e.key === "Enter") {
       var query = this.state.value.trim();
       if (query !== "") {
-        searchquery(this.props.user._id,query,(searchData)=>
+        searchquery(query,(searchData)=>
             this.setState(
               {
                 searchDataResult:searchData,
@@ -51,9 +51,9 @@ export default class SearchEntry extends React.Component{
         </div>
         <h4 style={{marginBottom:'10'}}>{this.state.title}</h4>
           {
-            this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((users,i)=>{
+            this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((user,i)=>{
               return (
-                <SearchFeedUserFeedItem key={i} data={users} currentUser={this.props.user}/>
+                <SearchFeedUserFeedItem key={i} data={user} currentUser={this.props.user}/>
               )
             })
           }

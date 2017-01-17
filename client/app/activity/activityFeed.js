@@ -3,6 +3,7 @@ import ActivityFeedItem from './activityFeedItem';
 import {getAllActivities} from '../server';
 import {Link} from "react-router";
 import {socket} from '../credentials';
+import {disabledElement} from '../util';
 import {hashHistory} from 'react-router';
 var debug = require('react-debug');
 
@@ -12,12 +13,14 @@ export default class ActivityFeed extends React.Component{
     super(props);
     this.state= {
       contents: [],
-      notified:false
+      notified:false,
+      btnText:"load more",
+      submitted:false
     }
   }
 
   getData(){
-    getAllActivities((activityFeedData)=>{
+    getAllActivities((new Date()).getTime(), (activityFeedData)=>{
       this.setState({
         contents:activityFeedData,
         notified:false
@@ -25,20 +28,32 @@ export default class ActivityFeed extends React.Component{
     });
   }
 
+  handleLoadMoreA(e){
+    e.preventDefault();
+    this.setState({
+      submitted:true
+    });
+    var date = this.state.contents.length===0?(new Date()).getTime():
+    this.state.contents[this.state.contents.length-1].postDate;
+    getAllActivities(date, (activities)=>{
+      if(activities.length===0){
+        return this.setState({
+          btnText:"nothing more to load",
+          submitted:false
+        })
+      }
+      var newActivities = this.state.contents.concat(activities);
+      this.setState({
+        contents:newActivities,
+        notified:false,
+        submitted:false
+      });
+    });
+  }
+
   componentWillReceiveProps(){
     this.getData();
   }
-
-  shouldComponentUpdate(nextProps,nextState){
-    if(nextState.contents===undefined || this.state.contents===undefined){
-      return true;
-    }
-    else if(nextState.contents.length!==this.state.contents.length){
-      return true;
-    }
-    return false;
-  }
-
 
   notifyMe(cb) {
     if (!Notification) {
@@ -80,8 +95,16 @@ export default class ActivityFeed extends React.Component{
     return(
       <div>
         {this.state.contents.map((activityFeedItem)=>{
-          return <ActivityFeedItem key={activityFeedItem._id} data={activityFeedItem} currentUser={this.props.user}/>
+          return <ActivityFeedItem key={activityFeedItem._id} data={activityFeedItem}/>
         })}
+        <div className="btn-group btn-group-justified" role="group" aria-label="...">
+          <div className="btn-group" role="group">
+            <button className={"btn btn-default loadbtn "+disabledElement(this.state.btnText==="nothing more to load"||this.state.submitted)} 
+            onClick={(e)=>this.handleLoadMoreA(e)}>
+              {this.state.btnText}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

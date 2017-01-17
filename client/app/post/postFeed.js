@@ -35,7 +35,7 @@ export default class PostFeed extends React.Component{
     });
     var date = this.state.contents.length===0?(new Date()).getTime():
     this.state.contents[this.state.contents.length-1].contents.postDate;
-    getAllPosts(date, this.props.userId, (postFeedData)=>{
+    getAllPosts(date, (postFeedData)=>{
       if(postFeedData.length===0){
         return this.setState({
           loadBtnText:"nothing more to load",
@@ -52,8 +52,8 @@ export default class PostFeed extends React.Component{
   }
 
   onPost(text,img){
-    postStatus(this.props.userId, text, img,()=>{
-      socket.emit('newPost',{authorization:getToken(),user:this.props.userId});
+    postStatus(this.props.user._id, text, img,()=>{
+      socket.emit('newPost',{authorization:getToken(),user:this.props.user._id});
       this.setState({
         loadBtnText:"load more"
       },()=>{
