@@ -383,11 +383,7 @@ function resetDatabase(db, cb) {
   processNextCollection();
 }
 
-// Check if called directly via 'node', or required() as a module.
-// http://stackoverflow.com/a/6398335
-if(require.main === module) {
-  // Called directly, via 'node src/resetdatabase.js'.
-  // Connect to the database, and reset it!
+function reset(cb){
   var MongoClient = require('mongodb').MongoClient;
   var url = 'mongodb://localhost:27017/' + databaseName;
   MongoClient.connect(url, function(err, db) {
@@ -399,10 +395,21 @@ if(require.main === module) {
         console.log("Database reset!");
         // Close the database connection so NodeJS closes.
         db.close();
+        cb();
       });
     }
   });
+}
+
+// Check if called directly via 'node', or required() as a module.
+// http://stackoverflow.com/a/6398335
+if(require.main === module) {
+  // Called directly, via 'node src/resetdatabase.js'.
+  // Connect to the database, and reset it!
+  reset(()=>{
+    console.log('reset!')
+  });
 } else {
   // require()'d.  Export the function.
-  module.exports = resetDatabase;
+  module.exports = reset;
 }

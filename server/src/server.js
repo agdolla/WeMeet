@@ -213,7 +213,7 @@ MongoClient.connect(url, function(err, db) {
 					user.sessions = [];
 					user.birthday = 147812931;
 					user.online = false;
-					user.facebookID = profile.id;				
+					user.facebookID = profile.id;
 					Promise.join(
 					db.collection('users').insertOneAsync(user),
 					db.collection('postFeeds').insertOneAsync({contents:[]}),
@@ -369,6 +369,7 @@ MongoClient.connect(url, function(err, db) {
 
 	app.get('/user/:userId/feed',cache(10),isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
+			if(userId.str!==req.user._id.str) return res.status(401).end();
 			getPostFeedData(new ObjectID(userId))
 			.then(feedData => {
 				if (feedData === null) {
@@ -448,6 +449,7 @@ MongoClient.connect(url, function(err, db) {
 	//create post
 	app.post('/postItem', validate({body: statusUpdateSchema}), isLoggedIn,function(req, res) {
 			var body = req.body;
+			if(body.userId.str!==req.user._id.str) return res.status(401).end();
 			postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
 			.then(function(newPost){
 				res.status(201);
@@ -508,7 +510,7 @@ MongoClient.connect(url, function(err, db) {
 			// query with an empty array.
 		if (userList.length === 0) {
 				callback(null, {});
-		} 
+		}
 		else {
 			// Build up a MongoDB "OR" query to resolve all of the user objects
 			// in the userList.
@@ -596,7 +598,7 @@ MongoClient.connect(url, function(err, db) {
 				}
 			})
 			.catch(err => {callback(err)})
-	}	
+	}
 
 	function getSessions(userId) {
 		return new Promise(function(resolve,reject){
@@ -620,6 +622,7 @@ MongoClient.connect(url, function(err, db) {
 	}
 
 	app.get('/user/:userId/sessions',isLoggedIn, function(req,res){
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 		var userId = new ObjectID(req.params.userId);
 		getSessions(userId)
 		.then(sessions=>{
@@ -629,6 +632,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	app.get('/chatNotification/:userid',isLoggedIn,function(req,res){
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 		var userid = req.params.userid;
 		getUserData(new ObjectID(userid),function(err,userdata){
 			if(err)
@@ -655,6 +659,7 @@ MongoClient.connect(url, function(err, db) {
 			var body = req.body;
 			var postItemId = req.params.postItemId;
 			var userId = body.author;
+			if(userId.str!==req.user._id.str) return res.status(401).end();
 			db.collection('postFeedItems').updateOneAsync({
 					_id: new ObjectID(postItemId)
 			}, {
@@ -679,6 +684,7 @@ MongoClient.connect(url, function(err, db) {
 	app.put('/settings/user/:userId', validate({body: userInfoSchema}), isLoggedIn, function(req, res) {
 		var data = req.body;
 		var moment = require('moment');
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 		var userId = new ObjectID(req.params.userId);
 		db.collection('users').updateOneAsync({
 				_id: userId
@@ -698,7 +704,7 @@ MongoClient.connect(url, function(err, db) {
 					res.send(userData);
 			});
 		})
-		.catch(err=>sendDatabaseError(res,err));	
+		.catch(err=>sendDatabaseError(res,err));
 	});
 
 	function getActivityFeedItem(activityId, callback) {
@@ -874,6 +880,7 @@ MongoClient.connect(url, function(err, db) {
 
 	app.put('/settings/emailChange/user/:userId', validate({body: emailChangeSchema}), isLoggedIn, function(req, res) {
 			var data = req.body;
+			if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 			var userId = new ObjectID(req.params.userId);
 			getUserData(userId, function(err, userData) {
 					if (err)
@@ -897,6 +904,7 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	app.put('/settings/avatar/user/:userId', isLoggedIn, function(req, res) {
+			if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 			var userId = new ObjectID(req.params.userId);
 			var body = req.body;
 			db.collection('users').findAndModifyAsync({
@@ -929,21 +937,22 @@ MongoClient.connect(url, function(err, db) {
 	});
 
 	app.put('/settings/location/user/:userId', isLoggedIn,function(req, res) {
-			var userId = req.params.userId;
-			var body = req.body;
-			db.collection('users').updateOne({
-					_id: new ObjectID(userId)
-			}, {
-					$set: {
-							location: body
-					}
-			}, function(err) {
-					if (err)
-							return sendDatabaseError(res, err);
-					else {
-							res.send(true);
-					}
-			});
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+		var userId = req.params.userId;
+		var body = req.body;
+		db.collection('users').updateOne({
+				_id: new ObjectID(userId)
+		}, {
+				$set: {
+						location: body
+				}
+		}, function(err) {
+				if (err)
+						return sendDatabaseError(res, err);
+				else {
+						res.send(true);
+				}
+		});
 	});
 
 	// get activity Feed data
@@ -1001,13 +1010,14 @@ MongoClient.connect(url, function(err, db) {
 	//post activity
 	app.post('/postActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
 		var body = req.body;
-			postActivity(body,function(err,activityData){
-				if(err)
-					return sendDatabaseError(res,err);
-				else{
-					res.send(activityData);
-				}
-			});
+		if(body.author.str!==req.user._id.str) return res.status(401).end();
+		postActivity(body,function(err,activityData){
+			if(err)
+				return sendDatabaseError(res,err);
+			else{
+				res.send(activityData);
+			}
+		});
 	});
 
 	//get activity detail
@@ -1088,6 +1098,7 @@ MongoClient.connect(url, function(err, db) {
 			var body = req.body;
 			var activityItemId = new ObjectID(req.params.activityId);
 			var userId = body.author;
+			if(userId.str!==req.user._id.str) return res.status(401).end();
 			db.collection('activityItems').updateOneAsync({
 					_id: activityItemId
 			}, {
@@ -1177,6 +1188,7 @@ MongoClient.connect(url, function(err, db) {
 
 	//get notification
 	app.get('/user/:userId/notification', isLoggedIn,function(req, res) {
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 		var userId = new ObjectID(req.params.userId);
 		db.collection('users').findOneAsync({
 				_id: userId
@@ -1233,52 +1245,55 @@ MongoClient.connect(url, function(err, db) {
 
 	//acceptRequest friend request
 	app.put('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
-			var userId = new ObjectID(req.params.userId);
-			var notificationId = new ObjectID(req.params.notificationId);
-			getNotificationItem(notificationId, function(err, notification) {
-					if (err)
-							return sendDatabaseError(res, err);
-					else {
-						db.collection('users').updateOneAsync({_id: userId},{
-								$addToSet: {
-										friends: notification.sender._id
-								}
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+		var userId = new ObjectID(req.params.userId);
+		var notificationId = new ObjectID(req.params.notificationId);
+		getNotificationItem(notificationId, function(err, notification) {
+				if (err)
+						return sendDatabaseError(res, err);
+				else {
+					db.collection('users').updateOneAsync({_id: userId},{
+							$addToSet: {
+									friends: notification.sender._id
+							}
+					})
+					.then(()=>{
+						db.collection('users').updateOneAsync({_id: notification.sender._id}, {
+							$addToSet: {
+									friends: userId
+							}
 						})
-						.then(()=>{
-							db.collection('users').updateOneAsync({_id: notification.sender._id}, {
-								$addToSet: {
-										friends: userId
-								}
-							})
-						})
-						.then(()=>{
-							deleteNotification(notificationId, userId, function(err, notificationData) {
-								if (err)
-									sendDatabaseError(res, err);
-								else {
-									res.send(notificationData);
-								}
-							});
-						})
-					}
-			});
+					})
+					.then(()=>{
+						deleteNotification(notificationId, userId, function(err, notificationData) {
+							if (err)
+								sendDatabaseError(res, err);
+							else {
+								res.send(notificationData);
+							}
+						});
+					})
+				}
+		});
 	});
 
 	//deleteNotification
 	app.delete('/notification/:notificationId/:userId', isLoggedIn,function(req, res) {
-			var userId = new ObjectID(req.params.userId);
-			var notificationId = new ObjectID(req.params.notificationId);
-			deleteNotification(notificationId, userId, function(err, notificationData) {
-					if (err)
-							sendDatabaseError(res, err);
-					else {
-							res.send(notificationData);
-					}
-			});
+		if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+		var userId = new ObjectID(req.params.userId);
+		var notificationId = new ObjectID(req.params.notificationId);
+		deleteNotification(notificationId, userId, function(err, notificationData) {
+				if (err)
+						sendDatabaseError(res, err);
+				else {
+						res.send(notificationData);
+				}
+		});
 	});
 
 	//accept activity request
 	app.put('/acceptactivity/:notificationId/:fromuser',isLoggedIn,function(req,res){
+		if(req.params.fromuser.str!==req.user._id.str) return res.status(401).end();
 		var user = new ObjectID(req.params.fromuser);
 		var notificationId = new ObjectID(req.params.notificationId);
 			getNotificationItem(notificationId,function(err,notification){
@@ -1321,6 +1336,7 @@ MongoClient.connect(url, function(err, db) {
 
 	//getMessage
 	app.get('/user/:userId/chatsession/:id/:time', isLoggedIn,function(req, res) {
+			if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
 			var id = req.params.id;
 			var userid = req.params.userId;
 			var time = req.params.time;
@@ -1372,6 +1388,7 @@ MongoClient.connect(url, function(err, db) {
 		var body = req.body;
 		var time = (new Date()).getTime();
 		var senderid = body.sender;
+		if(senderid.str!==req.user._id.str) return res.status(401).end();
 		var targetid = body.target;
 		var text = body.text;
 		var lastmessage = {
@@ -1412,7 +1429,7 @@ MongoClient.connect(url, function(err, db) {
 									});
 							}
 					});
-					
+
 				})
 				.catch(err=>sendDatabaseError(res,err))
 			}
@@ -1455,6 +1472,7 @@ function getMessage(time,sessionId, cb) {
 
 	app.get('/getsession/:userid/:targetid', cache(600), isLoggedIn,function(req, res) {
 			var userid = req.params.userid;
+			if(userid.str!==req.user._id.str) return res.status(401).end();
 			var targetid = req.params.targetid;
 			getSession(new ObjectID(userid), new ObjectID(targetid))
 			.then(session=>{
@@ -1612,12 +1630,12 @@ function getMessage(time,sessionId, cb) {
     return res.send();
 		})(req,res,next);
 	})
-	
+
 
 	app.post('/login',validate({body:loginSchema}),function(req,res,next){
 		passport.authenticate('login', function(err, user, info) {
     if (err) { return sendDatabaseError(res,err); }
-    if (!user) { return res.status(400).end(); }
+    if (!user) { return res.status(401).end(); }
 			req.login(user,()=>{
 				res.send(info);
 			})
@@ -1654,6 +1672,7 @@ function getMessage(time,sessionId, cb) {
 
 	app.post('/friendRequest/:sender/:target',isLoggedIn,function(req,res){
 		var sender = req.params.sender;
+		if(sender.str!==req.user._id.str) return res.status(401).end();
 		var target = req.params.target;
 		db.collection('notificationItems').insertOne({
 			sender: new ObjectID(sender),
@@ -1684,6 +1703,7 @@ function getMessage(time,sessionId, cb) {
 
 	app.post('/activityJoinRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
 		var sender = req.params.sender;
+		if(sender.str!==req.user._id.str) return res.status(401).end();
 		var target = req.params.target;
 		var activityid = req.params.activityid;
 		db.collection('notificationItems').insertOne({
@@ -1719,6 +1739,7 @@ function getMessage(time,sessionId, cb) {
 
 	app.post('/activityInviteRequest/:sender/:target/:activityid',isLoggedIn,function(req,res){
 		var sender = req.params.sender;
+		if(sender.str!==req.user._id.str) return res.status(401).end();
 		var target = req.params.target;
 		var activityid = req.params.activityid;
 		db.collection('notificationItems').insertOne({

@@ -5,7 +5,7 @@
   "main": "index.js",
   "author": "Shengbo Lou",
   "license": "MIT",
-  "scripts":{
+  "scripts": {
     "mocha": "./node_modules/.bin/mocha"
   },
   "dependencies": {
@@ -13,6 +13,8 @@
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.0",
     "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "chai-like": "^0.1.10",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-alpha.2",
