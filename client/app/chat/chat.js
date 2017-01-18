@@ -4,7 +4,7 @@ import NavBody from './navbody';
 import ChatWindow from './chatwindow';
 import {getUserData,getMessages,postMessage,getSessionId,getSessions} from '../server';
 import {socket} from '../credentials';
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 
 export default class Chat extends React.Component {
@@ -93,10 +93,8 @@ export default class Chat extends React.Component {
   handlePostMessage(message){
     socket.emit('chat',{currUser:this.props.user,friend:this.state.friend});
     postMessage(this.state.sessionId, this.props.user, this.state.friend ,message, (newMessage)=>{
-      debug(newMessage);
       this.setState({message:newMessage},()=>{
         getSessions(this.props.user, (sessions) => {
-          debug(sessions);
           this.setState({
             sessions:sessions,
             btnText:"load earier messages"
@@ -119,7 +117,6 @@ export default class Chat extends React.Component {
                 message:message
               },()=>{
                 getSessions(this.props.user, (sessions) => {
-                  debug('here');
                   this.setState({
                     sessions:sessions,
                     btnText:"load earier messages"

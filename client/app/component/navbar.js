@@ -122,7 +122,7 @@ export default class Navbar extends React.Component{
           <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
             <div className="container-fluid">
               <div className="navbar-header">
-                <button type="button" className="navbar-toggle">
+                <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
                   <span className="sr-only">Toggle navigation</span>
                   <span className="icon-bar"></span>
                   <span className="icon-bar"></span>

@@ -40,8 +40,21 @@ export default class NotificationBody extends React.Component{
   }
 
   handleDelete(id){
-    deleteNotification(id,this.props.user,()=>{
-      this.getData();
+    deleteNotification(id,this.props.user,(notificationData)=>{
+      var FR = [];
+      var AN = [];
+      notificationData.contents.map((notification)=>{
+        if(notification.type === "FR"){
+          FR.insert("0",notification);
+        }
+        else{
+          AN.insert("0",notification);
+        }
+      });
+      this.setState({
+        FR: FR,
+        AN: AN
+      });
     });
   }
 
