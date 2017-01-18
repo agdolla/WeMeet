@@ -1,14 +1,18 @@
 {
-  "name": "startup-server",
+  "name": "wemeetServerSide",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "author": "",
+  "author": "Shengbo Lou",
   "license": "MIT",
+  "scripts":{
+    "mocha": "./node_modules/.bin/mocha"
+  },
   "dependencies": {
     "bcryptjs": "^2.3.0",
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.0",
+    "chai": "^3.5.0",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "cookie-session": "^2.0.0-alpha.2",
@@ -19,6 +23,7 @@
     "jimp": "^0.2.27",
     "jsonwebtoken": "^5.7.0",
     "memory-cache": "^0.1.6",
+    "mocha": "^3.2.0",
     "moment": "2.16.0",
     "mongo-express": "^0.30.40",
     "mongodb": "^2.1.14",
