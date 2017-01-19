@@ -1,6 +1,5 @@
-import {} from './component/database.js';
 var moment = require('moment');
-import {updateCredentials,getToken,logout} from './credentials';
+import {updateCredentials,logout} from './credentials';
 var swal = require('sweetalert');
 /**
 * Properly configure+send an XMLHttpRequest with error handling,

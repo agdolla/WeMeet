@@ -17,6 +17,7 @@ var zxcvbn = require('zxcvbn');
 // var debug = require('react-debug');
 var swal = require('sweetalert');
 
+
 class ActivityPage extends React.Component{
   render(){
     if(this.props.location.query.data===undefined){
