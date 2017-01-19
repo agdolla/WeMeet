@@ -82,11 +82,12 @@
 .btn-group .loadbtn{
   margin-bottom: 15px;
   border: 0px solid #000000;
-  color:black !important;
-  background-color: #F3F4F7
+  color:#5B7EB8 !important;
+  background-color: #E6E9ED;
+  box-shadow:none;
 }
 .loadbtn:hover,
 .loadbtn:active,
 .loadbtn:focus{
-  background-color: #FDFDFD !important
+  background-color: #F5F7FA !important;
 }

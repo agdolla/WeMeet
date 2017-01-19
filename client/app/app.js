@@ -15,7 +15,7 @@ import {signup,login} from './server.js';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
 var zxcvbn = require('zxcvbn');
 // var debug = require('react-debug');
-var swal = require('sweetalert')
+var swal = require('sweetalert');
 
 class ActivityPage extends React.Component{
   render(){

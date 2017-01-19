@@ -2,10 +2,8 @@ import React from 'react';
 import ActivityFeedItem from './activityFeedItem';
 import {getAllActivities} from '../server';
 import {Link} from "react-router";
-import {socket} from '../credentials';
 import {disabledElement} from '../util';
-import {hashHistory} from 'react-router';
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export default class ActivityFeed extends React.Component{
 
@@ -13,7 +11,6 @@ export default class ActivityFeed extends React.Component{
     super(props);
     this.state= {
       contents: [],
-      notified:false,
       btnText:"load more",
       submitted:false
     }
@@ -22,13 +19,12 @@ export default class ActivityFeed extends React.Component{
   getData(){
     getAllActivities((new Date()).getTime(), (activityFeedData)=>{
       this.setState({
-        contents:activityFeedData,
-        notified:false
+        contents:activityFeedData
       });
     });
   }
 
-  handleLoadMoreA(e){
+  handleLoadMore(e){
     e.preventDefault();
     this.setState({
       submitted:true
@@ -45,42 +41,18 @@ export default class ActivityFeed extends React.Component{
       var newActivities = this.state.contents.concat(activities);
       this.setState({
         contents:newActivities,
-        notified:false,
         submitted:false
       });
     });
+  }
+  
+  componentDidMount(){
+    this.getData();
   }
 
   componentWillReceiveProps(){
     this.getData();
   }
-
-  notifyMe(cb) {
-    if (!Notification) {
-      alert('Desktop notifications not available in your browser. Try Chromium.');
-      return;
-    }
-
-    if (Notification.permission !== "granted")
-      Notification.requestPermission();
-    else {
-      this.setState({
-        notified:true
-      });
-      var notification = new Notification('WeMeet', {
-        icon: 'https://www.w1meet.com/img/logo/mipmap-xxhdpi/ic_launcher.png',
-        body: "Hey there! You have new activities"
-      });
-      notification.onclick = (event)=>{
-        event.preventDefault();
-        event.target.close();
-        hashHistory.push('/activity');
-        cb();
-      }
-    }
-  }
-
-
 
   render(){
     if(this.state.contents.length === 0){
@@ -100,23 +72,12 @@ export default class ActivityFeed extends React.Component{
         <div className="btn-group btn-group-justified" role="group" aria-label="...">
           <div className="btn-group" role="group">
             <button className={"btn btn-default loadbtn "+disabledElement(this.state.btnText==="nothing more to load"||this.state.submitted)} 
-            onClick={(e)=>this.handleLoadMoreA(e)}>
+            onClick={(e)=>this.handleLoadMore(e)}>
               {this.state.btnText}
             </button>
           </div>
         </div>
       </div>
     );
-  }
-
-  componentDidMount(){
-    this.getData();
-    socket.on('newActivity',()=>{
-      if(!this.state.notified){
-        this.notifyMe(()=>{
-          this.getData();
-        });
-      }
-    })
   }
 }

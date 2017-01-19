@@ -79,7 +79,7 @@ export default class Chat extends React.Component {
                 getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
                   this.setState({
                     message:message,
-                    btnText:"load earier messages"
+                    btnText:message.length===0?"say hello to your friend!":"load earier messages"
                   })
                 });
               });

@@ -27,11 +27,12 @@ module.exports = {
       {
         loader: 'babel-loader',
         query: {
-          presets: ['es2015', 'react']
+          presets: ['es2015', 'react'],
+          plugins: ["transform-class-properties"]
         }
       }
     ]
-    }),
+    })
   ],
   module: {
     // Transforms your application's code using Babel.

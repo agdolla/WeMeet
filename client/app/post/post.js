@@ -1,14 +1,8 @@
 import React from 'react';
 import PostFeed from './postFeed';
 import Navbar from '../component/navbar';
-// import {getUserData} from '../server';
 
 export default class Post extends React.Component{
-
-  constructor(props){
-    super(props);
-  }
-
   render(){
     return(
       <div style={{marginTop:'70'}}>

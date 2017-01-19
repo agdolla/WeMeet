@@ -34,6 +34,7 @@
     "zxcvbn": "^4.4.1"
   },
   "dependencies": {
+    "babel-plugin-transform-class-properties": "^6.19.0",
     "emojione": "^2.2.7",
     "sweetalert": "^1.1.3"
   }

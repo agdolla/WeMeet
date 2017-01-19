@@ -109,15 +109,15 @@ export default class PostActivity extends React.Component {
       createActivity(this.state,(data)=>{
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
         this.state.invitedlist.map((targetid)=>{
-            sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
-              if(success){
-                socket.emit('notification',{
-                  authorization:getToken(),
-                  sender: this.props.user,
-                  target: targetid
-                });
-              }
-            });
+          sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
+            if(success){
+              socket.emit('notification',{
+                authorization:getToken(),
+                sender: this.props.user,
+                target: targetid
+              });
+            }
+          });
         });
       });
       swal({

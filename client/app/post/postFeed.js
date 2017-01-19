@@ -2,9 +2,9 @@ import React from 'react';
 import PostEntry from './postEntry';
 import PostFeedItem from './postFeedItem';
 import {getAllPosts,postStatus} from '../server';
-import {hashHistory} from 'react-router';
 import {socket,getToken} from '../credentials';
 import {disabledElement} from '../util';
+// var debug = require('react-debug');
 
 export default class PostFeed extends React.Component{
 
@@ -12,7 +12,6 @@ export default class PostFeed extends React.Component{
     super(props);
     this.state = {
       contents: [],
-      notified:false,
       loadBtnText:"load more",
       submitted:false
     }
@@ -22,8 +21,7 @@ export default class PostFeed extends React.Component{
   getData(){
     getAllPosts((new Date()).getTime(), (postFeedData)=>{
       this.setState({
-        contents:postFeedData,
-        notified:false
+        contents:postFeedData
       });
     });
   }
@@ -45,7 +43,6 @@ export default class PostFeed extends React.Component{
       var newPostData = this.state.contents.concat(postFeedData);
       this.setState({
         contents:newPostData,
-        notified:false,
         submitted:false
       });
     });
@@ -60,31 +57,6 @@ export default class PostFeed extends React.Component{
         this.getData();
       })
     });
-  }
-
-  notifyMe(cb) {
-    if (!Notification) {
-      alert('Desktop notifications not available in your browser. Try Chromium.');
-      return;
-    }
-
-    if (Notification.permission !== "granted")
-      Notification.requestPermission();
-    else {
-      this.setState({
-        notified:true
-      });
-      var notification = new Notification('WeMeet', {
-        icon: 'https://www.w1meet.com/img/logo/mipmap-xxhdpi/ic_launcher.png',
-        body: "Hey there! You have new posts"
-      });
-      notification.onclick = (event)=>{
-        event.preventDefault();
-        event.target.close();
-        hashHistory.push("/post");
-        cb();
-      }
-    }
   }
 
   componentWillReceiveProps(){
@@ -121,12 +93,5 @@ export default class PostFeed extends React.Component{
 
   componentDidMount(){
     this.getData();
-    socket.on('newPost',()=>{
-      if(!this.state.notified){
-        this.notifyMe(()=>{
-          this.getData();
-        });
-      }
-    });
   }
 }
