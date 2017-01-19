@@ -8,7 +8,7 @@ chai.use(require('chai-like'));
 var agent = chai.request.agent('http://localhost:3000');
 var resetdatabase = require('../resetdatabase');
 
-describe('Test activities', function() {
+describe("test 'activity'", function() {
  this.timeout(3000);
 
   before((done)=>{
@@ -118,6 +118,23 @@ describe('Test activities', function() {
       }])
       done();
     });
-  })
+  });
 
+  it('should logout correctly',(done)=>{
+    agent.get('/logout')
+    .end((err,res)=>{
+      expect(err).to.be.null;
+      expect(res).to.redirectTo('http://localhost:3000/');
+      done();
+    })
+  });
+
+  it('should not get activities',(done)=>{
+    agent.get('/activities/'+new Date().getTime())
+    .end((err,res)=>{
+      expect(err).to.not.null;
+      res.should.have.status(401);
+      done();
+    })
+  });
 });

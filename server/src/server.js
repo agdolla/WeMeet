@@ -369,7 +369,6 @@ MongoClient.connect(url, function(err, db) {
 
 	app.get('/user/:userId/feed',cache(10),isLoggedIn,function(req, res) {
 			var userId = req.params.userId;
-			if(userId.str!==req.user._id.str) return res.status(401).end();
 			getPostFeedData(new ObjectID(userId))
 			.then(feedData => {
 				if (feedData === null) {

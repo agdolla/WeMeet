@@ -11,3 +11,5 @@ node_modules
 
 # Ignores npm-debug.log
 npm-debug.log*
+
+/mochawesome-reports
