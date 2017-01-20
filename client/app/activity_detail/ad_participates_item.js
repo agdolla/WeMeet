@@ -61,7 +61,7 @@ export default class Ad_participates_item extends React.Component{
         </div>
         <div className="media-body media-right" style={{textAlign:"right",width:'0px'}} >
           <a href="#" onClick={(e)=>this.handleAddFriend(e)}><i className={"fa fa-user-plus pull-right "+hideElement(this.checkFriendsOfUser()||this.props.data._id===this.props.currUser)} style={{'paddingRight':'20px'}} aria-hidden="true"></i></a>
-          <i className={"fa fa-check pull-right "+hideElement(!this.checkFriendsOfUser())} style={{color:'green','paddingRight':'20px','marginTop':'10'}} aria-hidden="true"></i>
+          <i className={"fa fa-check pull-right "+hideElement(!this.checkFriendsOfUser())} style={{color:'green','paddingRight':'20px','marginTop':'10px'}} aria-hidden="true"></i>
         </div>
       </li>
       )

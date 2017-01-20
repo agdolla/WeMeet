@@ -12,11 +12,13 @@ import Activity_detail from './activity_detail/activity_detail';
 import { IndexRoute, Router, Route, hashHistory } from 'react-router';
 import {hideElement} from './util';
 import {signup,login} from './server.js';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
 var zxcvbn = require('zxcvbn');
 // var debug = require('react-debug');
 var swal = require('sweetalert');
-
+var injectTapEventPlugin = require("react-tap-event-plugin");
+injectTapEventPlugin();
 
 class ActivityPage extends React.Component{
   render(){
@@ -63,9 +65,11 @@ class ThrendPage extends React.Component{
 class App extends React.Component {
   render() {
     return (
-      <div>
-        {this.props.children}
-      </div>
+      <MuiThemeProvider>
+        <div>
+          {this.props.children}
+        </div>
+      </MuiThemeProvider>
     );
   }
 }
@@ -455,7 +459,7 @@ class LandingPage extends React.Component{
                     <input onKeyUp={(e)=>this.handleSignUp(e)} type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass",e)}/>
                     <label>Password</label>
                   </div>
-                  <div className="progress" style={{height:'6', marginTop:'-15',borderRadius:'0'}}>
+                  <div className="progress" style={{height:'6px', marginTop:'-15px',borderRadius:'0'}}>
                     <div className={"progress-bar "+this.state.passwordClass}
                       role="progressbar"
                       aria-valuemin="0"

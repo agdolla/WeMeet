@@ -221,7 +221,7 @@ export default class Ad_body extends React.Component{
                     </div>
 
                     <div className = "col-md-4" style={{'paddingTop': '20px'}} >
-                      <div className = "col-md-12 col-sm-12 col-xs-12 body-title-signed-in" align="left">
+                      <div className = "col-md-12 col-sm-12 col-xs-12 body-title-signed-in">
                         {this.state.activity.participants === undefined ? 0:this.state.activity.participants.length} people <font style={{'color':'grey'}}>signed up</font>
 
                       <font style={{'color':'#61B4E4','fontSize':'10px','paddingLeft':'10px','cursor':'pointer'}}
@@ -237,12 +237,12 @@ export default class Ad_body extends React.Component{
                 </div>
                 <div className="row">
                   <div className = "col-md-12 col-sm-12 col-xs-12 remain-places" style={{'paddingTop':'25px',textAlign:"center"}} >
-                  <div className={"alert alert-success"+hideElement(!this.state.success)}  role="alert" align="center" style={{
+                  <div className={"alert alert-success"+hideElement(!this.state.success)}  role="alert" style={{
                     'marginLeft': '43%',
                      marginRight: '43%',
-                     paddingTop: 8,
-                     paddingBottom: 8,
-                     marginBottom: 7
+                     paddingTop: '8px',
+                     paddingBottom: '8px',
+                     marginBottom: '7px'
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
                   <a>  <span className={"btn btn-default sign-up-btn "+this.state.ishost} onClick={
                     (e)=>{
@@ -253,7 +253,7 @@ export default class Ad_body extends React.Component{
                         return
                       }
                     }
-                  } align="center">
+                  }>
                     {buttonText}
                     </span></a>
 

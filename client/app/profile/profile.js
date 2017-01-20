@@ -39,7 +39,7 @@ export default class Profile extends React.Component{
 
   render(){
     return(
-      <div style={{marginTop:'70'}}>
+      <div style={{marginTop:'70px'}}>
         <Navbar user={this.state.currUser}/>
         <div className="container profile">
           <div className="row">

@@ -129,14 +129,14 @@ export default class Navbar extends React.Component{
             <div className="collapse navbar-collapse" id="navbar">
               <ul className="nav navbar-nav nav-left">
                 <li className={this.props.activity}>
-                  <Link to='/activity'> Activities <i className={"fa fa-circle "+hideElement(!this.state.activity)} style={{fontSize:12,marginLeft:'2',color:'#EF9A9A'}}aria-hidden="true"></i>
+                  <Link to='/activity'> Activities <i className={"fa fa-circle "+hideElement(!this.state.activity)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i>
                   </Link>
                 </li>
                 <li className={this.props.post}>
-                  <Link to='/post'>Trend <i className={"fa fa-circle "+hideElement(!this.state.post)} style={{fontSize:12,marginLeft:'2',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                  <Link to='/post'>Trend <i className={"fa fa-circle "+hideElement(!this.state.post)} style={{fontSize:"12px",marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                 </li>
                 <li className={this.props.chat}>
-                  <Link to={"/chat"}>Chat <i className={"fa fa-circle "+hideElement(!this.state.chat||this.props.chat==="active")} style={{fontSize:12,marginLeft:'2',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                  <Link to={"/chat"}>Chat <i className={"fa fa-circle "+hideElement(!this.state.chat||this.props.chat==="active")} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                 </li>
               </ul>
 
@@ -158,7 +158,7 @@ export default class Navbar extends React.Component{
                     <Link to={"search"}><i className="fa fa-search" aria-hidden="true"/></Link>
                   </li>
                   <li className={this.props.notification}>
-                    <Link to={"notification/"+1}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:12,marginLeft:'2',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                    <Link to={"notification/"+1}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                   </li>
               </ul>
             </div>

@@ -10,7 +10,7 @@ export default class Search extends React.Component{
   }
   render(){
     return(
-      <div className="search" style={{marginTop:'70'}}>
+      <div className="search" style={{marginTop:'70px'}}>
         <Navbar search="active" user={this.props.user}/>
         <div className="container">
           <div className="row">

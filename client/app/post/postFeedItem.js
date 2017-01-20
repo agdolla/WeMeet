@@ -123,7 +123,7 @@ export default class PostFeedItem extends React.Component{
             </div>
             <div className="media-body">
               <h4 className="media-heading">{contents.author.fullname} </h4>
-              <span style={{"fontSize":"12"}}>{time}</span>
+              <span style={{"fontSize":"12px"}}>{time}</span>
               <div className="pull-right">
                 <span className="glyphicon glyphicon-map-marker"></span>
                   {Object.keys(contents.location).length>0 ?

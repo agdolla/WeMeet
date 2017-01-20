@@ -7,6 +7,7 @@ var moment = require('moment');
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
 var debug = require('react-debug');
+import DatePicker from 'material-ui/DatePicker';
 
 export default class Settings extends React.Component{
 
@@ -17,7 +18,7 @@ export default class Settings extends React.Component{
       username:"",
       nickname: "",
       description: "",
-      birthday:"",
+      birthday:null,
       oldEmail:"",
       newEmail:"",
       img: null,
@@ -128,7 +129,7 @@ export default class Settings extends React.Component{
           username:userData.fullname,
           nickname: userData.nickname,
           description: userData.description,
-          birthday: moment(userData.birthday).format('YYYY-MM-DD')
+          birthday: moment(userData.birthday).toDate()
         });
     });
   }
@@ -148,10 +149,11 @@ export default class Settings extends React.Component{
     e.preventDefault();
     this.setState({description: e.target.value});
   }
-  handleBirthday(e){
-    e.preventDefault();
-    this.setState({birthday: e.target.value});
-  }
+  handleBirthday = (event, date) => {
+    this.setState({
+      birthday: date,
+    });
+  };
   handleOldEmail(e){
     e.preventDefault();
     this.setState({oldEmail: e.target.value});
@@ -199,7 +201,7 @@ export default class Settings extends React.Component{
 
   render(){
     return(
-      <div style={{marginTop:'70'}}>
+      <div style={{marginTop:'70px'}}>
         {this.state.cropperOpen &&
           <AvatarCropper
             onRequestHide={(e)=>this.handleRequestHide(e)}
@@ -246,10 +248,8 @@ export default class Settings extends React.Component{
                           </div>
                           <div className="md-form">
                             <h5>Birthday</h5>
-                            <input type="date" id="" className="form-control"
-                              value={this.state.birthday}
-                              onChange={(e)=>this.handleBirthday(e)}
-                              placeholder="this"/>
+                            <DatePicker hintText="Choose your birthday" value={this.state.birthday} 
+                            onChange={(e,date)=>{this.handleBirthday(e,date)}} textFieldStyle={{width:"100%"}}/>
                           </div>
                           <div className="md-form">
                               <textarea type="text" className="md-textarea"
@@ -281,15 +281,15 @@ export default class Settings extends React.Component{
                 </a>
                 <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
-                    <div className="md-form" style={{"marginTop":'20'}}>
+                    <div className="md-form" style={{"marginTop":'20px'}}>
                         <input type="password" id="" className="form-control"/>
                         <label htmlFor="Form1" className="">Old password</label>
                     </div>
-                    <div className="md-form" style={{"marginTop":'20'}}>
+                    <div className="md-form" style={{"marginTop":'20px'}}>
                         <input type="password" id="" className="form-control"/>
                         <label htmlFor="Form1" className="">New password</label>
                     </div>
-                    <div className="md-form" style={{"marginTop":'20'}}>
+                    <div className="md-form" style={{"marginTop":'20px'}}>
                         <input type="password" id="" className="form-control"/>
                         <label htmlFor="Form1" className="">Repeat password</label>
                     </div>
@@ -302,11 +302,11 @@ export default class Settings extends React.Component{
                 <div id="reset-email" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
                     {emailAlert}
-                    <div className="md-form" style={{"marginTop":'20'}}>
+                    <div className="md-form" style={{"marginTop":'20px'}}>
                         <input type="email" id="" value={this.state.oldEmail}className="form-control" onChange={(e)=>this.handleOldEmail(e)}/>
                         <label htmlFor="Form1" className="">Old Email</label>
                     </div>
-                    <div className="md-form" style={{"marginTop":'20'}}>
+                    <div className="md-form" style={{"marginTop":'20px'}}>
                         <input type="email" id="" value={this.state.newEmail} className="form-control" onChange={(e)=>this.handleNewEmail(e)}/>
                         <label htmlFor="Form1" className="">New Email</label>
                     </div>

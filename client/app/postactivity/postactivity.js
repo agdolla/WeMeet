@@ -5,9 +5,11 @@ import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 var swal = require('sweetalert');
 import {socket,getToken} from '../credentials';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 export default class PostActivity extends React.Component {
 
@@ -15,7 +17,7 @@ export default class PostActivity extends React.Component {
     super(props);
     this.state = {
       userData: {},
-      type:"",
+      type:1,
       title: "",
       img:null,
       cropperOpen:false,
@@ -106,7 +108,21 @@ export default class PostActivity extends React.Component {
         this.state.detail.trim()!==""
     ){
       //activity created succesfully
-      createActivity(this.state,(data)=>{
+      var data = this.state;
+      var type = "";
+      switch (data.type) {
+        case 1:
+          type = "Event";
+          break;
+        case 2:
+          type = "Entertainment";
+          break;
+        default:
+          type = "Study";
+          break;
+      }
+      data.type = type;
+      createActivity(data,(data)=>{
         socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
         this.state.invitedlist.map((targetid)=>{
           sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
@@ -190,10 +206,10 @@ export default class PostActivity extends React.Component {
     })
   }
 
-  handleEvent(e){
+  handleEvent(e,index,value){
     e.preventDefault();
     this.setState({
-      type: e.target.value
+      type: value
     })
   }
   handleDescription(e){
@@ -206,7 +222,7 @@ export default class PostActivity extends React.Component {
 
   render() {
     return (
-      <div className='postactivity' style={{marginTop:'70'}}>
+      <div className='postactivity' style={{marginTop:'70px'}}>
         {this.state.cropperOpen &&
           <AvatarCropper
             onRequestHide={(e)=>this.handleRequestHide(e)}
@@ -222,7 +238,7 @@ export default class PostActivity extends React.Component {
           <div className="row">
             <div className="col-md-7 col-md-offset-2">
               <h4><span style={{
-                  "marginRight":'10'
+                  "marginRight":'10px'
                 }}><i className="glyphicon glyphicon-list-alt" aria-hidden="true"></i></span>Create Activity</h4>
             </div>
           </div>
@@ -280,19 +296,23 @@ export default class PostActivity extends React.Component {
                           <div className="md-form">
                             <input type="text" id="" className="form-control"
                               value={this.state.location}
+                              style={{marginTop:'12px'}}
                               onChange={(e)=>this.handleLocation(e)}/>
                             <label htmlFor="form1" className="">Location</label>
                           </div>
                         </div>
                         <div className="col-md-6">
-                          <div className="md-form">
-                            <select className="form-control select" value={this.state.type} onChange={(e)=>this.handleEvent(e)}>
-                              <option>------Select a Activity Type-----</option>
-                              <option>Event</option>
-                              <option>Entertainment</option>
-                              <option>Study</option>
-                            </select>
-                          </div>
+                          <SelectField
+                            value={this.state.type}
+                            style={{width:'100%'}}
+                            floatingLabelStyle={{color:'black !important'}}
+                            selectedMenuItemStyle={{color:'rgb(96,125,139)'}}
+                            floatingLabelText="Select the type of your activity"
+                            onChange={(e,index,value)=>{this.handleEvent(e,index,value)}}>
+                            <MenuItem value={1} primaryText="Event" />
+                            <MenuItem value={2} primaryText="Entertainment" />
+                            <MenuItem value={3} primaryText="Study" />
+                          </SelectField>
                         </div>
                       </div>
                       <div className="row">
@@ -326,7 +346,7 @@ export default class PostActivity extends React.Component {
 
                               </div>
                               <div className="modal-body " style={{
-                                  "padding":'0'
+                                  "padding":'0px'
                                 }}>
                                 <ul className="media-list">
                                   {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{

@@ -5,7 +5,7 @@ import Navbar from '../component/navbar';
 export default class Post extends React.Component{
   render(){
     return(
-      <div style={{marginTop:'70'}}>
+      <div style={{marginTop:'70px'}}>
         <Navbar post="active" user={this.props.user}/>
         <div className="container">
           <div className="row">
