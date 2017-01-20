@@ -4,6 +4,7 @@ import {hideElement} from '../util'
 // var debug = require('react-debug');
 import {ListItem} from 'material-ui/List'
 import Avatar from 'material-ui/Avatar';
+import CommunicationChatBubble from 'material-ui/svg-icons/communication/chat-bubble';
 export default class NavChatItem extends React.Component {
     constructor(props) {
         super(props);
@@ -24,12 +25,7 @@ export default class NavChatItem extends React.Component {
           onClick={(e)=>this.handleClick(e)}
           leftAvatar={<Link to={"profile/"+this.props.data._id}><Avatar src={this.props.data.avatar} backgroundColor="white"/></Link>}
           primaryText={this.props.data.fullname}
-          rightIcon={
-                 <i className="fa fa-circle" aria-hidden="true" style={{
-                    color:this.props.data.online? 'green':'grey', marginRight:'10px', marginTop:'10px'
-                }}>
-              </i>
-          }
+          rightIcon={<CommunicationChatBubble style={{fill:this.props.data.online? 'green':'grey'}}/>}
           secondaryText={
             <p>
               {this.props.lastmessage===undefined||

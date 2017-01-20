@@ -38,7 +38,7 @@ export default class NavBody extends React.Component {
 
         return (
           <List style={{backgroundColor:'#FDFDFD',height:'100%',overflowY:'auto'}}>
-            <Subheader style={{height:'50px',fontSize:'15px'}}><strong>Chat</strong></Subheader>
+            <Subheader style={{height:'50px',fontSize:'15px',textAlign:'center',paddingLeft:'0px'}}><strong>Chat</strong></Subheader>
               {
               this.state.userData === undefined ? null:
               (this.state.userData.friends===undefined || this.state.userData.friends.length===0 ? alert : this.state.userData.friends.map((friend)=>{
