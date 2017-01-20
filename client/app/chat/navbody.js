@@ -1,6 +1,7 @@
 import React from 'React';
 import NavChatItem from './navchatitem';
-
+import {List} from 'material-ui/List'
+import Subheader from 'material-ui/Subheader';
 export default class NavBody extends React.Component {
 
     constructor(props) {
@@ -36,24 +37,21 @@ export default class NavBody extends React.Component {
         </div>);
 
         return (
-            <div className="panel-body">
-                <ul className="list-group friends" style={{
-                    'marginBottom': '0'
-                }}>
-                {
-                  this.state.userData === undefined ? null:
-                  (this.state.userData.friends===undefined || this.state.userData.friends.length===0 ? alert : this.state.userData.friends.map((friend)=>{
-                    return <NavChatItem
-                      key={friend._id}
-                      data={friend}
-                      activeFriend = {this.props.activeFriend}
-                      currentUser={this.state.userData._id}
-                      switchUser={this.props.switchUser}
-                      lastmessage={this.getLastmessage(friend._id)}/>
-                    }))
-                  }
-                </ul>
-            </div>
+          <List style={{backgroundColor:'#FDFDFD',height:'100%',overflowY:'auto'}}>
+            <Subheader style={{height:'50px',fontSize:'15px'}}><strong>Chat</strong></Subheader>
+              {
+              this.state.userData === undefined ? null:
+              (this.state.userData.friends===undefined || this.state.userData.friends.length===0 ? alert : this.state.userData.friends.map((friend)=>{
+                return <NavChatItem
+                  key={friend._id}
+                  data={friend}
+                  activeFriend = {this.props.activeFriend}
+                  currentUser={this.state.userData._id}
+                  switchUser={this.props.switchUser}
+                  lastmessage={this.getLastmessage(friend._id)}/>
+                }))
+              }
+          </List>
         )
     }
 

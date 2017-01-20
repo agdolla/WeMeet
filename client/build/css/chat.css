@@ -2,16 +2,16 @@ body{
   overflow-x: hidden !important;
 }
 
-ul.list-group.friends{
+/*ul.list-group.friends{
   box-shadow: none !important;
-}
+}*/
 
-.panel-heading-chat .nav li a{
+/*.panel-heading-chat .nav li a{
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
   border-bottom: 0px;
 }
-
+*/
 .mainElement{
   height:90vh
 }
@@ -33,33 +33,33 @@ ul.list-group.friends{
   flex: 1 1 auto
 }
 
-.nav-pills>li.active>a,
+/*.nav-pills>li.active>a,
 .nav-pills>li.active>a:focus,
 .nav-pills>li.active>a:hover{
   background-color: white;
   color: black;
-}
+}*/
 
-.friends .list-group{
+/*.friends .list-group{
   box-shadow: none;
-}
+}*/
 
-.friends .list-group-item:first-child{
+/*.friends .list-group-item:first-child{
   margin-top: 0px;
-}
+}*/
 
 .chat-left{
   width: 30%;
 }
 
-.media-object{
+/*.media-object{
   box-shadow: none !important;
-}
+}*/
 
-.panel-heading-chat {
+/*.panel-heading-chat {
   padding: 0px 0px;
   border-bottom: 0px solid #FDFDFD;
-}
+}*/
 
 .panel-dafault {
   box-shadow: 0 10px 28px 0 rgba(137, 157, 197, .12);
@@ -67,13 +67,17 @@ ul.list-group.friends{
   background: none;
 }
 
-.chat-left .panel .panel-body {
+#chattext{
+  box-shadow: none
+}
+
+/*.chat-left .panel .panel-body {
   padding: 0px;
   overflow-y:scroll;
   overflow-x: hidden;
 }
-
-.friends .list-group-item {
+*/
+/*.friends .list-group-item {
   border-radius: 4px;
   cursor: pointer;
   margin-top: 3px;
@@ -85,7 +89,7 @@ ul.list-group.friends{
   cursor: pointer;
   margin-top: 3px;
   border: none;
-}
+}*/
 
 .chatwindow .panel-heading{
   background: #fdfdfd;
@@ -136,11 +140,11 @@ ul.list-group.friends{
   text-align: justify;
 }
 
-.friends li:hover,
+/*.friends li:hover,
 .friends li:focus,
 .friends li:active{
   background-color: rgba(232, 231, 231, 0.6);
-}
+}*/
 
 .msg{
   resize: none;
@@ -150,14 +154,14 @@ ul.list-group.friends{
   box-shadow: none;
 }
 
-.msg:hover{
+/*.msg:hover{
   background-color: transparent;
-}
+}*/
 
-.msg:focus{
+/*.msg:focus{
   box-shadow: none;
 }
-
+*/
 .send{
   margin-top: 50px
 }

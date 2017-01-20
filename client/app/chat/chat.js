@@ -119,7 +119,7 @@ export default class Chat extends React.Component {
                 getSessions(this.props.user, (sessions) => {
                   this.setState({
                     sessions:sessions,
-                    btnText:"load earier messages"
+                    btnText:message.length===0?"say hello to your friend!":"load earier messages"
                   })
                 })
               })
@@ -168,17 +168,8 @@ export default class Chat extends React.Component {
             <div className="container mainElement">
               <div className="row">
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
-                  <div className="panel panel-dafault">
-                    <div className="panel-heading panel-heading-chat" style={{paddingBottom:"3px"}}>
-                      <ul className="nav nav-pills nav-justified" >
-                        <li role="presentation" className="active">
-                          <a>Friends</a>
-                        </li>
-                      </ul>
-                    </div>
                     <NavBody sessions={this.state.sessions} 
                     userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
-                  </div>
                 </div>
                 {chatwindow}
               </div>
