@@ -263,7 +263,7 @@ export default class PostActivity extends React.Component {
           </div>
           <div className="row">
             <div className="col-md-7 col-md-offset-2 infos">
-              <div className="panel panel-default personal-info-1">
+              <div className="panel panel-default">
                 <div className="panel-heading">
                   <div className="row">
                     <div className="col-md-12">
@@ -406,7 +406,7 @@ export default class PostActivity extends React.Component {
                 </div>
                 <div className="row">
                   <div className="col-md-12">
-                    <img src={this.state.img} className={hideElement(this.state.cropperOpen)} width="100%"/>
+                    <img src={this.state.img} style={{marginTop:'20px'}} className={hideElement(this.state.cropperOpen)} width="100%"/>
                   </div>
                 </div>
               </div>

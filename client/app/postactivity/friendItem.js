@@ -40,7 +40,7 @@ export default class FriendItem extends React.Component{
         }}>
         <div className="media-left">
           <Link to="profile.html">
-            <img className="media-object" src={this.props.data.avatar} width="55px" alt="..." />
+            <img style={{marginRight:'20px'}} className="media-object" src={this.props.data.avatar} width="55px" alt="..." />
           </Link>
         </div>
         <div className="media-body media-top">

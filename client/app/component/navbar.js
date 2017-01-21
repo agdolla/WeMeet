@@ -180,7 +180,7 @@ export default class Navbar extends React.Component{
                     <Link to={"search"}><i className="fa fa-search" aria-hidden="true"/></Link>
                   </li>
                   <li className={this.props.notification}>
-                    <Link to={"notification/"+1}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                    <Link to={"notification"}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                   </li>
               </ul>
             </div>

@@ -4,6 +4,7 @@ import ActivityFeedItem from '../activity/activityFeedItem';
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem';
 import PostFeedItem from '../post/postFeedItem';
 import TextField from 'material-ui/TextField';
+// var debug = require('react-debug');
 
 export default class SearchEntry extends React.Component{
   constructor(props){

@@ -11,6 +11,8 @@ import {Link} from 'react-router';
 var moment = require('moment');
 import {socket,getToken} from '../credentials';
 import {hideElement} from '../util';
+import RaisedButton from 'material-ui/RaisedButton';
+
 // var debug = require('react-debug');
 
 export default class Ad_body extends React.Component{
@@ -18,7 +20,7 @@ export default class Ad_body extends React.Component{
     super(props);
     this.state = {
       activity: {},
-      ishost: "",
+      ishost: false,
       joined: false,
       success:false
     };
@@ -64,10 +66,10 @@ export default class Ad_body extends React.Component{
     getActivityDetail(this.props.id,(activitydata)=>{
       this.setState({activity:activitydata},()=>{
         if(this.isHost()){
-          this.setState({ishost:"disabled"});
+          this.setState({ishost:true});
         }
         if(this.checkJoined()){
-          this.setState({ishost:"disabled"});
+          this.setState({ishost:true});
           this.setState({joined:true});
         }
       });
@@ -115,10 +117,10 @@ export default class Ad_body extends React.Component{
 
   render(){
     var buttonText;
-    if(this.state.ishost==="disabled"&&this.state.joined!=true){
+    if(this.state.ishost&&this.state.joined!=true){
       buttonText = "You are the host"
     }
-    else if(this.state.ishost==="disabled"&&this.state.joined==true){
+    else if(this.state.ishost&&this.state.joined==true){
       buttonText = "You have joined"
     }
     else{
@@ -244,19 +246,7 @@ export default class Ad_body extends React.Component{
                      paddingBottom: '8px',
                      marginBottom: '7px'
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
-                  <a>  <span className={"btn btn-default sign-up-btn "+this.state.ishost} onClick={
-                    (e)=>{
-                      if(this.state.ishost!=="disabled"){
-                      this.handleRequestJoin(e)
-                      }
-                      else{
-                        return
-                      }
-                    }
-                  }>
-                    {buttonText}
-                    </span></a>
-
+                    <RaisedButton primary={true} label={buttonText} disabled={this.state.ishost} onClick={(e)=>this.handleRequestJoin(e)}/>
                   </div>
                 </div>
 

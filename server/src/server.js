@@ -1568,10 +1568,9 @@ function getMessage(time,sessionId, cb) {
 	});
 
 	// get search result.
-	app.get('/search/:querytext',cache(60),isLoggedIn,function(req,res){
+	app.get('/search/:querytext',cache(10),isLoggedIn,function(req,res){
 		var querytext = req.params.querytext.toLowerCase();
-		var data={};
-		db.collection('users').findAsync({
+		var users = db.collection('users').findAsync({
 			$or:
 				[
 					{fullname:{$regex:querytext,$options:'i'}}
@@ -1579,47 +1578,66 @@ function getMessage(time,sessionId, cb) {
 		})
 		.then(cursor => {
 			return cursor.toArrayAsync();
-		})
-		.then(items => {
-			data["users"]=items;
+		});
 
-			db.collection('activityItems').find({
+		var activityitems = db.collection('activityItems').findAsync({
 				description:{$regex:querytext,$options:'i'}
-			}).toArray(function(err, activityitems) {
-				if (err) {
-					return sendDatabaseError(res, err);
-				}
-				data["activities"]=activityitems;
+			})
+			.then(cursor => {
+				return cursor.toArrayAsync();
+			});
 
-				db.collection('postFeedItems').find({
+		var postItems = db.collection('postFeedItems').findAsync({
 					['contents.text']:{$regex:querytext,$options:'i'}
-				}).toArray(function(err, postitems) {
-					if (err) {
-						return sendDatabaseError(res, err);
-					}
-
-					var resolvedPosts = [];
-
-					if (postitems.length === 0) {
-						return res.send(data);
-					}
-					postitems.forEach((c) => {
-						resolvePostItem(c)
-						.then(postItem => {
-							resolvedPosts.push(postItem);
-							if (resolvedPosts.length === postitems.length) {
-								data["posts"] = resolvedPosts;
-								return res.send(data);
-							}
-						})
-						.catch(err => {sendDatabaseError(res,err)})
-					})
-
 				})
+				.then(cursor => {
+					return cursor.toArrayAsync();
+				});
 
+		Promise.join(users,activityitems,postItems,function(u,a,p){
+			return new Promise(function(resolve, reject){
+				var data = {};
+				data["users"] = u;
+				data["posts"] = p;
+				if(a.length===0){
+					data["activities"] = [];
+					return resolve(data);
+				}
+				var resolvedActivities = [];
+				a.forEach((element)=>{
+					getUserData(new ObjectID(element.author),(err,userObj)=>{
+						element.author = userObj;
+						resolvedActivities.push(element);
+						if(err){
+							return reject(err);
+						}
+						if(resolvedActivities.length===a.length){
+							data["activities"] = resolvedActivities;
+							resolve(data);
+						}
+					})
+				});
 			})
 		})
-		.catch(err => {sendDatabaseError(res,err)});
+		.then(data=>{
+			var resolvedPosts = [];
+			var p = data["posts"];
+			if (p.length === 0) {
+				return res.send(data);
+			}
+			p.forEach((c) => {
+				resolvePostItem(c)
+				.then(postItem => {
+					resolvedPosts.push(postItem);
+					if (resolvedPosts.length === p.length) {
+						data["posts"] = resolvedPosts;
+						return res.send(data);
+					}
+				})
+				.catch(err => {sendDatabaseError(res,err)})
+			})
+		})
+		.catch(err=>sendDatabaseError(res,err));
 	});
 
 	app.post('/signup',validate({body:userSchema}),function(req,res,next){

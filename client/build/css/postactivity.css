@@ -1,4 +1,4 @@
-.infos h4 span{
+/*.infos h4 span{
   margin-right: 5px;
 }
 .infos h4{
@@ -6,8 +6,8 @@
 }
 .infos{
   margin-top: 20px;
-}
-.postactivity .system-settings{
+}*/
+/*.postactivity .system-settings{
   margin-top: 20px;
 }
 .postactivity .system-settings .list-group{
@@ -17,7 +17,7 @@
   border:none;
   padding: 20px;
 }
-
+*/
 .postactivity .panel{
   box-shadow: 0 10px 28px 0 rgba(137,157,197,.12);
   border: none;
@@ -34,14 +34,14 @@
   border-top-color: #FDFDFD
 }
 
-.personal-info-1 .panel-heading img{
+/*.personal-info-1 .panel-heading img{
   position: relative;
   left: 0%;
   margin-top: 0%;
-}
-.md-form label{
+}*/
+/*.md-form label{
   font-size: 12px;
-}
+}*/
 
 .noboxshadow{
     box-shadow: none !important;
@@ -51,20 +51,20 @@
 }
 
 
-.media-object{
+/*.media-object{
   box-shadow: none !important;
-}
+}*/
 
-.modal-open .modal { outline: none !important; }
+/*.modal-open .modal { outline: none !important; }*/
 
 
-.md-form select{
+/*.md-form select{
   font-size: 10px;
   margin-top: 20px;
-}
-.md-form browse{
+}*/
+/*.md-form browse{
     margin-left: 0%;
-}
+}*/
 .nopadding{
     padding-left: 0px !important;
     padding-right: 0px !important;
@@ -74,7 +74,7 @@
     margin-right: 0px !important;
 }
 
-.postactivity-media{
+/*.postactivity-media{
   padding-top:8px;
   margin-top:0px !important;
-}
+}*/

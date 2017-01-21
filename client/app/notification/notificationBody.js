@@ -3,6 +3,10 @@ import Request from './friendRequest';
 import ActivityNotification from './activityNotification'
 import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../server';
 import {socket,getToken} from '../credentials';
+import {Tabs, Tab} from 'material-ui/Tabs';
+import FontIcon from 'material-ui/FontIcon';
+import Badge from 'material-ui/Badge';
+import IconButton from 'material-ui/IconButton';
 
 Array.prototype.insert = function (index, item) {
 this.splice(index, 0, item);
@@ -14,7 +18,8 @@ export default class NotificationBody extends React.Component{
     super(props);
     this.state = {
       FR: [],
-      AN: []
+      AN: [],
+      value: 'a'
     }
   }
 
@@ -75,47 +80,53 @@ export default class NotificationBody extends React.Component{
     })
   }
 
+  handleChange(value){
+    this.setState({
+      value: value
+    })
+  }
+
   render(){
-    if(this.props.id == 1){
-      if(this.state.FR.length === 0){
-        return(
-          <div className="panel panel-default">
-            <div className="panel-body">
-                  Nothing here yet
-            </div>
-          </div>
-        );
-      }
-      return(
-        <div className="panel panel-default">
-          <div className="panel-body">
-            {this.state.FR.map((fr,i)=>{
+    var frbadge =     
+    <Badge badgeStyle={{backgroundColor:'#DB6666', visibility:this.state.FR.length===0?"hidden":'visible'}}
+      badgeContent={this.state.FR.length}
+      primary={true}
+    >
+      <FontIcon className="material-icons" style={{color:'white'}}>person_add</FontIcon>
+    </Badge>;  
+
+    var anbadge =     
+    <Badge badgeStyle={{backgroundColor:'#DB6666', visibility:this.state.AN.length===0?"hidden":'visible'}}
+      badgeContent={this.state.AN.length}
+      primary={true}
+    >
+      <FontIcon className="material-icons" style={{color:'white'}}>notifications_active</FontIcon>
+    </Badge>;
+    return(
+      <Tabs
+        style={{boxShadow:  "0 10px 28px 0 rgba(137,157,197,.12)", marginTop:'5px'}}
+        inkBarStyle={{backgroundColor:"#607D8B",height:'3px'}}
+        contentContainerStyle={{backgroundColor:'#FDFDFD',padding:'10px'}}
+        value={this.state.value}
+        onChange={(value)=>this.handleChange(value)}
+      >
+        <Tab icon={frbadge} 
+        value="a" style={{backgroundColor:"#61B4E4"}}>
+          <div>
+            {this.state.FR.length===0?"Nothing here":this.state.FR.map((fr,i)=>{
               return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
             })}
           </div>
-        </div>
-      )
-    }
-    else{
-      if(this.state.AN.length === 0){
-        return(
-          <div className="panel panel-default">
-            <div className="panel-body">
-              Nothing here yet
-            </div>
-          </div>
-        );
-      }
-      return(
-        <div className="panel panel-default">
-          <div className="panel-body">
-            {this.state.AN.map((AN,i)=>{
+        </Tab>
+        <Tab  value="b" buttonStyle={{backgroundColor:"#61B4E4"}} icon={anbadge}>
+          <div>
+            {this.state.AN.length===0?"Nothing here":this.state.AN.map((AN,i)=>{
               return <ActivityNotification key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>
             })}
           </div>
-        </div>
-      )
-    }
+        </Tab>
+      </Tabs>);
+
   }
 
   componentDidMount(){

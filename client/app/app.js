@@ -541,9 +541,7 @@ ReactDOM.render((
       <Route path="profile" component={ProfilePage}>
         <Route path="/profile/:user" component={ProfilePage} />
       </Route>
-      <Route path="activity_detail" component={ActivityDetailPage}>
-        <Route path="/activity_detail/:id" component={ActivityDetailPage}/>
-      </Route>
+      <Route path="activity_detail/:id" component={ActivityDetailPage}/>
       <Route path="search" component={SearchPage}/>
       <Route path="postactivity" component={PostActivityPage} />
       <Route path='*' component={ActivityPage} />
