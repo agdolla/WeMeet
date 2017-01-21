@@ -37,7 +37,7 @@ export default class ChatEntry extends React.Component{
       <div className="panel-footer">
           <div className="row">
               <div className="col-md-10 col-xs-10 col-sm-10">
-                  <textarea id="chattext" className="form-control msg nohover non-active" name="name" rows="3" value={this.state.text}
+                  <textarea id="chattext" className="form-control msg nohover non-active" name="name" rows="5" value={this.state.text}
                     onChange={(e)=>this.handleChange(e)} onFocus={(e)=>this.handleChange(e)} cols="40" placeholder="please type text" 
                     onKeyUp={(e) => this.handleSubmit(e)}></textarea>
 
