@@ -47,7 +47,7 @@ export default class Profile extends React.Component{
               <div className="row">
                 <div className="col-md-7">
                   <h4>
-                    <span className="glyphicon glyphicon-user"></span>
+                    <span className="glyphicon glyphicon-user" style={{marginRight:'10px'}}></span>
                     Profile
                   </h4>
                 </div>

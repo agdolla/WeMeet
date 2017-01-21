@@ -78,16 +78,3 @@
 .glyphicon-map-marker::before{
   margin-right: 2px !important;
 }
-
-.btn-group .loadbtn{
-  margin-bottom: 15px;
-  border: 0px solid #000000;
-  color:#5B7EB8 !important;
-  background-color: #E6E9ED;
-  box-shadow:none;
-}
-.loadbtn:hover,
-.loadbtn:active,
-.loadbtn:focus{
-  background-color: #F5F7FA !important;
-}

@@ -47,7 +47,7 @@ export default class SearchFeedUserFeedItem extends React.Component{
 
   render(){
     return(
-      <div className="panel panel-default" style={{padding: '10'}}>
+      <div className="panel panel-default" style={{padding: '10px'}}>
         <div className={"alert alert-success "+hideElement(!this.state.success)} role="alert">Request sent!</div>
         <div className="media">
           <div className="media-left">

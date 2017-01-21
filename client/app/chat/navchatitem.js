@@ -5,6 +5,7 @@ import {hideElement} from '../util'
 import {ListItem} from 'material-ui/List'
 import Avatar from 'material-ui/Avatar';
 import CommunicationChatBubble from 'material-ui/svg-icons/communication/chat-bubble';
+import Divider from 'material-ui/Divider';
 export default class NavChatItem extends React.Component {
     constructor(props) {
         super(props);
@@ -21,26 +22,27 @@ export default class NavChatItem extends React.Component {
 
     render() {
         return (
-        <ListItem
-          onClick={(e)=>this.handleClick(e)}
-          leftAvatar={<Link to={"profile/"+this.props.data._id}><Avatar src={this.props.data.avatar} backgroundColor="white"/></Link>}
-          primaryText={this.props.data.fullname}
-          rightIcon={<CommunicationChatBubble style={{fill:this.props.data.online? 'green':'grey'}}/>}
-          secondaryText={
-            <p>
-              {this.props.lastmessage===undefined||
-                Object.keys(this.props.lastmessage).length===0?"":
-                (this.props.lastmessage.text.length>35?this.props.lastmessage.text.substring(0,35)+"...":this.props.lastmessage.text)}
-              <span className={"label label-danger "+
-                hideElement(this.props.lastmessage===undefined||
-                  Object.keys(this.props.lastmessage).length===0||
-                  this.props.lastmessage.isread ||
-                  this.props.lastmessage.sender===this.props.currentUser)}
-              style={{marginLeft:5}}>New</span>
-            </p>
-          }
-          secondaryTextLines={2}
-        />
+        <div>
+          <ListItem
+            onClick={(e)=>this.handleClick(e)}
+            leftAvatar={<Link to={"profile/"+this.props.data._id}><Avatar src={this.props.data.avatar} backgroundColor="white"/></Link>}
+            primaryText={this.props.data.fullname}
+            rightIcon={<CommunicationChatBubble style={{fill:this.props.data.online? 'green':'grey'}}/>}
+            secondaryText={
+              <p>
+                {this.props.lastmessage===undefined||Object.keys(this.props.lastmessage).length===0?"":this.props.lastmessage.text}
+                <span className={"label label-danger "+
+                  hideElement(this.props.lastmessage===undefined||
+                    Object.keys(this.props.lastmessage).length===0||
+                    this.props.lastmessage.isread ||
+                    this.props.lastmessage.sender===this.props.currentUser)}
+                style={{marginLeft:5}}>New</span>
+              </p>
+            }
+            secondaryTextLines={2}
+          />
+          <Divider inset={true} />
+        </div>
         )
     }
 

@@ -5,11 +5,14 @@ import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
 import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
-var debug = require('react-debug');
-var swal = require('sweetalert');
 import {socket,getToken} from '../credentials';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import DatePicker from 'material-ui/DatePicker';
+import TimePicker from 'material-ui/TimePicker';
+import TextField from 'material-ui/TextField';
+var debug = require('react-debug');
+var swal = require('sweetalert');
 
 export default class PostActivity extends React.Component {
 
@@ -21,8 +24,8 @@ export default class PostActivity extends React.Component {
       title: "",
       img:null,
       cropperOpen:false,
-      startTime: '',
-      endTime: '',
+      startTime: null,
+      endTime: null,
       description: "",
       location: "",
       detail:"",
@@ -101,8 +104,8 @@ export default class PostActivity extends React.Component {
     e.preventDefault();
     if(this.state.type!=="------Select a Activity Type-----"&&
         this.state.title.trim()!=="" &&
-        this.state.startTime.trim()!=="" &&
-        this.state.endTime.trim()!==""&&
+        this.state.startTime!==null &&
+        this.state.endTime!==null&&
         this.state.description.trim()!==""&&
         this.state.location.trim()!==""&&
         this.state.detail.trim()!==""
@@ -179,17 +182,15 @@ export default class PostActivity extends React.Component {
     })
   }
 
-  handleStartTime(e){
-    e.preventDefault();
+  handleStartDate(e,date){
     this.setState({
-      startTime: e.target.value
+      startTime: date
     })
   }
 
-  handleEndTime(e){
-    e.preventDefault();
+  handleEndDate(e,date){
     this.setState({
-      endTime: e.target.value
+      endTime: date
     })
   }
 
@@ -216,6 +217,24 @@ export default class PostActivity extends React.Component {
     e.preventDefault();
     this.setState({
       description: e.target.value
+    })
+  }
+
+  handleStartTime(e,date){
+    var currentDate = this.state.startTime;
+    currentDate.setHours(date.getHours(),date.getUTCMinutes());
+    debug(currentDate);
+    this.setState({
+      startTime: currentDate
+    })
+  }
+
+  handleEndTime(e,date){
+    var currentDate = this.state.endTime;
+    currentDate.setHours(date.getHours(),date.getUTCMinutes());
+    debug(currentDate);
+    this.setState({
+      endTime: currentDate
     })
   }
 
@@ -264,49 +283,51 @@ export default class PostActivity extends React.Component {
                         </div>
                       <div className="row">
                         <div className="col-md-12">
-                          <div className="md-form">
-                            <input type="text" id="" className="form-control"
-                              value={this.state.title}
-                              onChange={(e)=>this.handleTitle(e)}/>
-                            <label htmlFor="form1" className="">Title</label>
-                          </div>
+                          <TextField
+                            hintText="Title"
+                            floatingLabelText="Title"
+                            style={{width:'100%'}}
+                            onChange={(e)=>this.handleTitle(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-md-6">
-                          <div className="md-form">
-                            <h5>Start Time</h5>
-                            <input type="datetime-local" id="" className="form-control"
-                              value={this.state.startTime}
-                              onChange={(e)=>this.handleStartTime(e)}
-                              placeholder="this"/>
-                          </div>
+                          <DatePicker hintText="Start Date" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleStartDate(e,date)}/>
                         </div>
                         <div className="col-md-6">
                           <div className="md-form">
-                              <h5>End Time</h5>
-                            <input type="datetime-local" id="" className="form-control"
-                              value={this.state.endTime}
-                              onChange={(e)=>this.handleEndTime(e)}/>
+                            <DatePicker hintText="End Date" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleEndDate(e,date)}/>
                           </div>
+                        </div>
+                      </div>                      
+                      <div className="row">
+                        <div className="col-md-6">
+                          <TimePicker hintText="Start Time" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleStartTime(e,date)}/>
+                        </div>
+                        <div className="col-md-6">
+                            <TimePicker hintText="End Time" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleEndTime(e,date)}/>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-md-6">
-                          <div className="md-form">
-                            <input type="text" id="" className="form-control"
-                              value={this.state.location}
-                              style={{marginTop:'12px'}}
-                              onChange={(e)=>this.handleLocation(e)}/>
-                            <label htmlFor="form1" className="">Location</label>
-                          </div>
+                          <TextField
+                            hintText="Location"
+                            floatingLabelText="Location"
+                            style={{width:'100%'}}
+                            onChange={(e)=>this.handleLocation(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                         </div>
                         <div className="col-md-6">
                           <SelectField
                             value={this.state.type}
                             style={{width:'100%'}}
-                            floatingLabelStyle={{color:'black !important'}}
-                            selectedMenuItemStyle={{color:'rgb(96,125,139)'}}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            selectedMenuItemStyle={{color:'#607D8B'}}
                             floatingLabelText="Select the type of your activity"
                             onChange={(e,index,value)=>{this.handleEvent(e,index,value)}}>
                             <MenuItem value={1} primaryText="Event" />
@@ -317,18 +338,28 @@ export default class PostActivity extends React.Component {
                       </div>
                       <div className="row">
                         <div className="col-md-12">
-                          <div className="md-form">
-                            <textarea type="text" id="" className="md-textarea"
-                              value={this.state.description}
-                              onChange={(e)=>this.handleDescription(e)}></textarea>
-                            <label htmlFor="form7">Description</label>
-                          </div>
-                          <div className="md-form">
-                            <textarea type="text" id="" className="md-textarea"
-                              value={this.state.detail}
-                              onChange={(e)=>this.handleDetail(e)}></textarea>
-                            <label htmlFor="">Details</label>
-                          </div>
+                          <TextField
+                            rows={2}
+                            multiLine={true}
+                            rowsMax={2}
+                            hintText="Description"
+                            floatingLabelText="Description"
+                            style={{width:'100%'}}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                            onChange={(e)=>this.handleDescription(e)}
+                          />
+                          <TextField
+                            rows={4}
+                            multiLine={true}
+                            rowsMax={5}
+                            hintText="Details"
+                            floatingLabelText="Details"
+                            style={{width:'100%'}}
+                            onChange={(e)=>this.handleDetail(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                           underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                         </div>
                       </div>
                     </div>

@@ -6,6 +6,16 @@ import {socket} from '../credentials';
 import {hideElement} from '../util'
 // var debug = require('react-debug');
 var swal = require('sweetalert');
+import Avatar from 'material-ui/Avatar';
+import ListItem from 'material-ui/List/ListItem';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
+import IconButton from 'material-ui/IconButton';
+import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down';
+import Person from 'material-ui/svg-icons/social/person';
+import Settings from 'material-ui/svg-icons/action/settings';
+import Create from 'material-ui/svg-icons/content/create';
+import Divider from 'material-ui/Divider';
 
 export default class Navbar extends React.Component{
 
@@ -109,6 +119,19 @@ export default class Navbar extends React.Component{
   }
 
   render(){
+    var iconMenu = 
+    <IconMenu
+      iconButtonElement={<IconButton><HardwareKeyboardArrowDown/></IconButton>}
+      anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
+      targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
+    >
+      <Link style={{textDecoration:'none'}} to={"profile/"+this.props.user._id}><MenuItem primaryText="Profile" rightIcon={<Person/>}/></Link>
+      <Link style={{textDecoration:'none'}} to="settings"><MenuItem primaryText="Settings" rightIcon={<Settings/>}/></Link>
+      <Link style={{textDecoration:'none'}} to="postactivity"><MenuItem primaryText="Create Activity" rightIcon={<Create/>}/></Link>
+      <Divider/>
+      <MenuItem primaryText="Log out" onClick={(e)=>this.handleLogOut(e)}/>
+    </IconMenu>
+
     return(
       <div>
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -141,18 +164,17 @@ export default class Navbar extends React.Component{
               </ul>
 
               <ul className="nav navbar-nav navbar-right">
-                <div className="dropdown pull-left">
-                  <a href="#" className="dropdown-toggle" type="button" id="user-options" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <img src={this.props.user.avatar} height="50px" alt="" /> {this.props.user.fullname}
-                    <span className="caret"></span>
-                  </a>
-                  <ul className="dropdown-menu" aria-labelledby="user-options">
-                    <li><Link to={"profile/"+this.props.user._id}><span><i className="fa fa-user" aria-hidden="true"></i></span>Profile</Link></li>
-                    <li><Link to="settings"><span><i className="fa fa-cog" aria-hidden="true"></i></span>Settings</Link></li>
-                    <li><Link to="postactivity"><span><i className="fa fa-pencil" aria-hidden="true"></i></span>Create Activity</Link></li>
-                    <li role="separator" className="divider"></li>
-                    <li><a href="#" onClick={(e)=>this.handleLogOut(e)}><span><i className="fa fa-sign-out" aria-hidden="true"></i></span>Log out</a></li>
-                  </ul>
+                <div className="pull-left">
+                  <ListItem
+                    style={{paddingBottom:'0px'}}
+                    rightIconButton={iconMenu}
+                    disabled={true}
+                    leftAvatar={
+                      <Avatar style={{backgroundColor:'none'}} src={this.props.user.avatar} />
+                    }
+                  >
+                    {this.props.user.fullname}
+                  </ListItem>
                 </div>
                   <li className={this.props.search}>
                     <Link to={"search"}><i className="fa fa-search" aria-hidden="true"/></Link>

@@ -13,6 +13,8 @@ import { IndexRoute, Router, Route, hashHistory } from 'react-router';
 import {hideElement} from './util';
 import {signup,login} from './server.js';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import RaisedButton from 'material-ui/RaisedButton';
+import TextField from 'material-ui/TextField';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
 var zxcvbn = require('zxcvbn');
 // var debug = require('react-debug');
@@ -370,6 +372,9 @@ class LandingPage extends React.Component{
   }
 
   render(){
+    var btn_style={
+      margin:'10px'
+    }
     return(
       <div>
         <div className="bg">
@@ -377,11 +382,11 @@ class LandingPage extends React.Component{
             <h1 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="70px"/></span> WeMeet</h1>
             <h2 style={{color:'white'}}>Join nearby activities and make friends!</h2>
             <br/>
-            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-mdb btn-lg">Sign up free today</a>
-            <a href="#" onClick={(e)=>this.handleClick(e)} className="btn btn-info btn-lg">Log in</a>
-            <a href="/auth/facebook" style={{background: '#3b5998'}} className="btn btn-dark btn-lg">
-              <i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px'}}></i>FACEBOOK
-            </a>
+            <RaisedButton onClick={(e)=>this.handleClick(e)} label="Sign up free today" backgroundColor='#607D8B' labelColor="white" style={btn_style}/>
+            <RaisedButton onClick={(e)=>this.handleClick(e)} label="Log in" primary={true} labelColor="white" style={btn_style}/>
+            <RaisedButton href="/auth/facebook" label="FACEBOOK" 
+            icon={<i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px',color:'white'}}></i>} 
+            labelColor="white" style={btn_style} backgroundColor="#3b5998"/>
           </div>
         </div>
         <div className="container index LandingPage">
@@ -395,28 +400,34 @@ class LandingPage extends React.Component{
                 <div className="panel-body">
                   <div className="row">
                     <div className="col-md-7 col-md-offset-2">
-                      <div className="md-form">
-                        <input onKeyUp={(e)=>this.handleSignIn(e)} disabled={this.state.submitted} type="text" className="form-control"
-                          onChange={(e)=>this.handleChange("signInEmail",e)} required/>
-                        <label>Email</label>
-                      </div>
+                      <TextField
+                        hintText="Email"
+                        floatingLabelText="Email"
+                        style={{width:'100%'}}
+                        onChange={(e)=>this.handleChange("signInEmail",e)}
+                        onKeyUp={(e)=>this.handleSignIn(e)}
+                        floatingLabelStyle={{color:'#607D8B'}}
+                        underlineFocusStyle={{borderColor:'#90A4AE'}}
+                      />
                     </div>
                     <div className="col-md-7 col-md-offset-2">
-                      <div className="md-form">
-                        <input onKeyUp={(e)=>this.handleSignIn(e)} disabled={this.state.submitted} type="password" className="form-control"
-                          onChange={(e)=>this.handleChange("signInPass",e)}
-                          required/>
-                        <label>Password</label>
-                      </div>
+                      <TextField
+                        hintText="Password"
+                        type='password'
+                        floatingLabelText="Password"
+                        style={{width:'100%'}}
+                        onChange={(e)=>this.handleChange("signInPass",e)}
+                        onKeyUp={(e)=>this.handleSignIn(e)}
+                        floatingLabelStyle={{color:'#607D8B'}}
+                        underlineFocusStyle={{borderColor:'#90A4AE'}}
+                      />
                     </div>
                   </div>
                 </div>
                 <div className="panel-footer">
                   <div className="row">
                     <div className="col-md-12">
-                      <button disabled={this.state.submitted} type="submit" className="btn btn-amber pull-right" onClick={(e)=>this.handleSignIn(e)}>
-                        Welcome back!
-                      </button>
+                      <RaisedButton className="pull-right" default={true} disabled={this.state.submitted} label="Welcome Back" onClick={(e)=>this.handleSignIn(e)}/>
                     </div>
                   </div>
                 </div>
@@ -443,22 +454,38 @@ class LandingPage extends React.Component{
             <div className="panel-body">
               <div className="row">
                 <div className="col-md-7 col-md-offset-2">
-                  <div className="md-form">
-                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="text" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpName",e)}/>
-                    <label>Username</label>
-                  </div>
+                  <TextField
+                    hintText="Username"
+                    floatingLabelText="Username"
+                    style={{width:'100%'}}
+                    onChange={(e)=>this.handleChange("signUpName",e)}
+                    onKeyUp={(e)=>this.handleSignUp(e)}
+                    floatingLabelStyle={{color:'#607D8B'}}
+                    underlineFocusStyle={{borderColor:'#90A4AE'}}
+                  />
                 </div>
                 <div className="col-md-7 col-md-offset-2">
-                  <div className="md-form">
-                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="email" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpEmail",e)}/>
-                    <label>Email</label>
-                  </div>
+                  <TextField
+                    hintText="Email"
+                    floatingLabelText="Email"
+                    style={{width:'100%'}}
+                    onChange={(e)=>this.handleChange("signUpEmail",e)}
+                    onKeyUp={(e)=>this.handleSignUp(e)}
+                    floatingLabelStyle={{color:'#607D8B'}}
+                    underlineFocusStyle={{borderColor:'#90A4AE'}}
+                  />
                 </div>
                 <div className="col-md-7 col-md-offset-2">
-                  <div className="md-form">
-                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass",e)}/>
-                    <label>Password</label>
-                  </div>
+                  <TextField
+                    hintText="Password"
+                    floatingLabelText="Password"
+                    type="password"
+                    style={{width:'100%'}}
+                    onChange={(e)=>this.handleChange("signUpPass",e)}
+                    onKeyUp={(e)=>this.handleSignUp(e)}
+                    floatingLabelStyle={{color:'#607D8B'}}
+                    underlineFocusStyle={{borderColor:'#90A4AE'}}
+                  />
                   <div className="progress" style={{height:'6px', marginTop:'-15px',borderRadius:'0'}}>
                     <div className={"progress-bar "+this.state.passwordClass}
                       role="progressbar"
@@ -469,19 +496,23 @@ class LandingPage extends React.Component{
                   </div>
                 </div>
                 <div className="col-md-7 col-md-offset-2">
-                  <div className="md-form">
-                    <input onKeyUp={(e)=>this.handleSignUp(e)} type="password" disabled={this.state.submitted} className="form-control" onChange={(e)=>this.handleChange("signUpPass2",e)}/>
-                    <label>Repeat password</label>
-                  </div>
+                  <TextField
+                    hintText="Repeat password"
+                    floatingLabelText="Repeat password"
+                    type="password"
+                    style={{width:'100%'}}
+                    onChange={(e)=>this.handleChange("signUpPass2",e)}
+                    onKeyUp={(e)=>this.handleSignUp(e)}
+                    floatingLabelStyle={{color:'#607D8B'}}
+                    underlineFocusStyle={{borderColor:'#90A4AE'}}
+                  />
                 </div>
               </div>
             </div>
             <div className="panel-footer">
               <div className="row">
                 <div className="col-md-12">
-                  <button disabled={this.state.submitted} type="button" className="btn btn-info pull-right" onClick={(e)=>this.handleSignUp(e)}>
-                    Join Us!
-                  </button>
+                <RaisedButton className="pull-right" primary={true} disabled={this.state.submitted} label="Join Us!" onClick={(e)=>this.handleSignUp(e)}/>
                 </div>
               </div>
             </div>

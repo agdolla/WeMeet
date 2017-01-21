@@ -8,6 +8,7 @@ import AvatarCropper from "react-avatar-cropper";
 import {hideElement} from '../util';
 var debug = require('react-debug');
 import DatePicker from 'material-ui/DatePicker';
+import TextField from 'material-ui/TextField';
 
 export default class Settings extends React.Component{
 
@@ -230,33 +231,45 @@ export default class Settings extends React.Component{
                       </div>
                       <div className="row">
                         <div className="col-md-12">
-                          <div className="md-form">
-                              <input type="text" className="form-control"
-                                value={this.state.username}
-                                onChange={(e)=>this.handleUsername(e)}/>
-                              <label className="shown">Your name</label>
-                          </div>
+                          <TextField
+                            hintText="Your name"
+                            floatingLabelText="Your name"
+                            style={{width:'100%'}}
+                            value={this.state.username}
+                            onChange={(e)=>this.handleUsername(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-md-12">
-                          <div className="md-form">
-                              <input type="text" id="" className="form-control"
-                                value={this.state.nickname}
-                                onChange={(e)=>this.handleNickname(e)}/>
-                              <label className="shown">NickName</label>
-                          </div>
+                          <TextField
+                            hintText="NickName"
+                            floatingLabelText="NickName"
+                            style={{width:'100%'}}
+                            value={this.state.nickname}
+                            onChange={(e)=>this.handleNickname(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                           <div className="md-form">
                             <h5>Birthday</h5>
                             <DatePicker hintText="Choose your birthday" value={this.state.birthday} 
                             onChange={(e,date)=>{this.handleBirthday(e,date)}} textFieldStyle={{width:"100%"}}/>
                           </div>
-                          <div className="md-form">
-                              <textarea type="text" className="md-textarea"
-                                value={this.state.description}
-                                onChange={(e)=>this.handleDescription(e)}></textarea>
-                              <label className="shown">About you</label>
-                          </div>
+                          <TextField
+                            rows={4}
+                            multiLine={true}
+                            rowsMax={4}
+                            hintText="About you"
+                            floatingLabelText="About you"
+                            style={{width:'100%'}}
+                            value={this.state.description}
+                            onChange={(e)=>this.handleDescription(e)}
+                            floatingLabelStyle={{color:'#607D8B'}}
+                            underlineFocusStyle={{borderColor:'#90A4AE'}}
+                          />
                         </div>
                       </div>
                     </div>
@@ -281,18 +294,32 @@ export default class Settings extends React.Component{
                 </a>
                 <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
-                    <div className="md-form" style={{"marginTop":'20px'}}>
-                        <input type="password" id="" className="form-control"/>
-                        <label htmlFor="Form1" className="">Old password</label>
-                    </div>
-                    <div className="md-form" style={{"marginTop":'20px'}}>
-                        <input type="password" id="" className="form-control"/>
-                        <label htmlFor="Form1" className="">New password</label>
-                    </div>
-                    <div className="md-form" style={{"marginTop":'20px'}}>
-                        <input type="password" id="" className="form-control"/>
-                        <label htmlFor="Form1" className="">Repeat password</label>
-                    </div>
+                    <TextField
+                      hintText="Old password"
+                      floatingLabelText="Old password"
+                      style={{width:'100%'}}
+                      type='password'
+                      floatingLabelStyle={{color:'#607D8B'}}
+                      underlineFocusStyle={{borderColor:'#90A4AE'}}
+                    />                    
+
+                    <TextField
+                      hintText="New password"
+                      floatingLabelText="New password"
+                      style={{width:'100%'}}
+                      type='password'
+                      floatingLabelStyle={{color:'#607D8B'}}
+                      underlineFocusStyle={{borderColor:'#90A4AE'}}
+                    />                    
+
+                    <TextField
+                      hintText="Repeat password"
+                      floatingLabelText="Repeat password"
+                      style={{width:'100%'}}
+                      type='password'
+                      floatingLabelStyle={{color:'#607D8B'}}
+                      underlineFocusStyle={{borderColor:'#90A4AE'}}
+                    />
                     <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
                   </div>
                 </div>
@@ -302,14 +329,25 @@ export default class Settings extends React.Component{
                 <div id="reset-email" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                   <div className="panel-body">
                     {emailAlert}
-                    <div className="md-form" style={{"marginTop":'20px'}}>
-                        <input type="email" id="" value={this.state.oldEmail}className="form-control" onChange={(e)=>this.handleOldEmail(e)}/>
-                        <label htmlFor="Form1" className="">Old Email</label>
-                    </div>
-                    <div className="md-form" style={{"marginTop":'20px'}}>
-                        <input type="email" id="" value={this.state.newEmail} className="form-control" onChange={(e)=>this.handleNewEmail(e)}/>
-                        <label htmlFor="Form1" className="">New Email</label>
-                    </div>
+                    <TextField
+                      hintText="Old Email"
+                      floatingLabelText="Old Email"
+                      style={{width:'100%'}}
+                      value={this.state.oldEmail}
+                      onChange={(e)=>this.handleOldEmail(e)}
+                      floatingLabelStyle={{color:'#607D8B'}}
+                      underlineFocusStyle={{borderColor:'#90A4AE'}}
+                    />                    
+
+                    <TextField
+                      hintText="New Email"
+                      floatingLabelText="New Email"
+                      style={{width:'100%'}}
+                      value={this.state.newEmail}
+                      onChange={(e)=>this.handleNewEmail(e)}
+                      floatingLabelStyle={{color:'#607D8B'}}
+                      underlineFocusStyle={{borderColor:'#90A4AE'}}
+                    />
                     <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleEmailChange(e)}>Submit</button>
                   </div>
                 </div>

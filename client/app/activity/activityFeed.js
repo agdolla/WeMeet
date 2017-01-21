@@ -2,9 +2,8 @@ import React from 'react';
 import ActivityFeedItem from './activityFeedItem';
 import {getAllActivities} from '../server';
 import {Link} from "react-router";
-import {disabledElement} from '../util';
 // var debug = require('react-debug');
-
+import RaisedButton from 'material-ui/RaisedButton';
 export default class ActivityFeed extends React.Component{
 
   constructor(props){
@@ -69,14 +68,8 @@ export default class ActivityFeed extends React.Component{
         {this.state.contents.map((activityFeedItem)=>{
           return <ActivityFeedItem key={activityFeedItem._id} data={activityFeedItem}/>
         })}
-        <div className="btn-group btn-group-justified" role="group" aria-label="...">
-          <div className="btn-group" role="group">
-            <button className={"btn btn-default loadbtn "+disabledElement(this.state.btnText==="nothing more to load"||this.state.submitted)} 
-            onClick={(e)=>this.handleLoadMore(e)}>
-              {this.state.btnText}
-            </button>
-          </div>
-        </div>
+        <RaisedButton label={this.state.btnText} fullWidth={true} onClick={(e)=>this.handleLoadMore(e)} 
+        disabled={this.state.btnText==="nothing more to load"||this.state.submitted} style={{marginBottom:'30px'}}/>
       </div>
     );
   }

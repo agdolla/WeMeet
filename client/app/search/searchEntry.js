@@ -3,6 +3,7 @@ import {searchquery} from '../server';
 import ActivityFeedItem from '../activity/activityFeedItem';
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem';
 import PostFeedItem from '../post/postFeedItem';
+import TextField from 'material-ui/TextField';
 
 export default class SearchEntry extends React.Component{
   constructor(props){
@@ -43,13 +44,20 @@ export default class SearchEntry extends React.Component{
           <div className="panel-heading">
             <div className="media">
               <div className="media-body">
-                <input type="text" className="form-control" placeholder="Welcome to We Meet, please search" onChange={(e) => this.handleChange(e)}
-              onKeyUp={(e) => this.handleKeyUp(e)}/>
+                  <TextField
+                    hintText="Search..."
+                    floatingLabelText="Welcome to We Meet, please search"
+                    style={{width:'100%'}}
+                    onChange={(e)=>this.handleChange(e)}
+                    onKeyUp={(e)=>this.handleKeyUp(e)}
+                    floatingLabelStyle={{color:'#607D8B'}}
+                    underlineFocusStyle={{borderColor:'#90A4AE'}}
+                  />
               </div>
             </div>
           </div>
         </div>
-        <h4 style={{marginBottom:'10'}}>{this.state.title}</h4>
+        <h4 style={{marginBottom:'10px'}}>{this.state.title}</h4>
           {
             this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((user,i)=>{
               return (

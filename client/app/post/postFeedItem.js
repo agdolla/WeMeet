@@ -8,6 +8,8 @@ import {Link} from 'react-router';
 import Lightbox from 'react-images';
 var moment = require('moment');
 // var debug = require('react-debug');
+import {RadioButton} from 'material-ui/RadioButton';
+import FontIcon from 'material-ui/FontIcon';
 
 export default class PostFeedItem extends React.Component{
 
@@ -168,13 +170,21 @@ export default class PostFeedItem extends React.Component{
         <div className="panel-footer">
           <div className="row">
             <div className="col-md-12">
-              <a href="#" onClick={(e)=>this.handleLikeClick(e)}>
-                <span className="glyphicon glyphicon-heart" 
-                style={{"color":this.didUserLike(this.props.currentUser)===true?"rgb(223, 61, 71)":"grey"}}></span>
-                {data.likeCounter.length}
-              </a>
-              <span className="glyphicon glyphicon-comment"></span>{data.comments.length}
-
+              <div style={{display: 'flex', flexDirection: 'row'}}>
+                  <div>              
+                    <RadioButton
+                    style={{width:'50px'}}
+                    iconStyle={{marginRight:'2px'}}
+                    onClick={(e)=>this.handleLikeClick(e)}
+                    checked={this.didUserLike(this.props.currentUser)===true}
+                    label={data.likeCounter.length}
+                    checkedIcon={<FontIcon className="material-icons" style={{color:'red',fontSize:'20px'}}>favorite</FontIcon>}
+                    uncheckedIcon={<FontIcon className="material-icons" style={{fontSize:'20px'}}>favorite_border</FontIcon>}
+                    />
+                  </div>
+                  <FontIcon className="material-icons" style={{fontSize:'20px'}}>insert_comment</FontIcon>
+                  <div><span style={{marginLeft:'2px'}}>{data.comments.length}</span></div>
+              </div>
               <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)}>
                 {data.comments.map((comment,i)=>{
                   return (

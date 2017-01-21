@@ -3,8 +3,8 @@ import PostEntry from './postEntry';
 import PostFeedItem from './postFeedItem';
 import {getAllPosts,postStatus} from '../server';
 import {socket,getToken} from '../credentials';
-import {disabledElement} from '../util';
 // var debug = require('react-debug');
+import RaisedButton from 'material-ui/RaisedButton';
 
 export default class PostFeed extends React.Component{
 
@@ -80,13 +80,8 @@ export default class PostFeed extends React.Component{
         {this.state.contents.map((postFeedItem,i)=>{
           return <PostFeedItem key={i} data={postFeedItem} currentUser={this.props.user._id}/>
         })}
-        <div className="btn-group btn-group-justified" role="group" aria-label="...">
-          <div className="btn-group" role="group">
-            <button className={"btn btn-default loadbtn "+disabledElement(this.state.loadBtnText==="nothing more to load"||this.state.submitted)} onClick={(e)=>this.handleLoadMore(e)}>
-              {this.state.loadBtnText}
-            </button>
-          </div>
-        </div>
+        <RaisedButton label={this.state.loadBtnText} fullWidth={true} onClick={(e)=>this.handleLoadMore(e)} 
+        disabled={this.state.loadBtnText==="nothing more to load"||this.state.submitted} style={{marginBottom:'30px'}}/>
       </div>
     );
   }

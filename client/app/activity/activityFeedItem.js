@@ -1,6 +1,10 @@
 import React from 'react';
 import {Link} from 'react-router';
 var moment = require('moment');
+// var debug = require('react-debug');
+import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
+import Avatar from 'material-ui/Avatar';
+import Chip from 'material-ui/Chip';
 
 export default class ActivityFeedItem extends React.Component{
 
@@ -13,35 +17,35 @@ export default class ActivityFeedItem extends React.Component{
     var startTime = moment(this.state.startTime).calendar();
     var endTime = moment(this.state.endTime).calendar();
     return(
-      <div>
-        <div className="panel panel-default">
-          <Link to={"activity_detail/"+this.state._id}>
-            <div className="panel-heading">
-              <h3>{this.state.title} <span className="badge pull-right">{this.state.type}</span></h3>
-              <h5 className="">{startTime}--{endTime}</h5>
+       <Card style={{marginBottom:'30px',boxShadow:'0 10px 28px 0 rgba(137, 157, 197, .12)'}}>
+        <CardHeader
+          title={this.state.author.fullname}
+          subtitle={this.state.author.description}
+          avatar={<Link to={"/profile/"+this.state.author._id}><Avatar src={this.state.author.avatar} backgroundColor="white"/></Link>}
+        />
+        <Link to={"activity_detail/"+this.state._id}>
+          <CardMedia
+            overlay={<CardTitle title="Location" subtitle={this.state.location}/>}
+          >
+            <img src={this.state.img} />
+          </CardMedia>
+        </Link>
+          <div className="row">
+            <div className="col-md-10">
+              <CardTitle title={this.state.title} subtitle={startTime+"--"+endTime} style={{width:'90%'}}/>
             </div>
-          </Link>
-          <div className="panel-body" style={{'textAlign':'justify'}}>
-            <div className="media">
-              <div className="media-left">
-                <Link to={"activity_detail/"+this.state._id}>
-                  <img className="media-object" src={this.state.img} width="200px" height="120px;" alt="..." />
-                </Link>
-              </div>
-              <div className="media-body">
-                {this.state.description}
-              </div>
-            </div>
-          </div>
-          <div className="panel-footer">
-            <div className="row">
-              <div className="col-md-12">
-                <h5 className="pull-left"><span className="glyphicon glyphicon-map-marker"></span>{this.state.location}</h5>
+            <div className="col-md-2">
+              <div className='pull-right'>
+                <Chip style={{marginTop:'30px',marginRight:'10px'}} backgroundColor="#607D8B"labelColor="white">{this.state.type}</Chip>
               </div>
             </div>
-          </div>
         </div>
-      </div>
+        <CardText>
+          {this.state.description}
+        </CardText>
+        <CardActions>
+        </CardActions>
+      </Card>
     );
   }
 }

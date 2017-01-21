@@ -91,7 +91,24 @@ body{
 	background-color: #F3F4F7;
 }
 
-input[type=date]:focus:not([readonly]),
+.btn{
+	outline: none !important;
+	border: none !important;
+}
+.btn-blue-grey{
+	background-color: #607D8B !important;
+	color: white;
+	margin-right: 5px
+}
+
+.btn-blue-grey:hover,
+.btn-blue-grey:focus,
+.btn-blue-grey:visited{
+	background-color: #607D8B !important;
+	color: white;
+}
+
+/*input[type=date]:focus:not([readonly]),
 input[type=datetime-local]:focus:not([readonly]),
 input[type=email]:focus:not([readonly]),
 input[type=number]:focus:not([readonly]),
@@ -105,26 +122,20 @@ input[type=url]:focus:not([readonly]),
 textarea.md-textarea:focus:not([readonly]) {
 	border-bottom: 1px solid #61B4E4;
 	box-shadow: 0 1px 0 0 #61B4E4;
-}
+}*/
 
-.media .media-object{
+/*.media .media-object{
 	box-shadow: none;
-}
+}*/
 
 input[type="file"] {
 	display: none;
-}
-
-h4 span,
-h5 span{
-	margin-right: 5px;
 }
 
 .c-btn{
 	position: fixed;
 	bottom: 20px;
 	right: 20px;
-	border-radius: 50%;
 	padding-top: 12px;
 	padding-bottom: 12px;
 }
