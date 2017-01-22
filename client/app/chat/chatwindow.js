@@ -6,6 +6,9 @@ import ChatEntry from './chatentry';
 import ChatRightBubble from './chatrightbubble';
 import ChatLeftBubble from './chatleftbubble';
 // var debug = require('react-debug');
+import IconButton from 'material-ui/IconButton';
+import FontIcon from 'material-ui/FontIcon';
+
 
 export default class ChatWindow extends React.Component {
 
@@ -60,27 +63,40 @@ export default class ChatWindow extends React.Component {
     }
     render() {
         return (
-            <div className="col-md-7 col-sm-7 col-xs-7 chat-right">
+            <div className="col-md-7 col-md-offset-0 col-sm-10 col-sm-offset-1 col-xs-12 chat-right">
                 <div className="panel panel-dafault chatwindow">
                     <div className="panel-heading">
+                          <IconButton
+                            className="pull-right friend-btn"
+                            tooltip="Friends"
+                            tooltipPosition="bottom-center"
+                            onClick={()=>this.props.onExpand()}
+                          >
+                            <FontIcon className="material-icons">group</FontIcon>
+                          </IconButton>
                         <div className="media">
                             <div className="media-left">
                               <Link to={"profile/"+this.state.targetUser._id}>
                                 <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
-                                </Link>
-                          </div>
+                              </Link>
+                            </div>
                             <div className="media-body">
+                            <div className="row">
+                              <div className="col-md-10">
                                 <div className="media-heading">
-
                                     <div className="media">
-                                        <div className="media-left media-body">
-                                            <font size="3">{this.state.targetUser.fullname}</font>
-                                        </div>
-
+                                      <div className="media-left media-body">
+                                          <font size="3">{this.state.targetUser.fullname}</font>
+                                      </div>
                                     </div>
                                 </div>
                                 <font size="2" color="grey ">
                                     {this.state.targetUser.description}</font>
+                              </div>
+                              <div className="col-md-2">
+                              </div>
+                            </div>
+
                             </div>
                         </div>
                     </div>

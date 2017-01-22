@@ -2,6 +2,7 @@ import React from 'React';
 import NavChatItem from './navchatitem';
 import {List} from 'material-ui/List'
 import Subheader from 'material-ui/Subheader';
+
 export default class NavBody extends React.Component {
 
     constructor(props) {

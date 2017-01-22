@@ -4,8 +4,8 @@ import NavBody from './navbody';
 import ChatWindow from './chatwindow';
 import {getUserData,getMessages,postMessage,getSessionId,getSessions} from '../server';
 import {socket} from '../credentials';
+import Drawer from 'material-ui/Drawer';  
 // var debug = require('react-debug');
-
 
 export default class Chat extends React.Component {
 
@@ -17,7 +17,8 @@ export default class Chat extends React.Component {
       sessions: [],
       friend: "",
       sessionId:"",
-      btnText:"load earier messages"
+      btnText:"load earier messages",
+      open:false
     };
   }
 
@@ -151,6 +152,7 @@ export default class Chat extends React.Component {
           onPost={(message)=>this.handlePostMessage(message)}
           message={this.state.message}
           onLoad={(e)=>this.handleLoadMessage(e)}
+          onExpand={()=>this.setState({open:!this.state.open})}
           btnText={this.state.btnText}>
         </ChatWindow>
       );
@@ -164,9 +166,14 @@ export default class Chat extends React.Component {
         }
         return (
           <div style={{marginTop:'70px'}}>
+            <Drawer open={this.state.open} width={300} docked={false} onRequestChange={(open) => this.setState({open:open})}>
+              <NavBody sessions={this.state.sessions} 
+                userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
+            </Drawer>
             <Navbar chat="active" user={this.state.user}/>
             <div className="container mainElement">
               <div className="row">
+                
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
                     <NavBody sessions={this.state.sessions} 
                     userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>

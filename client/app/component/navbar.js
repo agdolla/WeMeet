@@ -7,7 +7,7 @@ import {hideElement} from '../util'
 // var debug = require('react-debug');
 var swal = require('sweetalert');
 import Avatar from 'material-ui/Avatar';
-import ListItem from 'material-ui/List/ListItem';
+import {List, ListItem} from 'material-ui/List';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
@@ -16,6 +16,8 @@ import Person from 'material-ui/svg-icons/social/person';
 import Settings from 'material-ui/svg-icons/action/settings';
 import Create from 'material-ui/svg-icons/content/create';
 import Divider from 'material-ui/Divider';
+import Drawer from 'material-ui/Drawer';
+import FontIcon from 'material-ui/FontIcon';
 
 export default class Navbar extends React.Component{
 
@@ -25,7 +27,8 @@ export default class Navbar extends React.Component{
       activity:false,
       post:false,
       chat:false,
-      notification:false
+      notification:false,
+      open:false
     }
   }
 
@@ -137,7 +140,7 @@ export default class Navbar extends React.Component{
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
           <div className="container-fluid">
             <div className="navbar-header">
-              <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+              <button type="button" className="navbar-toggle" onClick={()=>{this.setState({open:!this.state.open})}}>
                 <span className="sr-only">Toggle navigation</span>
                 <span className="icon-bar"></span>
                 <span className="icon-bar"></span>
@@ -147,7 +150,44 @@ export default class Navbar extends React.Component{
                 <img src="./img/logo/mipmap-xxhdpi/ic_launcher.png" width="50px" height="50px" alt="" />
               </Link>
             </div>
+            <Drawer
+              docked={false}
+              width={300}
+              open={this.state.open}
+              onRequestChange={(open) => this.setState({open:open})}
+            >
+            <List>
+              <ListItem
+                style={{marginBottom:'5px'}}
+                rightIconButton={iconMenu}
+                disabled={true}
+                leftAvatar={
+                  <Avatar style={{backgroundColor:'none'}} src={this.props.user.avatar} />
+                }
+              >
+                {this.props.user.fullname}
+              </ListItem>
+              <Link style={{textDecoration:'none'}} to='/activity'>
+                <ListItem primaryText="Activities" leftIcon={<FontIcon className="material-icons">featured_play_list</FontIcon>}/>
+              </Link>          
 
+              <Link style={{textDecoration:'none'}} to='/post'>
+                <ListItem primaryText="Trend" leftIcon={<FontIcon className="material-icons">assessment</FontIcon>}/>
+              </Link>          
+
+              <Link style={{textDecoration:'none'}} to='/chat'>
+                <ListItem primaryText="Chat" leftIcon={<FontIcon className="material-icons">chat_bubble</FontIcon>}/>
+              </Link>          
+
+              <Link style={{textDecoration:'none'}} to='/search'>
+                <ListItem primaryText="Search" leftIcon={<FontIcon className="material-icons">search</FontIcon>}/>
+              </Link>          
+
+              <Link style={{textDecoration:'none'}} to='/notification'>
+                <ListItem primaryText="Notification" leftIcon={<FontIcon className="material-icons">notifications</FontIcon>}/>
+              </Link>
+            </List>
+            </Drawer>
             {/* Collect the nav links, forms, and other content for toggling */}
             <div className="collapse navbar-collapse" id="navbar">
               <ul className="nav navbar-nav nav-left">

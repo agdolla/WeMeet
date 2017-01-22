@@ -104,21 +104,21 @@ export default class NotificationBody extends React.Component{
     </Badge>;
     return(
       <Tabs
-        style={{boxShadow:  "0 10px 28px 0 rgba(137,157,197,.12)", marginTop:'5px'}}
+        style={{boxShadow:  "0 10px 28px 0 rgba(137,157,197,.12)", marginTop:'20px'}}
         inkBarStyle={{backgroundColor:"#607D8B",height:'3px'}}
         contentContainerStyle={{backgroundColor:'#FDFDFD',padding:'10px'}}
         value={this.state.value}
         onChange={(value)=>this.handleChange(value)}
       >
         <Tab icon={frbadge} 
-        value="a" style={{backgroundColor:"#61B4E4"}}>
+        value="a" style={{backgroundColor:"#61B4E4",height:60}}>
           <div>
             {this.state.FR.length===0?"Nothing here":this.state.FR.map((fr,i)=>{
               return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
             })}
           </div>
         </Tab>
-        <Tab  value="b" buttonStyle={{backgroundColor:"#61B4E4"}} icon={anbadge}>
+        <Tab  value="b" buttonStyle={{backgroundColor:"#61B4E4",height:60}} icon={anbadge}>
           <div>
             {this.state.AN.length===0?"Nothing here":this.state.AN.map((AN,i)=>{
               return <ActivityNotification key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>

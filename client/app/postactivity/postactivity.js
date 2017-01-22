@@ -255,14 +255,17 @@ export default class PostActivity extends React.Component {
         <Navbar user={this.state.userData}/>
         <div className="container">
           <div className="row">
-            <div className="col-md-7 col-md-offset-2">
+            <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1">
               <h4><span style={{
                   "marginRight":'10px'
                 }}><i className="glyphicon glyphicon-list-alt" aria-hidden="true"></i></span>Create Activity</h4>
             </div>
           </div>
           <div className="row">
-            <div className="col-md-7 col-md-offset-2 infos">
+            <div className="
+            col-md-8 col-md-offset-2 
+            col-sm-10 col-sm-offset-1
+            infos">
               <div className="panel panel-default">
                 <div className="panel-heading">
                   <div className="row">

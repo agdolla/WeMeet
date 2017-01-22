@@ -9,7 +9,10 @@ export default class Post extends React.Component{
         <Navbar post="active" user={this.props.user}/>
         <div className="container">
           <div className="row">
-            <div className="col-md-8 col-md-offset-2 main-feed">
+            <div className="
+            col-md-8 col-md-offset-2 
+            col-sm-10 col-sm-offset-1
+            main-feed">
               <PostFeed user={this.props.user} socket={this.props.socket}/>
             </div>
           </div>
