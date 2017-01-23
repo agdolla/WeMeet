@@ -7,6 +7,10 @@
 	width: 100% !important;
 }
 
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px #F7F7F7 inset;
+}
+
 *::-webkit-scrollbar
 {
 	width: 8px;
