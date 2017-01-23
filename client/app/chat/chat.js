@@ -2,7 +2,7 @@ import React from 'react';
 import Navbar from '../component/navbar';
 import NavBody from './navbody';
 import ChatWindow from './chatwindow';
-import {getUserData,getMessages,postMessage,getSessionId,getSessions} from '../server';
+import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../server';
 import {socket} from '../credentials';
 import Drawer from 'material-ui/Drawer';  
 // var debug = require('react-debug');
@@ -40,9 +40,9 @@ export default class Chat extends React.Component {
 
   componentDidUpdate(){
     socket.on('chat',()=>{
-      getSessionId(this.props.user,this.state.friend,(session)=>{
+      this.getSession(this.state.friend._id,(session)=>{
         this.setState({
-          sessionId:session._id
+          sessionId:session
         },
         ()=>{
           getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
@@ -70,11 +70,11 @@ export default class Chat extends React.Component {
         getSessions(this.props.user,(sessions)=>{
           this.setState({
             sessions:sessions,
-            friend:this.state.user.friends[0]._id
+            friend:this.state.user.friends[0]
           },()=>{
-            getSessionId(this.props.user,this.state.friend,(session)=>{
+            this.getSession(this.state.friend._id,(session)=>{
               this.setState({
-                sessionId:session._id
+                sessionId:session
               },
               ()=>{
                 getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
@@ -91,9 +91,24 @@ export default class Chat extends React.Component {
     });
   }
 
+  getSession(friend,callback){
+    var sessions = this.state.sessions;
+    var result = null;
+    sessions.forEach(session=>{
+      if(session.users.indexOf(friend)!==-1){
+        return result = session._id;
+      }
+    }); 
+    if(result === null){
+      getSessionId(this.props.user,friend,(session)=>{
+        return callback(session._id);
+      });
+    }else callback(result);
+  }
+
   handlePostMessage(message){
-    socket.emit('chat',{currUser:this.props.user,friend:this.state.friend});
-    postMessage(this.state.sessionId, this.props.user, this.state.friend ,message, (newMessage)=>{
+    socket.emit('chat',{currUser:this.props.user,friend:this.state.friend._id});
+    postMessage(this.state.sessionId, this.props.user, this.state.friend._id ,message, (newMessage)=>{
       this.setState({message:newMessage},()=>{
         getSessions(this.props.user, (sessions) => {
           this.setState({
@@ -105,24 +120,18 @@ export default class Chat extends React.Component {
     });
   }
 
-  handleSwitchFriends(friendId){
-    this.setState({friend:friendId},
+  handleSwitchFriends(friendData){
+    this.setState({friend:friendData},
       ()=>{
-        getSessionId(this.props.user,this.state.friend,(session)=>{
+        this.getSession(this.state.friend._id,(session)=>{
           this.setState({
-            sessionId:session._id
+            sessionId:session
           },
           ()=>{
             getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
               this.setState({
-                message:message
-              },()=>{
-                getSessions(this.props.user, (sessions) => {
-                  this.setState({
-                    sessions:sessions,
-                    btnText:message.length===0?"say hello to your friend!":"load earier messages"
-                  })
-                })
+                message:message,
+                btnText:message.length===0?"say hello to your friend!":"load earier messages"
               })
             });
           });
@@ -168,7 +177,7 @@ export default class Chat extends React.Component {
           <div style={{marginTop:'70px'}}>
             <Drawer open={this.state.open} width={300} docked={false} onRequestChange={(open) => this.setState({open:open})}>
               <NavBody sessions={this.state.sessions} 
-                userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
+                userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
             </Drawer>
             <Navbar chat="active" user={this.state.user}/>
             <div className="container mainElement">
@@ -176,7 +185,7 @@ export default class Chat extends React.Component {
                 
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
                     <NavBody sessions={this.state.sessions} 
-                    userData={this.state.user} activeFriend={this.state.friend} switchUser={(id)=>this.handleSwitchFriends(id)}/>
+                    userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
                 </div>
                 {chatwindow}
               </div>

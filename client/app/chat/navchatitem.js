@@ -16,7 +16,7 @@ export default class NavChatItem extends React.Component {
 
     handleClick(e){
       e.preventDefault();
-      this.props.switchUser(this.props.data._id);
+      this.props.switchUser(this.props.data);
     }
 
 

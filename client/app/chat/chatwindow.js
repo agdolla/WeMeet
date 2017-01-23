@@ -15,15 +15,15 @@ export default class ChatWindow extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          targetUser: {},
+          targetUser: props.target,
           message: props.message,
           load:false
         }
     }
 
-    componentDidMount() {
-        this.getData();
-    }
+    // componentDidMount() {
+    //     this.getData();
+    // }
 
     componentDidUpdate() {
       if(!this.state.load)
@@ -44,22 +44,20 @@ export default class ChatWindow extends React.Component {
       this.props.onPost(text);
     }
 
-    getData() {
-      if(!this.props.target==""){
-        getUserData(this.props.target, (userData) => {
-            this.setState({targetUser:userData})
-        });}
-    }
+    // getData() {
+    //   if(!this.props.target==""){
+    //     getUserData(this.props.target, (userData) => {
+    //         this.setState({targetUser:userData})
+    //     });}
+    // }
 
     componentWillReceiveProps(nextProps){
       if(!this.props.target==""){
-      getUserData(this.props.target, (userData) => {
-          this.setState(
-            {
-              targetUser:userData,
-              message:nextProps.message
-            })
-      });}
+        this.setState({
+          targetUser:nextProps.target,
+          message:nextProps.message
+        })
+      }
     }
     render() {
         return (
