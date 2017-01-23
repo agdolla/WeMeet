@@ -1,5 +1,5 @@
 var path = require('path');
-
+// var webpack = require('webpack');
 var HappyPack = require('happypack');
 
 module.exports = {
@@ -27,12 +27,23 @@ module.exports = {
       {
         loader: 'babel-loader',
         query: {
+          cacheDirectory: true,
           presets: ['es2015', 'react'],
           plugins: ["transform-class-properties"]
         }
       }
     ]
-    })
+    }),
+    // new webpack.DefinePlugin({
+    //   'process.env': {
+    //     NODE_ENV: JSON.stringify('production')
+    //   }
+    // }),
+    // new webpack.optimize.UglifyJsPlugin({
+    //     compress: {
+    //         warnings: false
+    //     }
+    // })
   ],
   module: {
     // Transforms your application's code using Babel.
