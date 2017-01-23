@@ -20,6 +20,10 @@ body{
   .friend-btn{
     visibility: visible !important;
   }
+  .navbar-brand img {
+    margin-left: 30px;
+    margin-right: 50px;
+  }
 }
 
 .friend-btn{

@@ -18,6 +18,7 @@ import Create from 'material-ui/svg-icons/content/create';
 import Divider from 'material-ui/Divider';
 import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
+import Snackbar from 'material-ui/Snackbar';
 
 export default class Navbar extends React.Component{
 
@@ -28,7 +29,8 @@ export default class Navbar extends React.Component{
       post:false,
       chat:false,
       notification:false,
-      open:false
+      open:false,
+      snackBar:false
     }
   }
 
@@ -53,7 +55,8 @@ export default class Navbar extends React.Component{
   }
   onChat = ()=>{
     this.setState({
-      chat:true
+      chat:true,
+      snackBar:true
     });
   }
   onNotification = ()=>{
@@ -137,6 +140,14 @@ export default class Navbar extends React.Component{
 
     return(
       <div>
+        <Snackbar
+          open={this.state.snackBar}
+          message={"You have new messages"}
+          action="check"
+          autoHideDuration={4000}
+          onActionTouchTap={(e)=>{hashHistory.push('/chat')}}
+          onRequestClose={(e)=>{this.setState({snackBar:false})}}
+        />
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
           <div className="container-fluid">
             <div className="navbar-header">

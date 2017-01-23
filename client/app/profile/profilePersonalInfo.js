@@ -1,5 +1,7 @@
 import React from 'react';
 var moment = require('moment');
+import {List, ListItem} from 'material-ui/List';
+import FontIcon from 'material-ui/FontIcon'
 
 export default class ProfilePersonalInfo extends React.Component{
 
@@ -46,26 +48,10 @@ export default class ProfilePersonalInfo extends React.Component{
             </div>
           </div>
         </div>
-        <div className="panel panel-default">
-          <div className="panel-body">
-            <div className="media">
-              <div>
-                <b>Email</b>
-                <br />
-                <div className="col-md-offset-1">
-                  {this.state.email}
-                </div>
-              </div>
-              <div>
-                <b>Birthday</b>
-                <br />
-                <div className="col-md-offset-1">
-                  {moment(this.state.birthday).calendar()}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
+          <ListItem primaryText={moment(this.state.birthday).calendar()} leftIcon={<FontIcon className="material-icons">cake</FontIcon>} />
+          <ListItem primaryText={this.state.email} leftIcon={<FontIcon className="material-icons">mail</FontIcon>} />
+        </List>
       </div>
     );
   }

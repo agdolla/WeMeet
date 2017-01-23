@@ -17,6 +17,12 @@ input:-webkit-autofill {
 	background-color: #9E9E9E;
 }
 
+a{
+  cursor: pointer;
+  cursor: hand
+}
+
+
 *::-webkit-scrollbar-thumb
 {
 	background-color: #757575;

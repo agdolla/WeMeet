@@ -18,9 +18,12 @@ import TextField from 'material-ui/TextField';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
 var zxcvbn = require('zxcvbn');
 // var debug = require('react-debug');
-var swal = require('sweetalert');
+// var swal = require('sweetalert');
 var injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
+
+import Perf from 'react-addons-perf';
+window.Perf = Perf;
 
 class ActivityPage extends React.Component{
   render(){
