@@ -1408,7 +1408,7 @@ MongoClient.connect(url, function(err, db) {
 						}
 				})
 				.then(()=>{
-					getMessage(time+1,contentsid, function(err, messages) {
+					getMessage(time,contentsid, function(err, messages) {
 							if (err)
 									sendDatabaseError(res, err);
 							else {
