@@ -52,7 +52,7 @@ function sendXHR(verb, resource, body, cb, errorCb) {
   // });
   // Network failure: request took too long to complete.
   xhr.addEventListener('timeout', function() {
-    swal('Could not ' + verb + " " + resource +
+    swal('Could not ' + verb + " "+
     ": Request timed out.","error");
   });
   switch (typeof(body)) {

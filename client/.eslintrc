@@ -1,5 +1,6 @@
-{
+  {
   "extends": "eslint:recommended",
+  "parser": "babel-eslint",
   "ecmaFeatures": {
     "arrowFunctions": true,
     "binaryLiterals": true,
@@ -25,6 +26,7 @@
     "react"
   ],
   "rules": {
-    "react/no-unknown-property": 1
+    "react/no-unknown-property": 1,
+    "react/jsx-uses-vars": 2
   }
 }

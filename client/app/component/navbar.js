@@ -4,7 +4,6 @@ import {logout} from '../credentials';
 import {hashHistory} from 'react-router'
 import {socket} from '../credentials';
 import {hideElement} from '../util'
-// var debug = require('react-debug');
 var swal = require('sweetalert');
 import Avatar from 'material-ui/Avatar';
 import {List, ListItem} from 'material-ui/List';
@@ -19,6 +18,7 @@ import Divider from 'material-ui/Divider';
 import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
 import Snackbar from 'material-ui/Snackbar';
+// var debug = require('react-debug');
 
 export default class Navbar extends React.Component{
 
@@ -145,9 +145,9 @@ export default class Navbar extends React.Component{
           message={"You have new messages"}
           action="check"
           autoHideDuration={4000}
-          onActionTouchTap={(e)=>{hashHistory.push('/chat')}}
-          onRequestClose={(e)=>{this.setState({snackBar:false})}}
-        />
+          onActionTouchTap={()=>{hashHistory.push('/chat')}}
+          onRequestClose={()=>{this.setState({snackBar:false})}}
+        /> 
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
           <div className="container-fluid">
             <div className="navbar-header">

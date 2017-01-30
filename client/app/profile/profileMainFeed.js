@@ -26,10 +26,10 @@ export default class ProfileMainFeed extends React.Component{
               </center>
             </div>
             <div className="col-md-8">
-              <div className="media">
+              <div className="media" style={{textAlign:'center'}}>
                 <h3>{this.state.fullname}</h3>
                 {this.state.description}
-                <div className="location">
+                <div className="location center-block">
                   <span className="glyphicon glyphicon-map-marker"></span>
                   {location}
                 </div>

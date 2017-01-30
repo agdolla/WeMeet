@@ -25,7 +25,7 @@ export default class Chat extends React.Component {
   componentDidMount() {
     this.getData();
     socket.on('online',(user)=>{
-      if(this.state.user.friends.filter((item) => {if(item._id===user)return true;else return false;}).length>0)
+      if(this.state.user.friends.filter((item) => {return item._id===user}).length>0)
       getUserData(this.props.user, (userData) => {
         this.setState({
           user:userData
@@ -182,7 +182,7 @@ export default class Chat extends React.Component {
             <Navbar chat="active" user={this.state.user}/>
             <div className="container mainElement">
               <div className="row">
-                
+
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
                     <NavBody sessions={this.state.sessions} 
                     userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
