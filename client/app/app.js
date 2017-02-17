@@ -246,7 +246,7 @@ class LandingPage extends React.Component{
         case 2:{
           this.setState({
             passwordStrength:60,
-            passwordClass:"progress-bar-warning"
+            passwordClass:"progress-bar-success"
           })
         }
           break;
@@ -323,7 +323,7 @@ class LandingPage extends React.Component{
     if(this.state.signUpName.trim()!==""&&
     this.state.signUpEmail!==""&&
     this.state.signUpPass!==""&&
-    this.state.passwordStrength>=80&&
+    this.state.passwordStrength>=60&&
     this.state.signUpPass===this.state.signUpPass2&&(e.key==="Enter"||e.button===0)){
       this.setState({
         submitted:true
@@ -360,7 +360,7 @@ class LandingPage extends React.Component{
         }
       });
     }
-    else if(this.state.passwordStrength<80 && this.state.signUpPass!==""&&(e.key==="Enter"||e.button===0)){
+    else if(this.state.passwordStrength<60 && this.state.signUpPass!==""&&(e.key==="Enter"||e.button===0)){
       this.setState({
         passwordTooSimple:true,
         submitted:false
