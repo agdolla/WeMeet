@@ -1,7 +1,7 @@
 import React from 'react';
 // import NavTab from './navTabs';
-import NotificationBody from './notificationBody';
-import Navbar from '../component/navbar';
+import {NotificationBody} from '../containers';
+import {Navbar} from '../containers';
 // import {getUserData} from '../server';
 
 export default class Notification extends React.Component{

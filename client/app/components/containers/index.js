@@ -6,6 +6,8 @@ import Ad_body from './ad_body'
 
 import PostFeed from './postFeed'
 
+import NotificationBody from './notificationBody'
+
 import ChatNavBody from './chatnavbody'
 import ChatWindow from './chatwindow'
 
@@ -15,6 +17,7 @@ export{
     ActivityFeed,
     Ad_body,
     PostFeed,
+    NotificationBody,
     ChatNavBody,
     ChatWindow,
     SearchEntry

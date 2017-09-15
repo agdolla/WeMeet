@@ -23,6 +23,10 @@ import ChatLeftBubble from './chatleftbubble'
 import ChatNavChatItem from './chatnavchatitem'
 import ChatRightBubble from './chatrightbubble'
 
+// import Notification presentations
+import NotificationActivity from './notificationactivity'
+import NotificationFriendRequest from './notificationfriendRequest'
+
 //import Search presentations
 import SearchActivityFeedItem from './searchActivityFeedItem'
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
@@ -50,7 +54,8 @@ export{
     ChatNavChatItem,
     ChatRightBubble,
 
-
+    NotificationActivity,
+    NotificationFriendRequest,
 
     SearchActivityFeedItem,
     SearchFeedUserFeedItem,

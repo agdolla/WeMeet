@@ -1,7 +1,7 @@
 import Activity_detail from './activity_detail'
 import Activity from './activity';
 import Chat from './chat'
-// import Notification from './notification';
+import Notification from './notification';
 import Post from './post';
 // import PostActivity from './postactivity';
 // import Profile from './profile';
@@ -13,7 +13,7 @@ export {
     Activity_detail,
     Activity,
     Chat,
-    // Notification,
+    Notification,
     Post,
     // PostActivity,
     // Profile,
