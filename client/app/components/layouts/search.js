@@ -1,6 +1,6 @@
 import React from 'react';
-import SearchEntry from './searchEntry';
-import Navbar from '../component/navbar';
+import {SearchEntry} from '../containers';
+import {Navbar} from '../containers';
 // import {getUserData} from '../server';
 
 

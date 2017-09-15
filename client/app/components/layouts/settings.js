@@ -1,7 +1,7 @@
 import React from 'react';
 
-//import presentations
-import {Navbar} from '../presentations';
+//import containers
+import {Navbar} from '../containers';
 //import request function
 import {getUserData,changeEmail,changeUserInfo,ChangeAvatar} from '../../utils';
 //import util function

@@ -3,8 +3,7 @@ import {Link} from 'react-router';
 
 //import container
 import { ActivityFeed } from '../containers';
-//import presentations
-import { Navbar } from '../presentations';
+import { Navbar } from '../containers';
 //import request function
 import {getlocation,setlocation} from '../../utils';
 

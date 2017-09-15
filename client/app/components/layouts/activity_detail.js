@@ -1,5 +1,5 @@
 import React from 'React';
-import {Navbar} from '../presentations';
+import {Navbar} from '../containers';
 import {Ad_body} from '../containers';
 // import {getUserData} from '../server';
 

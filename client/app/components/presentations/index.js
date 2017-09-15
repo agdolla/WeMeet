@@ -9,11 +9,17 @@ import Ad_commentThread from './ad_commentThread'
 import Ad_participates_item from './ad_participates_item'
 import Ad_signeduser from './ad_signeduser'
 
+//import Post presentations
+import PostComment from './postComment'
+import PostCommentEntry from './postCommentEntry'
+import PostCommentThread from './postCommentThread'
+import PostEntry from './postEntry'
+import PostFeedItem from './postFeedItem'
 
-
-//import Navbar presentations
-import Navbar from './navbar'
-
+//import Search presentations
+import SearchActivityFeedItem from './searchActivityFeedItem'
+import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
+import SearchPostFeedItem from './searchPostFeedItem'
 
 
 export{
@@ -25,7 +31,15 @@ export{
     Ad_participates_item,
     Ad_signeduser,
 
-    
-    Navbar
+
+    PostComment,
+    PostCommentEntry,
+    PostCommentThread,
+    PostEntry,
+    PostFeedItem,
+
+    SearchActivityFeedItem,
+    SearchFeedUserFeedItem,
+    SearchPostFeedItem
 
 }

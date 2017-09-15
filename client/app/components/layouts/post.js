@@ -1,6 +1,6 @@
 import React from 'react';
-import PostFeed from './postFeed';
-import Navbar from '../component/navbar';
+import {PostFeed} from '../containers';
+import {Navbar} from '../containers';
 
 export default class Post extends React.Component{
   render(){
@@ -10,7 +10,7 @@ export default class Post extends React.Component{
         <div className="container">
           <div className="row">
             <div className="
-            col-md-8 col-md-offset-2 
+            col-md-8 col-md-offset-2
             col-sm-10 col-sm-offset-1
             main-feed">
               <PostFeed user={this.props.user} socket={this.props.socket}/>

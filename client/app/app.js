@@ -1,10 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Post from './post/post';
+// import Post from './post/post';
+import {Post} from './components/layouts';
+
 import Chat from './chat/chat'
 import Notification from './notification/notification';
-import Search from './search/search';
+
+// import Search from './search/search';
+import { Search } from './components/layouts';
+
 import Profile from './profile/profile';
 import PostActivity from './postactivity/postactivity';
 
