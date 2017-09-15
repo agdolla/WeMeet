@@ -183,7 +183,7 @@ export default class Chat extends React.Component {
         return (
           <div style={{marginTop:'70px'}}>
             <Drawer open={this.state.open} width={300} docked={false} onRequestChange={(open) => this.setState({open:open})}>
-              <NavBody sessions={this.state.sessions}
+              <ChatNavBody sessions={this.state.sessions}
                 userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
             </Drawer>
             <Navbar chat="active" user={this.state.user}/>
@@ -191,7 +191,7 @@ export default class Chat extends React.Component {
               <div className="row">
 
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
-                    <NavBody sessions={this.state.sessions}
+                    <ChatNavBody sessions={this.state.sessions}
                     userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
                 </div>
                 {chatwindow}

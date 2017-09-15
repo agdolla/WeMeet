@@ -26,6 +26,8 @@ import {adpostComment} from '../server'
 import {getMessages} from '../server'
 import {postMessage} from '../server'
 import {getSessionId} from '../server'
+import {signup} from '../server'
+import {login} from '../server'
 import {searchquery} from '../server'
 import {addFriend} from '../server'
 import {sendJoinActivityRequest} from '../server'
@@ -77,6 +79,8 @@ export{
     getMessages,
     postMessage,
     getSessionId,
+    signup,
+    login,
     searchquery,
     addFriend,
     sendJoinActivityRequest,

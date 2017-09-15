@@ -7,6 +7,7 @@ import PostActivity from './postactivity';
 import Profile from './profile';
 import Search from './search';
 import Settings from './settings';
+import Landing from './landing'
 
 
 export {
@@ -18,5 +19,6 @@ export {
     PostActivity,
     Profile,
     Search,
-    Settings
+    Settings,
+    Landing
 }
