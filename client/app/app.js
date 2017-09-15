@@ -1,14 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Activity from './activity/activity';
+
 import Post from './post/post';
-import Settings from './settings/settings';
 import Chat from './chat/chat'
 import Notification from './notification/notification';
 import Search from './search/search';
 import Profile from './profile/profile';
 import PostActivity from './postactivity/postactivity';
-import Activity_detail from './activity_detail/activity_detail';
+
+// import Activity_detail from './activity_detail/activity_detail';
+import {Activity_detail} from './components/layouts';
+// import Activity from './activity/activity';
+import { Activity } from './components/layouts';
+// import Settings from './settings'
+import { Settings } from './components/layouts';
+
+//import { Activity, Activity_detail} from './components/layouts'
+
 import { IndexRoute, Router, Route, hashHistory } from 'react-router';
 import {hideElement} from './util';
 import {signup,login} from './server.js';
@@ -387,8 +395,8 @@ class LandingPage extends React.Component{
             <br/>
             <RaisedButton onClick={(e)=>this.handleClick(e)} label="Sign up free today" backgroundColor='#607D8B' labelColor="white" style={btn_style}/>
             <RaisedButton onClick={(e)=>this.handleClick(e)} label="Log in" primary={true} labelColor="white" style={btn_style}/>
-            <RaisedButton href="/auth/facebook" label="FACEBOOK" 
-            icon={<i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px',color:'white'}}></i>} 
+            <RaisedButton href="/auth/facebook" label="FACEBOOK"
+            icon={<i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px',color:'white'}}></i>}
             labelColor="white" style={btn_style} backgroundColor="#3b5998"/>
           </div>
         </div>
