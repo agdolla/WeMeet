@@ -1,10 +1,17 @@
 import React from 'react';
-import Navbar from '../component/navbar';
-import NavBody from './navbody';
-import ChatWindow from './chatwindow';
-import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../server';
-import {socket} from '../credentials';
-import Drawer from 'material-ui/Drawer';  
+
+import {Navbar} from '../containers';
+import {ChatNavBody} from '../containers';
+import {ChatWindow} from '../containers';
+
+//request function
+import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
+//credentials function
+import {socket} from '../../utils';
+
+
+
+import Drawer from 'material-ui/Drawer';
 // var debug = require('react-debug');
 
 export default class Chat extends React.Component {
@@ -98,7 +105,7 @@ export default class Chat extends React.Component {
       if(session.users.indexOf(friend)!==-1){
         return result = session._id;
       }
-    }); 
+    });
     if(result === null){
       getSessionId(this.props.user,friend,(session)=>{
         return callback(session._id);
@@ -176,7 +183,7 @@ export default class Chat extends React.Component {
         return (
           <div style={{marginTop:'70px'}}>
             <Drawer open={this.state.open} width={300} docked={false} onRequestChange={(open) => this.setState({open:open})}>
-              <NavBody sessions={this.state.sessions} 
+              <NavBody sessions={this.state.sessions}
                 userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
             </Drawer>
             <Navbar chat="active" user={this.state.user}/>
@@ -184,7 +191,7 @@ export default class Chat extends React.Component {
               <div className="row">
 
                 <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
-                    <NavBody sessions={this.state.sessions} 
+                    <NavBody sessions={this.state.sessions}
                     userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
                 </div>
                 {chatwindow}

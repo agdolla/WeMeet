@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 
 // import Post from './post/post';
 import {Post} from './components/layouts';
+// import Chat from './chat/chat'
+import {Chat} from './components/layouts';
 
-import Chat from './chat/chat'
 import Notification from './notification/notification';
 
 // import Search from './search/search';

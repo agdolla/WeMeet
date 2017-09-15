@@ -16,6 +16,13 @@ import PostCommentThread from './postCommentThread'
 import PostEntry from './postEntry'
 import PostFeedItem from './postFeedItem'
 
+
+//import Chat presentations
+import ChatEntry from './chatentry'
+import ChatLeftBubble from './chatleftbubble'
+import ChatNavChatItem from './chatnavchatitem'
+import ChatRightBubble from './chatrightbubble'
+
 //import Search presentations
 import SearchActivityFeedItem from './searchActivityFeedItem'
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
@@ -37,6 +44,13 @@ export{
     PostCommentThread,
     PostEntry,
     PostFeedItem,
+
+    ChatEntry,
+    ChatLeftBubble,
+    ChatNavChatItem,
+    ChatRightBubble,
+
+
 
     SearchActivityFeedItem,
     SearchFeedUserFeedItem,
