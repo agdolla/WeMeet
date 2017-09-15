@@ -9,9 +9,8 @@ import {Chat} from './components/layouts';
 import {Notification} from './components/layouts';
 // import Search from './search/search';
 import { Search } from './components/layouts';
-
-import Profile from './profile/profile';
-
+// import Profile from './profile/profile';
+import { Profile } from './components/layouts';
 // import PostActivity from './postactivity/postactivity';
 import { PostActivity } from './components/layouts';
 // import Activity_detail from './activity_detail/activity_detail';

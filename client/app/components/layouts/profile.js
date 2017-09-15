@@ -1,10 +1,12 @@
 import React from 'react';
-import Navbar from '../component/navbar';
-import ProfileMainFeed from './profileMainFeed';
-import ProfilePersonalInfo from './profilePersonalInfo';
-import ProfileRecentActivityFeed from './profileRecentActivityFeed';
-import ProfileRecentPostFeed from './profileRecentPostFeed';
-import {getUserData} from '../server';
+
+import {Navbar} from '../containers';
+import {ProfileMainFeed} from '../containers';
+import {ProfilePersonalInfo} from '../containers';
+import {ProfileRecentActivityFeed} from '../containers';
+import {ProfileRecentPostFeed} from '../containers';
+
+import {getUserData} from '../../utils';
 
 export default class Profile extends React.Component{
 

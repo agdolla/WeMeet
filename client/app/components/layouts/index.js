@@ -4,7 +4,7 @@ import Chat from './chat'
 import Notification from './notification';
 import Post from './post';
 import PostActivity from './postactivity';
-// import Profile from './profile';
+import Profile from './profile';
 import Search from './search';
 import Settings from './settings';
 
@@ -16,7 +16,7 @@ export {
     Notification,
     Post,
     PostActivity,
-    // Profile,
+    Profile,
     Search,
     Settings
 }

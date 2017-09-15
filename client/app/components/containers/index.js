@@ -13,6 +13,11 @@ import NotificationBody from './notificationBody'
 import ChatNavBody from './chatnavbody'
 import ChatWindow from './chatwindow'
 
+import ProfileMainFeed from './profileMainFeed'
+import ProfilePersonalInfo from './profilePersonalInfo'
+import ProfileRecentActivityFeed from './profileRecentActivityFeed'
+import ProfileRecentPostFeed from './profileRecentPostFeed'
+
 import SearchEntry from './searchEntry'
 export{
     Navbar,
@@ -22,5 +27,9 @@ export{
     NotificationBody,
     ChatNavBody,
     ChatWindow,
+    ProfileMainFeed,
+    ProfilePersonalInfo,
+    ProfileRecentActivityFeed,
+    ProfileRecentPostFeed,
     SearchEntry
 }
