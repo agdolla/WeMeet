@@ -1,7 +1,7 @@
 import React from 'react';
 
-import {Request} from '../presentations';
-import {ActivityNotification} from '../presentations'
+import {NotificationFriendRequest} from '../presentations';
+import {NotificationActivity} from '../presentations'
 
 //request function
 import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../../utils';
@@ -120,14 +120,14 @@ export default class NotificationBody extends React.Component{
         value="a" style={{backgroundColor:"#61B4E4",height:60}}>
           <div>
             {this.state.FR.length===0?"Nothing here":this.state.FR.map((fr,i)=>{
-              return <Request key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
+              return <NotificationFriendRequest key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
             })}
           </div>
         </Tab>
         <Tab  value="b" buttonStyle={{backgroundColor:"#61B4E4",height:60}} icon={anbadge}>
           <div>
             {this.state.AN.length===0?"Nothing here":this.state.AN.map((AN,i)=>{
-              return <ActivityNotification key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>
+              return <NotificationActivity key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>
             })}
           </div>
         </Tab>

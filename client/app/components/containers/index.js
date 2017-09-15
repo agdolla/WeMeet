@@ -6,6 +6,8 @@ import Ad_body from './ad_body'
 
 import PostFeed from './postFeed'
 
+import PostActivityFriendItem from './postactivityfriendItem'
+
 import NotificationBody from './notificationBody'
 
 import ChatNavBody from './chatnavbody'

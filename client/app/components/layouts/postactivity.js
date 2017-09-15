@@ -1,11 +1,17 @@
 import React from 'react';
-import Navbar from '../component/navbar';
-import {getUserData,createActivity,sendInviteActivityRequest} from '../server';
-import FriendItem from './friendItem';
 import {hashHistory} from 'react-router';
+
+import {Navbar} from '../containers';
+import {PostActivityFriendItem} from '../containers';
+//request function
+import {getUserData,createActivity,sendInviteActivityRequest} from '../../utils';
+//util function
+import {hideElement} from '../../utils';
+//credentials function
+import {socket,getToken} from '../../utils';
+
 import AvatarCropper from "react-avatar-cropper";
-import {hideElement} from '../util';
-import {socket,getToken} from '../credentials';
+
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
@@ -263,7 +269,7 @@ export default class PostActivity extends React.Component {
           </div>
           <div className="row">
             <div className="
-            col-md-8 col-md-offset-2 
+            col-md-8 col-md-offset-2
             col-sm-10 col-sm-offset-1
             infos">
               <div className="panel panel-default">
@@ -305,7 +311,7 @@ export default class PostActivity extends React.Component {
                             <DatePicker hintText="End Date" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleEndDate(e,date)}/>
                           </div>
                         </div>
-                      </div>                      
+                      </div>
                       <div className="row">
                         <div className="col-md-6">
                           <TimePicker hintText="Start Time" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleStartTime(e,date)}/>
@@ -384,7 +390,7 @@ export default class PostActivity extends React.Component {
                                 }}>
                                 <ul className="media-list">
                                   {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{
-                                    return <FriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
+                                    return <PostActivityFriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
                                   })}
                                 </ul>
                           </div>

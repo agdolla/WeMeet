@@ -49,7 +49,7 @@ export default class ChatNavBody extends React.Component {
               {
               this.state.userData === undefined ? null:
               (this.state.userData.friends===undefined || this.state.userData.friends.length===0 ? alert : this.state.userData.friends.map((friend)=>{
-                return <NavChatItem
+                return <ChatNavChatItem
                   key={friend._id}
                   data={friend}
                   activeFriend = {this.props.activeFriend}
