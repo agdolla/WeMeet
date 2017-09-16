@@ -1,17 +1,24 @@
 import React from 'react';
 import {hashHistory} from 'react-router';
 
+
+
 import {Navbar} from '../containers';
-import {PostActivityFriendItem} from '../containers';
-//request function
+
+
 import {getUserData,createActivity,sendInviteActivityRequest} from '../../utils';
-//util function
+
+
+import {PostActivityFriendItem} from '../containers';
+
+
 import {hideElement} from '../../utils';
-//credentials function
 import {socket,getToken} from '../../utils';
 
-import AvatarCropper from "react-avatar-cropper";
 
+
+
+import AvatarCropper from "react-avatar-cropper";
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';

@@ -19,17 +19,27 @@ import ProfileRecentActivityFeed from './profileRecentActivityFeed'
 import ProfileRecentPostFeed from './profileRecentPostFeed'
 
 import SearchEntry from './searchEntry'
+
 export{
     Navbar,
+
     ActivityFeed,
+
     Ad_body,
+
     PostFeed,
+
+    PostActivityFriendItem,
+
     NotificationBody,
+
     ChatNavBody,
     ChatWindow,
+
     ProfileMainFeed,
     ProfilePersonalInfo,
     ProfileRecentActivityFeed,
     ProfileRecentPostFeed,
+
     SearchEntry
 }
