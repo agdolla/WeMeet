@@ -1,6 +1,7 @@
 var moment = require('moment');
 import {updateCredentials,logout} from './credentials';
 var swal = require('sweetalert');
+// var debug = require('react-debug');
 /**
 * Properly configure+send an XMLHttpRequest with error handling,
 * authorization token, and other needed properties.

@@ -1408,27 +1408,25 @@ MongoClient.connect(url, function(err, db) {
 						}
 				})
 				.then(()=>{
-					getMessage(time,contentsid, function(err, messages) {
+					getMessage(time+10,contentsid, function(err, messages) {
 							if (err)
 									sendDatabaseError(res, err);
 							else {
 									//seting lastmessage;
 									lastmessage.isread = false;
-									db.collection("messageSession").updateOne({
+									db.collection("messageSession").updateOneAsync({
 											_id: new ObjectID(id)
 									}, {
 											$set: {
 													"lastmessage": lastmessage
 											}
-									}, function(err) {
-											if (err)
-													sendDatabaseError(res, err);
-
-											else res.send(messages);
-									});
+									})
+									.then(()=>{
+											res.send(messages);
+									})
+									.catch(err=>sendDatabaseError(res,err))
 							}
 					});
-
 				})
 				.catch(err=>sendDatabaseError(res,err))
 			}
