@@ -162,6 +162,7 @@ class ActivityDetailPage extends React.Component{
     }
   }
 }
+
 class SearchPage extends React.Component{
    render(){
      if(isUserLoggedIn()){
