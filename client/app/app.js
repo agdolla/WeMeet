@@ -31,6 +31,7 @@ class ActivityPage extends React.Component{
     if(this.props.location.query.data===undefined){
       if(isUserLoggedIn()){
         var user = getUserData();
+        socket.emit('user',user._id);
         window.onload = ()=>{
           socket.emit('user',user._id);
         }
@@ -45,6 +46,7 @@ class ActivityPage extends React.Component{
     else{
      var data = JSON.parse(this.props.location.query.data);
       updateCredentials(data.user, data.token);
+      socket.emit('user',data.user._id);
       window.onload = ()=>{
         socket.emit('user',data.user._id);
       }

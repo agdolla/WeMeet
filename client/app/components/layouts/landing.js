@@ -1,6 +1,6 @@
 import React from 'react';
 import {hashHistory} from 'react-router';
-
+var debug = require('react-debug');
 
 
 import {hideElement} from '../../utils';
@@ -103,7 +103,7 @@ export default class Landing extends React.Component {
                 failedLogin:false,
                 submitted:false
               });
-              hashHistory.push('/activity');
+              hashHistory.push("/activity");
             }
             else{
               this.setState({

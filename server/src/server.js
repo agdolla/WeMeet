@@ -1357,7 +1357,7 @@ MongoClient.connect(url, function(err, db) {
 						}
 					})
 					.then(()=>{
-						getMessage(time, message.contents, function(err, messages) {
+						getMessage(time+1, message.contents, function(err, messages) {
 							if (err)
 								sendDatabaseError(res, err);
 							else {
@@ -1368,7 +1368,7 @@ MongoClient.connect(url, function(err, db) {
 					})
 					.catch(err=>sendDatabaseError(res,err));
 					}
-					else getMessage(time,message.contents, function(err, messages) {
+					else getMessage(time+1,message.contents, function(err, messages) {
 						if (err)
 							sendDatabaseError(res, err);
 						else {
@@ -1408,7 +1408,7 @@ MongoClient.connect(url, function(err, db) {
 						}
 				})
 				.then(()=>{
-					getMessage(time+10,contentsid, function(err, messages) {
+					getMessage(time+1,contentsid, function(err, messages) {
 							if (err)
 									sendDatabaseError(res, err);
 							else {
