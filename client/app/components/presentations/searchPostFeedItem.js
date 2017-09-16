@@ -7,9 +7,9 @@ import Lightbox from 'react-images';
 import {PostComment} from './';
 import {PostCommentThread} from './';
 
-import {postComment} from '../../server';
-import {likePost} from '../../server';
-import {unLikePost} from '../../server';
+import {postComment} from '../../utils';
+import {likePost} from '../../utils';
+import {unLikePost} from '../../utils';
 
 var moment = require('moment');
 // var debug = require('react-debug');

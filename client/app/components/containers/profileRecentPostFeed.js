@@ -3,7 +3,7 @@ import React from 'react';
 //request function
 import {getPostFeedData} from '../../utils';
 
-import ProfileRecentPostItem from '../presentations';
+import {ProfileRecentPostItem} from '../presentations';
 
 export default class ProfileRecentPostFeed extends React.Component{
 

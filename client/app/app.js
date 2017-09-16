@@ -3,30 +3,19 @@ import ReactDOM from 'react-dom';
 import { IndexRoute, Router, Route, hashHistory } from 'react-router';
 
 
-// import Post from './post/post';
 import {Post} from './components/layouts';
-// import Chat from './chat/chat'
 import {Chat} from './components/layouts';
-// import Notification from './notification/notification';
 import {Notification} from './components/layouts';
-// import Search from './search/search';
 import { Search } from './components/layouts';
-// import Profile from './profile/profile';
 import { Profile } from './components/layouts';
-// import PostActivity from './postactivity/postactivity';
 import { PostActivity } from './components/layouts';
-// import Activity_detail from './activity_detail/activity_detail';
 import {Activity_detail} from './components/layouts';
-// import Activity from './activity/activity';
 import { Activity } from './components/layouts';
-// import Settings from './settings'
 import { Settings } from './components/layouts';
 import { Landing } from './components/layouts';
 
-//import { Activity, Activity_detail} from './components/layouts'
-
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './credentials';
+import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './utils/credentials';
 
 
 // var debug = require('react-debug');
