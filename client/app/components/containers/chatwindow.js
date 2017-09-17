@@ -22,9 +22,9 @@ export default class ChatWindow extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-          targetUser: props.target,
-          message: props.message,
-          load:false
+            targetUser: props.target,
+            message: props.message,
+            load:false
         }
     }
 
@@ -33,22 +33,22 @@ export default class ChatWindow extends React.Component {
     // }
 
     componentDidUpdate() {
-      if(!this.state.load)
+        if(!this.state.load)
         this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
     }
 
     handleLoad(e){
-      e.preventDefault();
-      this.setState({
-        load:true
-      },()=>{
-        this.props.onLoad(e);
-      });
+        e.preventDefault();
+        this.setState({
+            load:true
+        },()=>{
+            this.props.onLoad(e);
+        });
 
     }
 
     handlePostMessage(text){
-      this.props.onPost(text);
+        this.props.onPost(text);
     }
 
     // getData() {
@@ -59,74 +59,70 @@ export default class ChatWindow extends React.Component {
     // }
 
     componentWillReceiveProps(nextProps){
-      if(!this.props.target==""){
-        this.setState({
-          targetUser:nextProps.target,
-          message:nextProps.message
-        })
-      }
+        if(!this.props.target==""){
+            this.setState({
+                targetUser:nextProps.target,
+                message:nextProps.message
+            })
+        }
     }
     render() {
         return (
             <div className="col-md-7 col-md-offset-0 col-sm-10 col-sm-offset-1 col-xs-12 chat-right">
                 <div className="panel panel-dafault chatwindow">
                     <div className="panel-heading">
-                          <IconButton
-                            className="pull-right friend-btn"
-                            tooltip="Friends"
-                            tooltipPosition="bottom-center"
-                            onClick={()=>this.props.onExpand()}
-                          >
+                        <IconButton className="pull-right friend-btn" tooltip="Friends" tooltipPosition="bottom-center" onClick={()=>this.props.onExpand()}>
                             <FontIcon className="material-icons">group</FontIcon>
-                          </IconButton>
+                        </IconButton>
                         <div className="media">
                             <div className="media-left">
-                              <Link to={"profile/"+this.state.targetUser._id}>
-                                <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
-                              </Link>
+                                <Link to={"profile/"+this.state.targetUser._id}>
+                                    <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
+                                </Link>
                             </div>
                             <div className="media-body">
-                            <div className="row">
-                              <div className="col-md-10">
-                                <div className="media-heading">
-                                    <div className="media">
-                                      <div className="media-left media-body">
-                                          <font size="3">{this.state.targetUser.fullname}</font>
-                                      </div>
+                                <div className="row">
+                                    <div className="col-md-10">
+                                        <div className="media-heading">
+                                            <div className="media">
+                                                <div className="media-left media-body">
+                                                    <font size="3">{this.state.targetUser.fullname}</font>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <font size="2" color="grey ">
+                                            {this.state.targetUser.description}
+                                        </font>
+                                    </div>
+                                    <div className="col-md-2">
                                     </div>
                                 </div>
-                                <font size="2" color="grey ">
-                                    {this.state.targetUser.description}</font>
-                              </div>
-                              <div className="col-md-2">
-                              </div>
-                            </div>
 
                             </div>
                         </div>
                     </div>
 
                     <div className="panel-body" ref="chatwindow">
-                      <div style={{textAlign:"center"}}>
-                        <a href="" onClick={(e)=>this.handleLoad(e)}>{this.props.btnText}</a>
-                      </div>
+                        <div style={{textAlign:"center"}}>
+                            <a href="" onClick={(e)=>this.handleLoad(e)}>{this.props.btnText}</a>
+                        </div>
 
-                      {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
-                        if(msg.sender._id===this.props.curUser){
-                          return (
-                            <ChatRightBubble key={i} data={msg} />
-                          )
-                        }
-                        else{
-                          return (
-                            <ChatLeftBubble key={i} data={msg} />
-                          )
-                        }
-                      })}
+                        {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
+                            if(msg.sender._id===this.props.curUser){
+                                return (
+                                <ChatRightBubble key={i} data={msg} />
+                                )
+                            }
+                            else{
+                                return (
+                                <ChatLeftBubble key={i} data={msg} />
+                                )
+                            }
+                        })}
 
                     </div>
-
                     <ChatEntry onPost={(message)=>this.handlePostMessage(message)}/>
+
                 </div>
             </div>
 

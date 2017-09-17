@@ -27,185 +27,185 @@ import Perf from 'react-addons-perf';
 window.Perf = Perf;
 
 class ActivityPage extends React.Component{
-  render(){
-    if(this.props.location.query.data===undefined){
-      if(isUserLoggedIn()){
-        var user = getUserData();
-        socket.emit('user',user._id);
-        window.onload = ()=>{
-          socket.emit('user',user._id);
+    render(){
+        if(this.props.location.query.data===undefined){
+            if(isUserLoggedIn()){
+                var user = getUserData();
+                socket.emit('user',user._id);
+                window.onload = ()=>{
+                    socket.emit('user',user._id);
+                }
+                return(<Activity user={user}/>);
+            }
+            else{
+                hashHistory.push('/');
+                location.reload();
+            }
         }
-        return(<Activity user={user}/>);
-      }
-      else{
-        hashHistory.push('/');
-        location.reload();
-      }
+        //facebook login
+        else{
+            var data = JSON.parse(this.props.location.query.data);
+            updateCredentials(data.user, data.token);
+            socket.emit('user',data.user._id);
+            window.onload = ()=>{
+                socket.emit('user',data.user._id);
+            }
+            return(<Activity user={data.user}/>);
+        }
     }
-    //facebook login
-    else{
-     var data = JSON.parse(this.props.location.query.data);
-      updateCredentials(data.user, data.token);
-      socket.emit('user',data.user._id);
-      window.onload = ()=>{
-        socket.emit('user',data.user._id);
-      }
-      return(<Activity user={data.user}/>);
-    }
-  }
 }
 class ThrendPage extends React.Component{
-  render(){
-    if(isUserLoggedIn()){
-      var user = getUserData();
-      window.onload = ()=>{
-        socket.emit('user',user._id);
-      }
-      return (<Post user={user}/>);
+    render(){
+        if(isUserLoggedIn()){
+            var user = getUserData();
+            window.onload = ()=>{
+                socket.emit('user',user._id);
+            }
+            return (<Post user={user}/>);
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class App extends React.Component {
-  render() {
-    return (
-      <MuiThemeProvider>
-        <div>
-          {this.props.children}
-        </div>
-      </MuiThemeProvider>
-    );
-  }
+    render() {
+        return (
+            <MuiThemeProvider>
+                <div>
+                    {this.props.children}
+                </div>
+            </MuiThemeProvider>
+        );
+    }
 }
 
 class SettingsPage extends React.Component {
-  render() {
-    if(isUserLoggedIn()){
-      var userId = getUserId();
-      window.onload = ()=>{
-        socket.emit('user',userId);
-      }
-      return (
-        <Settings user={userId} />
-      );
+    render() {
+        if(isUserLoggedIn()){
+            var userId = getUserId();
+            window.onload = ()=>{
+                socket.emit('user',userId);
+            }
+            return (
+                <Settings user={userId} />
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class ChatPage extends React.Component{
-  render() {
-    if(isUserLoggedIn()){
-      var userId = getUserId();
-      window.onload = ()=>{
-        socket.emit('user',userId);
-      }
-      return (
-        <Chat user={userId}/>
-      );
+    render() {
+        if(isUserLoggedIn()){
+            var userId = getUserId();
+            window.onload = ()=>{
+                socket.emit('user',userId);
+            }
+            return (
+                <Chat user={userId}/>
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class NotificationPage extends React.Component{
-  render(){
-    if(isUserLoggedIn()){
-      var user = getUserData();
-      window.onload = ()=>{
-        socket.emit('user',user._id);
-      }
-      return(
-        <Notification user={user} id={this.props.params.id}/>
-      );
+    render(){
+        if(isUserLoggedIn()){
+            var user = getUserData();
+            window.onload = ()=>{
+                socket.emit('user',user._id);
+            }
+            return(
+                <Notification user={user} id={this.props.params.id}/>
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class ActivityDetailPage extends React.Component{
-  render(){
-    if(isUserLoggedIn()){
-      var user = getUserData();
-      window.onload = ()=>{
-        socket.emit('user',user._id);
-      }
-      return(
-        <Activity_detail user={user} id={this.props.params.id}/>
-      )
+    render(){
+        if(isUserLoggedIn()){
+            var user = getUserData();
+            window.onload = ()=>{
+                socket.emit('user',user._id);
+            }
+            return(
+                <Activity_detail user={user} id={this.props.params.id}/>
+            )
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class SearchPage extends React.Component{
-   render(){
-     if(isUserLoggedIn()){
-       var user = getUserData();
-       window.onload = ()=>{
-         socket.emit('user',user._id);
-       }
-       return(
-         <Search user={user}/>
-       );
-     }
-     else{
-       hashHistory.push('/');
-       location.reload();
-     }
-  }
+    render(){
+        if(isUserLoggedIn()){
+            var user = getUserData();
+            window.onload = ()=>{
+                socket.emit('user',user._id);
+            }
+            return(
+                <Search user={user}/>
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
+    }
 }
 
 class ProfilePage extends React.Component{
-  render(){
-    if(isUserLoggedIn()){
-      var userId = getUserId();
-      window.onload = ()=>{
-        socket.emit('user',userId);
-      }
-      return(
-        <Profile user={this.props.params.user} currUser={userId}/>
-      );
+    render(){
+        if(isUserLoggedIn()){
+            var userId = getUserId();
+            window.onload = ()=>{
+                socket.emit('user',userId);
+            }
+            return(
+                <Profile user={this.props.params.user} currUser={userId}/>
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class PostActivityPage extends React.Component {
-  render() {
-    if(isUserLoggedIn()){
-      var userId = getUserId();
-      window.onload = ()=>{
-        socket.emit('user',userId);
-      }
-      return (
-        <PostActivity user={userId}/>
-      );
+    render() {
+        if(isUserLoggedIn()){
+            var userId = getUserId();
+            window.onload = ()=>{
+                socket.emit('user',userId);
+            }
+            return (
+                <PostActivity user={userId}/>
+            );
+        }
+        else{
+            hashHistory.push('/');
+            location.reload();
+        }
     }
-    else{
-      hashHistory.push('/');
-      location.reload();
-    }
-  }
 }
 
 class LandingPage extends React.Component {
@@ -218,24 +218,23 @@ class LandingPage extends React.Component {
 
 //render main
 ReactDOM.render((
-  <Router history={hashHistory}>
-    <Route path="/" component={App}>
-      <IndexRoute component={LandingPage} />
-      <Route path="post" component={ThrendPage} />
-      <Route path="activity/:data" component={ActivityPage} />
-      <Route path="settings" component={SettingsPage} />
-      <Route path="chat" component={ChatPage} />
-      <Route path="notification" component={NotificationPage}>
-        <Route path="/notification/:id" component={NotificationPage}/>
-      </Route>
-      <Route path="profile" component={ProfilePage}>
-        <Route path="/profile/:user" component={ProfilePage} />
-      </Route>
-      <Route path="activity_detail/:id" component={ActivityDetailPage}/>
-      <Route path="search" component={SearchPage}/>
-      <Route path="postactivity" component={PostActivityPage} />
-      <Route path='*' component={ActivityPage} />
-    </Route>
-  </Router>
-
+    <Router history={hashHistory}>
+        <Route path="/" component={App}>
+            <IndexRoute component={LandingPage} />
+            <Route path="post" component={ThrendPage} />
+            <Route path="activity/:data" component={ActivityPage} />
+            <Route path="settings" component={SettingsPage} />
+            <Route path="chat" component={ChatPage} />
+            <Route path="notification" component={NotificationPage}>
+                <Route path="/notification/:id" component={NotificationPage}/>
+            </Route>
+            <Route path="profile" component={ProfilePage}>
+                <Route path="/profile/:user" component={ProfilePage} />
+            </Route>
+            <Route path="activity_detail/:id" component={ActivityDetailPage}/>
+            <Route path="search" component={SearchPage}/>
+            <Route path="postactivity" component={PostActivityPage} />
+            <Route path='*' component={ActivityPage} />
+        </Route>
+    </Router>
 ),document.getElementById('container'));

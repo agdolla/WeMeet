@@ -7,34 +7,34 @@ import {ProfileRecentActivityItem} from '../presentations';
 
 export default class ProfileRecentActivityFeed extends React.Component{
 
-  constructor(props){
-    super(props);
-    this.state = {
-      "contents": []
-    };
-  }
+    constructor(props){
+        super(props);
+        this.state = {
+            "contents": []
+        };
+    }
 
-  getData(user){
-    getActivityFeedData(user, (activity) => {
-        this.setState(activity);
-    });
-  }
+    getData(user){
+        getActivityFeedData(user, (activity) => {
+            this.setState(activity);
+        });
+    }
 
-  componentWillReceiveProps(newProps){
-      this.getData(newProps.user);
-  }
+    componentWillReceiveProps(newProps){
+        this.getData(newProps.user);
+    }
 
-  componentDidMount(){
-    this.getData(this.props.user);
-  }
+    componentDidMount(){
+        this.getData(this.props.user);
+    }
 
-  render(){
-    return(
-      <div>
-        {this.state.contents.map((activityItem)=>{
-          return <ProfileRecentActivityItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
-        })}
-      </div>
-    );
-  }
+    render(){
+        return(
+            <div>
+                {this.state.contents.map((activityItem)=>{
+                    return <ProfileRecentActivityItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
+                })}
+            </div>
+        );
+    }
 }

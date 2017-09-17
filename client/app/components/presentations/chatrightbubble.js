@@ -11,14 +11,14 @@ export default class ChatRightBubble extends React.Component {
     }
 
     componentWillReceiveProps(nextProps){
-          this.setState(nextProps.data);
+        this.setState(nextProps.data);
     }
 
     render() {
-      //default time format
-      var time = moment(this.state.date).calendar();
-      //if less than 24 hours, use relative time
-      if((new Date().getTime()) - 12 <= 86400000)
+        //default time format
+        var time = moment(this.state.date).calendar();
+        //if less than 24 hours, use relative time
+        if((new Date().getTime()) - 12 <= 86400000)
         time = moment(this.state.date).fromNow();
 
         return (
@@ -29,15 +29,15 @@ export default class ChatRightBubble extends React.Component {
 
                 <div className="media-body">
                     <div className="msg pull-right">
-                      {this.state.text}
+                        {this.state.text}
                     </div>
                 </div>
                 <div className="media-right ">
                     <div className="media-right">
-                      <Link to={"profile/"+this.state.sender._id}>
-                        <img className="media-object" src={this.state.sender.avatar} alt="image" height="40" width="40"></img>
+                        <Link to={"profile/"+this.state.sender._id}>
+                            <img className="media-object" src={this.state.sender.avatar} alt="image" height="40" width="40"></img>
                         </Link>
-                  </div>
+                    </div>
                 </div>
 
             </div>
