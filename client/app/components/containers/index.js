@@ -10,6 +10,8 @@ import PostActivityFriendItem from './postactivityfriendItem'
 
 import NotificationBody from './notificationBody'
 
+import PostActivityFeed from './postactivityFeed'
+
 import ChatNavBody from './chatnavbody'
 import ChatWindow from './chatwindow'
 
@@ -32,6 +34,8 @@ export{
     PostActivityFriendItem,
 
     NotificationBody,
+
+    PostActivityFeed,
 
     ChatNavBody,
     ChatWindow,
