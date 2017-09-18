@@ -31,13 +31,10 @@ export default class Chat extends React.Component {
 
     componentDidMount() {
         this.getData();
-        socket.on('online',(user)=>{
-            if(this.state.user.friends.filter((item) => {return item._id===user}).length>0)
-            getUserData(this.props.user, (userData) => {
-                this.setState({
-                    user:userData
-                });
-            });
+        socket.on('online',(data)=>{
+            var tmp = Object.assign({},this.state.user); 
+            tmp.friends.forEach((i)=>{if(i._id===data.user)i.online=data.online}) 
+            this.setState({ user:tmp })
         })
     }
 
