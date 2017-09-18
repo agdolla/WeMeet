@@ -1822,6 +1822,7 @@ MongoClient.connect(url, function(err, db) {
                     online:false
                 }
             });
+            db.collection('userSocketIds').remove({socketId:socket.id});
             socket.broadcast.emit('online',user);
         });
 
