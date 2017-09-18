@@ -1804,36 +1804,41 @@ MongoClient.connect(url, function(err, db) {
         socket.on('disconnect', function () {
             db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
                 if(socketData!==null){
-                    db.collection('users').updateOne({_id:socketData.userId},{
+                    db.collection('users').updateOneAsync({_id:socketData.userId},{
                         $set:{
                             online:false
                         }
-                    });
-                    socket.broadcast.emit('online',socketData.userId);
+                    })
+                    .then(()=>{
+                        socket.broadcast.emit('online',socketData.userId);
+                    })
                 }
             });
-
             db.collection('userSocketIds').remove({socketId:socket.id});
         });
 
         socket.on('logout',function(user){
-            db.collection('users').updateOne({_id:new ObjectID(user)},{
+            db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
                 $set:{
                     online:false
                 }
-            });
+            })
+            .then(()=>{
+                socket.broadcast.emit('online',user);
+            })
             db.collection('userSocketIds').remove({socketId:socket.id});
-            socket.broadcast.emit('online',user);
         });
 
         socket.on('user',function(user){
 
-            db.collection('users').updateOne({_id:new ObjectID(user)},{
+            db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
                 $set:{
                     online:true
                 }
-            });
-            socket.broadcast.emit('online',user);
+            })
+            .then(()=>{
+                socket.broadcast.emit('online',user);
+            })
             db.collection('userSocketIds').updateOne({userId:new ObjectID(user)},{
                 $set:{
                     socketId:socket.id
