@@ -1810,7 +1810,11 @@ MongoClient.connect(url, function(err, db) {
                         }
                     })
                     .then(()=>{
-                        socket.broadcast.emit('online',socketData.userId);
+                        var data = {
+                            user: socketData.userId,
+                            online: false
+                        }
+                        socket.broadcast.emit('online',data);
                     })
                 }
             });
@@ -1824,7 +1828,11 @@ MongoClient.connect(url, function(err, db) {
                 }
             })
             .then(()=>{
-                socket.broadcast.emit('online',user);
+                var data = {
+                    user: user,
+                    online: false
+                }
+                socket.broadcast.emit('online',data);
             })
             db.collection('userSocketIds').remove({socketId:socket.id});
         });
@@ -1837,7 +1845,11 @@ MongoClient.connect(url, function(err, db) {
                 }
             })
             .then(()=>{
-                socket.broadcast.emit('online',user);
+                var data = {
+                    user: user,
+                    online: true
+                }
+                socket.broadcast.emit('online',data);
             })
             db.collection('userSocketIds').updateOne({userId:new ObjectID(user)},{
                 $set:{
