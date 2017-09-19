@@ -22,6 +22,9 @@ import ProfileRecentPostFeed from './profileRecentPostFeed'
 
 import SearchEntry from './searchEntry'
 
+import SettingProfileInfo from './settingprofileinfo'
+import SettingSystemInfo from './settingsysteminfo'
+
 export{
     Navbar,
 
@@ -45,5 +48,8 @@ export{
     ProfileRecentActivityFeed,
     ProfileRecentPostFeed,
 
-    SearchEntry
+    SearchEntry,
+
+    SettingProfileInfo,
+    SettingSystemInfo
 }
