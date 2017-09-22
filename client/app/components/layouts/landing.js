@@ -2,10 +2,14 @@ import React from 'react';
 import {hashHistory} from 'react-router';
 var debug = require('react-debug');
 
-
+//util function
 import {hideElement} from '../../utils';
+//request function
 import {signup,login} from '../../utils';
+//credentials function
 import {isUserLoggedIn} from '../../utils';
+
+import {LandingBackground} from '../containers';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
@@ -184,23 +188,9 @@ export default class Landing extends React.Component {
       }
 
       render(){
-        var btn_style={
-          margin:'10px'
-        }
         return(
           <div>
-            <div className="bg">
-              <div className="text-vertical-center">
-                <h1 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="70px"/></span> WeMeet</h1>
-                <h2 style={{color:'white'}}>Join nearby activities and make friends!</h2>
-                <br/>
-                <RaisedButton onClick={(e)=>this.handleClick(e)} label="Sign up free today" backgroundColor='#607D8B' labelColor="white" style={btn_style}/>
-                <RaisedButton onClick={(e)=>this.handleClick(e)} label="Log in" primary={true} labelColor="white" style={btn_style}/>
-                <RaisedButton href="/auth/facebook" label="FACEBOOK"
-                icon={<i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px',color:'white'}}></i>}
-                labelColor="white" style={btn_style} backgroundColor="#3b5998"/>
-              </div>
-            </div>
+            <LandingBackground onclick={this.handleClick.bind(this)}/>
             <div className="container index LandingPage">
               <div className="row">
                 <div className="col-md-6 signin">

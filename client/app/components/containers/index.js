@@ -1,47 +1,49 @@
-import Navbar from './navbar'
+import ActivityFeed from './activityFeed';
 
-import ActivityFeed from './activityFeed'
+import Ad_body from './ad_body';
 
-import Ad_body from './ad_body'
+import ChatNavBody from './chatnavbody';
+import ChatWindow from './chatwindow';
 
-import PostFeed from './postFeed'
+import LandingBackground from './landingbackground';
 
-import PostActivityFriendItem from './postactivityfriendItem'
+import Navbar from './navbar';
 
-import NotificationBody from './notificationBody'
+import NotificationBody from './notificationBody';
 
-import PostActivityFeed from './postactivityFeed'
+import PostActivityFeed from './postactivityFeed';
+import PostActivityFriendItem from './postactivityfriendItem';
 
-import ChatNavBody from './chatnavbody'
-import ChatWindow from './chatwindow'
+import PostFeed from './postFeed';
 
-import ProfileMainFeed from './profileMainFeed'
-import ProfilePersonalInfo from './profilePersonalInfo'
-import ProfileRecentActivityFeed from './profileRecentActivityFeed'
-import ProfileRecentPostFeed from './profileRecentPostFeed'
+import ProfileMainFeed from './profileMainFeed';
+import ProfilePersonalInfo from './profilePersonalInfo';
+import ProfileRecentActivityFeed from './profileRecentActivityFeed';
+import ProfileRecentPostFeed from './profileRecentPostFeed';
 
-import SearchEntry from './searchEntry'
+import SearchEntry from './searchEntry';
 
-import SettingProfileInfo from './settingprofileinfo'
-import SettingSystemInfo from './settingsysteminfo'
+import SettingProfileInfo from './settingprofileinfo';
+import SettingSystemInfo from './settingsysteminfo';
 
 export{
-    Navbar,
-
     ActivityFeed,
 
     Ad_body,
 
-    PostFeed,
+    ChatNavBody,
+    ChatWindow,
 
-    PostActivityFriendItem,
+    LandingBackground,
+
+    Navbar,
 
     NotificationBody,
 
     PostActivityFeed,
+    PostActivityFriendItem,
 
-    ChatNavBody,
-    ChatWindow,
+    PostFeed,
 
     ProfileMainFeed,
     ProfilePersonalInfo,
