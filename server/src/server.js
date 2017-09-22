@@ -6,10 +6,6 @@ var app = express();
 var http = require('http');
 // var https = require('https');
 var bodyParser = require('body-parser');
-// Support receiving JSON in HTTP request bodies
-var mongo_express = require('mongo-express/lib/middleware');
-// Import the default Mongo Express configuration
-var mongo_express_config = require('mongo-express/config.default.js');
 var Promise = require("bluebird");
 var fs = Promise.promisifyAll(require('fs'));
 var uuidV1 = require('uuid/v1');
@@ -76,7 +72,6 @@ MongoClient.connect(url, function(err, db) {
     }));
     app.use(passport.initialize());
     app.use(passport.session());
-    app.use('/mongo_express', mongo_express(mongo_express_config));
 
     //schemas
     var statusUpdateSchema = require('./schemas/statusUpdate.json');
