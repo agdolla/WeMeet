@@ -6,6 +6,8 @@ import ChatNavBody from './chatnavbody';
 import ChatWindow from './chatwindow';
 
 import LandingBackground from './landingbackground';
+import LandingSignin from './landingsignin';
+import LandingSignup from './landingsignup';
 
 import Navbar from './navbar';
 
@@ -35,6 +37,8 @@ export{
     ChatWindow,
 
     LandingBackground,
+    LandingSignin,
+    LandingSignup,
 
     Navbar,
 
