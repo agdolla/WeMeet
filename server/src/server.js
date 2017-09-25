@@ -61,6 +61,9 @@ function isLoggedIn(req, res, next) {
 }
 
 MongoClient.connect(url, function(err, db) {
+    if(err){
+        console.log("mongodb err: "+err)
+    }
     app.use(bodyParser.json());
     app.use(bodyParser.text());
     app.use(cookieParser());
