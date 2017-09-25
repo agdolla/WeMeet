@@ -1,6 +1,18 @@
-//client side request function
-import {getlocation} from './server'
-import {setlocation} from './server'
+//client side credentials function
+import {socket} from './credentials'
+import {getToken} from './credentials'
+import {getUserId} from './credentials'
+import {getUserFullName} from './credentials'
+import {updateCredentials} from './credentials'
+import {isUserLoggedIn} from './credentials'
+import {logout} from './credentials'
+
+//client side geolocation request function
+import {getlocation} from './geolocation'
+import {setlocation} from './geolocation'
+
+
+//client side httprequest function
 import {deleteNotification} from './server'
 import {acceptFriendRequest} from './server'
 import {acceptActivityRequest} from './server'
@@ -37,23 +49,29 @@ import {sendInviteActivityRequest} from './server'
 import {hideElement} from './util'
 import {disabledElement} from './util'
 
-//client side credentials function
-import {socket} from './credentials'
-import {getToken} from './credentials'
-import {getUserId} from './credentials'
-import {getUserFullName} from './credentials'
-import {updateCredentials} from './credentials'
-import {isUserLoggedIn} from './credentials'
-import {logout} from './credentials'
 
+
+import {sendXHR} from './xmlhttprequest'
 
 //unsolve repeate name
 //import {getUserData} from './credentials'
 
 
 export{
+    //export credentials function
+    socket,
+    getToken,
+    getUserId,
+    getUserFullName,
+    updateCredentials,
+    isUserLoggedIn,
+    logout,
+
+    //export geolocation function
     getlocation,
     setlocation,
+
+    //export httprequest function
     deleteNotification,
     acceptFriendRequest,
     acceptActivityRequest,
@@ -86,18 +104,15 @@ export{
     sendJoinActivityRequest,
     sendInviteActivityRequest,
 
-    //export {util function
+    //export util function
     hideElement,
     disabledElement,
 
-    //export {credentials function
-    socket,
-    getToken,
-    getUserId,
-    getUserFullName,
-    updateCredentials,
-    isUserLoggedIn,
-    logout
+
+
+
+    //export xhr function
+    sendXHR
 
     //unsolve repeate name
     //,getUserData
