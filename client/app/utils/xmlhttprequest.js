@@ -1,3 +1,8 @@
+var swal = require('sweetalert');
+
+//credentials function
+import {logout} from './';
+
 export function sendXHR(verb, resource, body, cb, errorCb) {
     var xhr = new XMLHttpRequest();
     xhr.open(verb, resource);

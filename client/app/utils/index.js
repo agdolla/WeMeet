@@ -10,6 +10,10 @@ import {adpostComment} from './activityitem'
 import {signup} from './authentication'
 import {login} from './authentication'
 
+//cliend side chat request function
+import {getMessages} from './chat'
+import {postMessage} from './chat'
+
 //client side credentials function
 import {socket} from './credentials'
 import {getToken} from './credentials'
@@ -37,13 +41,6 @@ import {getAllPosts} from './postitem'
 
 //client side httprequest function
 import {acceptActivityRequest} from './server'
-import {getNotificationData} from './server'
-import {getPostFeedData} from './server'
-import {getActivityFeedData} from './server'
-import {getUserData} from './server'
-import {getSessions} from './server'
-import {getMessages} from './server'
-import {postMessage} from './server'
 import {getSessionId} from './server'
 import {addFriend} from './server'
 import {sendJoinActivityRequest} from './server'
@@ -57,6 +54,13 @@ import {searchquery} from './search'
 import {changeUserInfo} from './settings'
 import {ChangeAvatar} from './settings'
 import {changeEmail} from './settings'
+
+//client side user get request function
+import {getNotificationData} from './usergetrequest'
+import {getPostFeedData} from './usergetrequest'
+import {getActivityFeedData} from './usergetrequest'
+import {getUserData} from './usergetrequest'
+import {getSessions} from './usergetrequest'
 
 //client side util function
 import {hideElement} from './util'
@@ -91,6 +95,10 @@ export{
     isUserLoggedIn,
     logout,
 
+    //export chat function
+    getMessages,
+    postMessage,
+
     //export geolocation function
     getlocation,
     setlocation,
@@ -112,17 +120,8 @@ export{
     searchquery,
 
 
-
-
     //export httprequest function
     acceptActivityRequest,
-    getNotificationData,
-    getPostFeedData,
-    getActivityFeedData,
-    getUserData,
-    getSessions,
-    getMessages,
-    postMessage,
     getSessionId,
     addFriend,
     sendJoinActivityRequest,
@@ -133,11 +132,16 @@ export{
     ChangeAvatar,
     changeEmail,
 
+    //export usergetrequest function
+    getNotificationData,
+    getPostFeedData,
+    getActivityFeedData,
+    getUserData,
+    getSessions,
 
     //export util function
     hideElement,
     disabledElement,
-
 
     //export xhr function
     sendXHR

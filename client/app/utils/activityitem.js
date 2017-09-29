@@ -1,5 +1,8 @@
+var moment = require('moment');
+
 //xmlhttprequest function
 import {sendXHR} from './'
+
 
 
 export function createActivity(data,cb){
