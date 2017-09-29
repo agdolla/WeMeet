@@ -1,3 +1,15 @@
+//client side activityitem function
+import {likeActivity} from './activityitem'
+import {unLikeActivity} from './activityitem'
+import {createActivity} from './activityitem'
+import {getActivityDetail} from './activityitem'
+import {getAllActivities} from './activityitem'
+import {adpostComment} from './activityitem'
+
+//client side authentication request function
+import {signup} from './authentication'
+import {login} from './authentication'
+
 //client side credentials function
 import {socket} from './credentials'
 import {getToken} from './credentials'
@@ -11,46 +23,46 @@ import {logout} from './credentials'
 import {getlocation} from './geolocation'
 import {setlocation} from './geolocation'
 
+//client side notification request function
+import {deleteNotification} from './notification'
+import {acceptFriendRequest} from './notification'
+
+//client side postitem request function
+import {likePost} from './postitem'
+import {unLikePost} from './postitem'
+import {postComment} from './postitem'
+import {postStatus} from './postitem'
+import {getAllPosts} from './postitem'
+
 
 //client side httprequest function
-import {deleteNotification} from './server'
-import {acceptFriendRequest} from './server'
 import {acceptActivityRequest} from './server'
 import {getNotificationData} from './server'
-import {likePost} from './server'
-import {unLikePost} from './server'
-import {likeActivity} from './server'
-import {unLikeActivity} from './server'
-import {changeUserInfo} from './server'
-import {ChangeAvatar} from './server'
-import {changeEmail} from './server'
-import {postComment} from './server'
-import {postStatus} from './server'
-import {createActivity} from './server'
 import {getPostFeedData} from './server'
 import {getActivityFeedData} from './server'
-import {getAllActivities} from './server'
-import {getAllPosts} from './server'
 import {getUserData} from './server'
 import {getSessions} from './server'
-import {getActivityDetail} from './server'
-import {adpostComment} from './server'
 import {getMessages} from './server'
 import {postMessage} from './server'
 import {getSessionId} from './server'
-import {signup} from './server'
-import {login} from './server'
-import {searchquery} from './server'
 import {addFriend} from './server'
 import {sendJoinActivityRequest} from './server'
 import {sendInviteActivityRequest} from './server'
+
+//client side search request function
+import {searchquery} from './search'
+
+
+//client side settings request function
+import {changeUserInfo} from './settings'
+import {ChangeAvatar} from './settings'
+import {changeEmail} from './settings'
 
 //client side util function
 import {hideElement} from './util'
 import {disabledElement} from './util'
 
-
-
+//client side shedXHR function
 import {sendXHR} from './xmlhttprequest'
 
 //unsolve repeate name
@@ -58,6 +70,18 @@ import {sendXHR} from './xmlhttprequest'
 
 
 export{
+    //export activityitem function
+    likeActivity,
+    unLikeActivity,
+    createActivity,
+    getAllActivities,
+    getActivityDetail,
+    adpostComment,
+
+    //export authentication function
+    signup,
+    login,
+
     //export credentials function
     socket,
     getToken,
@@ -71,44 +95,48 @@ export{
     getlocation,
     setlocation,
 
-    //export httprequest function
+
+    //export notification function
     deleteNotification,
     acceptFriendRequest,
-    acceptActivityRequest,
-    getNotificationData,
+
+    //export postitem function
     likePost,
     unLikePost,
-    likeActivity,
-    unLikeActivity,
-    changeUserInfo,
-    ChangeAvatar,
-    changeEmail,
     postComment,
     postStatus,
-    createActivity,
+    getAllPosts,
+
+
+    //export search function
+    searchquery,
+
+
+
+
+    //export httprequest function
+    acceptActivityRequest,
+    getNotificationData,
     getPostFeedData,
     getActivityFeedData,
-    getAllActivities,
-    getAllPosts,
     getUserData,
     getSessions,
-    getActivityDetail,
-    adpostComment,
     getMessages,
     postMessage,
     getSessionId,
-    signup,
-    login,
-    searchquery,
     addFriend,
     sendJoinActivityRequest,
     sendInviteActivityRequest,
 
+    //export settings function
+    changeUserInfo,
+    ChangeAvatar,
+    changeEmail,
+
+
     //export util function
     hideElement,
     disabledElement,
-
-
 
 
     //export xhr function

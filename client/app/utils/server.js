@@ -2,30 +2,16 @@ var moment = require('moment');
 var swal = require('sweetalert');
 
 //credentials function
-import {updateCredentials,logout} from './credentials';
+import {updateCredentials,logout} from './';
 
 
 //xmlhttprequest function
 import {sendXHR} from './'
 
-//geolocation function
-import {getlocation} from './'
-
 // var debug = require('react-debug');
 
 
 
-export function deleteNotification(id, user ,cb){
-    sendXHR('DELETE','/notification/'+id+'/'+user,undefined,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function acceptFriendRequest(id,user,cb){
-    sendXHR('PUT','/notification/'+id+'/'+user,undefined,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
-}
 
 export function acceptActivityRequest(notificationid,fromuser,cb){
     sendXHR('PUT','/acceptactivity/'+notificationid+'/'+fromuser,undefined,(xhr)=>{
@@ -39,96 +25,6 @@ export function getNotificationData(user, cb){
     });
 }
 
-export function likePost(feedItemId, user, cb){
-    sendXHR('PUT', '/postItem/'+feedItemId+'/likelist/'+user,
-    undefined, (xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function unLikePost(feedItemId, user, cb){
-    sendXHR('DELETE', '/postItem/'+feedItemId+'/likelist/'+user,
-    undefined, (xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function likeActivity(activityId, user, cb){
-    sendXHR('PUT', '/activityItem/' + activityId + '/likelist/' + user,
-    undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function unLikeActivity(activityId, user, cb){
-    sendXHR('DELETE', '/activityItem/' + activityId +'/likelist/' + user,
-    undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function changeUserInfo(data, cb){
-    sendXHR('PUT','/settings/user/'+data.userId,data,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
-}
-
-export function ChangeAvatar(user,img,cb){
-    sendXHR('PUT','/settings/avatar/user/'+user,{"img":img},(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function changeEmail(data,cb){
-    sendXHR('PUT','/settings/emailChange/user/'+data.userId, data,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
-}
-
-
-export function postComment(feedItemId, author, comment, cb){
-    sendXHR('POST','/postItem/'+feedItemId+'/commentThread/comment',{
-        author:author,
-        text:comment
-    },(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
-}
-
-export function postStatus(user, text, img, cb){
-    getlocation((res)=>{
-        sendXHR('POST', '/postItem', {
-            userId:user,
-            text:text,
-            img: img,
-            location:res!=="error"&&res.status==="OK" && res.results.length>0 ? res.results[0] : {}
-        }, (xhr)=>{
-            cb(JSON.parse(xhr.responseText));
-        });
-    });
-}
-
-
-export function createActivity(data,cb){
-    sendXHR('POST','/postActivity',{
-        postDate: new Date().getTime(),
-        type: data.type,
-        author:data.userData._id,
-        title: data.title,
-        description:data.description,
-        img:data.img === null ? "./img/default.png" : data.img,
-        startTime: moment(data.startTime).valueOf(),
-        endTime: moment(data.endTime).valueOf(),
-        location: data.location,
-        contents: {
-            "text": data.detail
-        }
-    }
-    , (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
-
-}
 
 
 export function getPostFeedData(user, cb){
@@ -148,21 +44,7 @@ export function getActivityFeedData(user,cb){
     });
 }
 
-export function getAllActivities(time,cb){
-    // We don't need to send a body, so pass in 'undefined' for the body.
-    sendXHR('GET', '/activities/'+time, undefined, (xhr) => {
-        // Call the callback with the data.
-        cb(JSON.parse(xhr.responseText));
-    });
-}
 
-export function getAllPosts(time,cb){
-    // We don't need to send a body, so pass in 'undefined' for the body.
-    sendXHR('GET', '/posts/'+time, undefined, (xhr) => {
-        // Call the callback with the data.
-        cb(JSON.parse(xhr.responseText));
-    });
-}
 
 export function getUserData(user,cb){
     sendXHR('GET','/user/'+user,undefined,(xhr)=>{
@@ -176,20 +58,6 @@ export function getSessions(user,cb){
     })
 }
 
-export function getActivityDetail(id,cb){
-    sendXHR('GET','/activityItem/'+id, undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-export function adpostComment(activityId, author, comment, cb){
-    sendXHR('POST','/activityItem/'+activityId+'/commentThread/comment',{
-        author:author,
-        text:comment
-    },(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
-}
 
 export function getMessages(time,userid,id,cb){
     sendXHR('GET','/user/'+userid+'/chatsession/'+id+"/"+time, undefined, (xhr) => {
@@ -210,40 +78,6 @@ export function postMessage(sessionId,sender,target, text, cb){
 export function getSessionId(userid,targetid,cb){
     sendXHR('GET','/getsession/'+userid+'/'+targetid, undefined ,(xhr) => {
         cb(JSON.parse(xhr.responseText));
-    });
-}
-
-
-
-export function searchquery(querytext,cb){
-    sendXHR('GET','/search/'+querytext, undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
-}
-
-
-export function signup(email, username, password, cb) {
-    sendXHR('POST', '/signup', { fullname: username,
-        email: email,
-        password: password }, () => {
-            cb(true);
-        }, () => {
-            cb(false);
-        }
-    );
-}
-
-export function login(email, password, cb) {
-    sendXHR('POST', '/login', { email: email, password: password},
-    (xhr) => {
-        // Success callback: Login succeeded.
-        var authData = JSON.parse(xhr.responseText);
-        // Update credentials and indicate success via the callback!
-        updateCredentials(authData.user, authData.token);
-        cb(true);
-    }, () => {
-        // Error callback: Login failed.
-        cb(false);
     });
 }
 
