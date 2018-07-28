@@ -1,30 +1,19 @@
 import React from 'react';
-import {hashHistory} from 'react-router';
-
-
-
+import {withRouter} from 'react-router-dom';
 import {getUserData, createActivity, sendInviteActivityRequest} from '../../utils';
-
-
 import {PostActivityFriendItem} from './';
-
-
 import {hideElement} from '../../utils';
 import {socket,getToken} from '../../utils';
-
-
-
-
-import AvatarCropper from "react-avatar-cropper";
+// import AvatarCropper from "react-avatar-cropper";
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import TimePicker from 'material-ui/TimePicker';
 import TextField from 'material-ui/TextField';
-var debug = require('react-debug');
+// var debug = require('react-debug');
 var swal = require('sweetalert');
 
-export default class PostActivityFeed extends React.Component {
+class PostActivityFeed extends React.Component {
 
     constructor(props){
         super(props);
@@ -54,10 +43,11 @@ export default class PostActivityFeed extends React.Component {
             })
         });
     }
+
+
     componentDidMount(){
         this.getData();
     }
-
 
 
     handleFile(e){
@@ -157,15 +147,12 @@ export default class PostActivityFeed extends React.Component {
                 });
             });
             swal({
-                title: "Go Check It Out!",
-                type: "success",
-                showCancelButton: false,
-                confirmButtonColor: "#30E4A2",
-                confirmButtonText: "Go",
-                closeOnConfirm: true
-            },
-            function(){
-                hashHistory.push('/activity');
+              title:"Success",
+              icon: "success",
+              button: "OK",
+            })
+            .then(()=>{
+                this.props.history.push('/activity');
             });
         }
         else{
@@ -236,7 +223,6 @@ export default class PostActivityFeed extends React.Component {
     handleStartTime(e,date){
         var currentDate = this.state.startTime;
         currentDate.setHours(date.getHours(),date.getUTCMinutes());
-        debug(currentDate);
         this.setState({
             startTime: currentDate
         })
@@ -245,7 +231,6 @@ export default class PostActivityFeed extends React.Component {
     handleEndTime(e,date){
         var currentDate = this.state.endTime;
         currentDate.setHours(date.getHours(),date.getUTCMinutes());
-        debug(currentDate);
         this.setState({
             endTime: currentDate
         })
@@ -255,15 +240,15 @@ export default class PostActivityFeed extends React.Component {
     render() {
         return (
             <div className="container">
-                {this.state.cropperOpen &&
-                    <AvatarCropper
-                    onRequestHide={(e)=>this.handleRequestHide(e)}
-                    cropperOpen={this.state.cropperOpen}
-                    onCrop={(e)=>this.handleCrop(e)}
-                    image={this.state.img}
-                    width={1200}
-                    height={500}
-                    />
+                {this.state.cropperOpen
+                    // <AvatarCropper
+                    // onRequestHide={(e)=>this.handleRequestHide(e)}
+                    // cropperOpen={this.state.cropperOpen}
+                    // onCrop={(e)=>this.handleCrop(e)}
+                    // image={this.state.img}
+                    // width={1200}
+                    // height={500}
+                    // />
                 }
 
                 <div className="row">
@@ -431,3 +416,5 @@ export default class PostActivityFeed extends React.Component {
         )
     }
 }
+
+export default withRouter(PostActivityFeed)

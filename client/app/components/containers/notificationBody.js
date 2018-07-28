@@ -12,7 +12,7 @@ import {socket,getToken} from '../../utils';
 import {Tabs, Tab} from 'material-ui/Tabs';
 import FontIcon from 'material-ui/FontIcon';
 import Badge from 'material-ui/Badge';
-import IconButton from 'material-ui/IconButton';
+// import IconButton from 'material-ui/IconButton';
 
 Array.prototype.insert = function (index, item) {
     this.splice(index, 0, item);
@@ -117,14 +117,14 @@ export default class NotificationBody extends React.Component{
                 onChange={(value)=>this.handleChange(value)}
                 >
                 <Tab icon={frbadge}
-                    value="a" style={{backgroundColor:"#61B4E4",height:60}}>
+                    value="a" style={{backgroundColor:'#61B4E4',height:60}}>
                     <div>
                         {this.state.FR.length===0?"Nothing here":this.state.FR.map((fr,i)=>{
                             return <NotificationFriendRequest key={i} data={fr} onDelete={(id)=>this.handleDelete(id)} onAccept={(id,user)=>this.handleFriendAccept(id,user)}/>
                         })}
                     </div>
                 </Tab>
-                <Tab  value="b" buttonStyle={{backgroundColor:"#61B4E4",height:60}} icon={anbadge}>
+                <Tab  value="b" buttonStyle={{backgroundColor:'#61B4E4',height:60}} icon={anbadge}>
                     <div>
                         {this.state.AN.length===0?"Nothing here":this.state.AN.map((AN,i)=>{
                             return <NotificationActivity key={i} data={AN} onDelete={(id)=>this.handleDelete(id)} onAccept={(activityid,userid)=>this.handleActivityAccept(activityid,userid)}/>

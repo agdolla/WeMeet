@@ -1,5 +1,5 @@
 import React from 'React';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 
 export default class Ad_signeduser extends React.Component{
     constructor(props){

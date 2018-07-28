@@ -1,19 +1,14 @@
 import React from 'react'
-import {hashHistory} from 'react-router';
-
+import {withRouter} from 'react-router-dom';
 //util function
 import {hideElement} from '../../utils';
-
 //request function
 import {login} from '../../utils';
-
-
-
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
 
-export default class LandingSignin extends React.Component{
+class LandingSignin extends React.Component{
     constructor(props){
         super(props);
         this.state={
@@ -46,7 +41,7 @@ export default class LandingSignin extends React.Component{
                         failedLogin:false,
                         submitted:false
                     });
-                    hashHistory.push("/activity");
+                    this.props.history.push("/activity");
                 }
                 else{
                     this.setState({
@@ -110,3 +105,5 @@ export default class LandingSignin extends React.Component{
         )
     }
 }
+
+export default withRouter(LandingSignin);

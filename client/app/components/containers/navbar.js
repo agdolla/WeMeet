@@ -1,6 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
-import {hashHistory} from 'react-router';
+import {Link, withRouter} from 'react-router-dom';
 
 //import credentials function
 import {socket} from '../../utils';
@@ -25,7 +24,7 @@ import FontIcon from 'material-ui/FontIcon';
 import Snackbar from 'material-ui/Snackbar';
 // var debug = require('react-debug');
 
-export default class Navbar extends React.Component{
+class Navbar extends React.Component{
 
   constructor(props){
     super(props);
@@ -42,7 +41,7 @@ export default class Navbar extends React.Component{
   handleLogOut(e){
     e.preventDefault();
     logout();
-    hashHistory.push('/');
+    this.props.history.push('/');
   }
 
   onNewPost = () => {
@@ -124,7 +123,7 @@ export default class Navbar extends React.Component{
       notification.onclick = (event)=>{
         event.preventDefault();
         event.target.close();
-        hashHistory.push(route);
+        this.props.history.push(route);
       }
     }
   }
@@ -150,9 +149,10 @@ export default class Navbar extends React.Component{
           message={"You have new messages"}
           action="check"
           autoHideDuration={4000}
-          onActionTouchTap={()=>{hashHistory.push('/chat')}}
+          onActionClick={()=>{this.props.history.push('/chat')}}
           onRequestClose={()=>{this.setState({snackBar:false})}}
         />
+
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
           <div className="container-fluid">
             <div className="navbar-header">
@@ -215,7 +215,7 @@ export default class Navbar extends React.Component{
                   <Link to='/post'>Trend <i className={"fa fa-circle "+hideElement(!this.state.post)} style={{fontSize:"12px",marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                 </li>
                 <li className={this.props.chat}>
-                  <Link to={"/chat"}>Chat <i className={"fa fa-circle "+hideElement(!this.state.chat||this.props.chat==="active")} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                  <Link to={'/chat'}>Chat <i className={"fa fa-circle "+hideElement(!this.state.chat||this.props.chat==="active")} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                 </li>
               </ul>
 
@@ -233,10 +233,10 @@ export default class Navbar extends React.Component{
                   </ListItem>
                 </div>
                   <li className={this.props.search}>
-                    <Link to={"search"}><i className="fa fa-search" aria-hidden="true"/></Link>
+                    <Link to="/search"><i className="fa fa-search" aria-hidden="true"/></Link>
                   </li>
                   <li className={this.props.notification}>
-                    <Link to={"notification"}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                    <Link to={"/notification"}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
                   </li>
               </ul>
             </div>
@@ -248,3 +248,4 @@ export default class Navbar extends React.Component{
     );
   }
 }
+export default withRouter(Navbar);

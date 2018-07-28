@@ -15,6 +15,7 @@ module.exports = {
     filename: "app.js",
     pathinfo: true
   },
+  mode: 'development',
   // Source Maps map locations in build/js/app.js back to individual application
   // modules. Chrome Developer Tools uses this so you can see your original code
   // in the development tools.
@@ -52,14 +53,14 @@ module.exports = {
     // are a recent addition to JavaScript that are not supported by all browsers.
     // In the future, this transformation step will not be necessary.
     // (The babel-loader will also compile your React templates to JavaScript.)
-    loaders: [
+    rules: [
       {
         // Only transform *.js files.
         test: /\.js$/,
         // Don't transform any of the modules you depend on -- just transform
         // *your* code.
         exclude: /(node_modules|bower_components)/,
-        loader: 'happypack/loader'
+        use: 'happypack/loader'
         // loader: 'babel-loader'
       }
     ]
@@ -69,10 +70,9 @@ module.exports = {
       react: path.resolve(__dirname, './node_modules/react'),
       React: path.resolve(__dirname, './node_modules/react')
     },
-    fallback: path.resolve(__dirname, './node_modules')
+    modules: [__dirname, './node_modules']
   },
   resolveLoader: {
-      fallback: path.resolve(__dirname, './node_modules')
+      modules: [__dirname, './node_modules']
   }
-
 };

@@ -23,10 +23,6 @@ import {updateCredentials} from './credentials'
 import {isUserLoggedIn} from './credentials'
 import {logout} from './credentials'
 
-//client side geolocation request function
-import {getlocation} from './geolocation'
-import {setlocation} from './geolocation'
-
 //client side notification request function
 import {deleteNotification} from './notification'
 import {acceptFriendRequest} from './notification'
@@ -98,11 +94,6 @@ export{
     //export chat function
     getMessages,
     postMessage,
-
-    //export geolocation function
-    getlocation,
-    setlocation,
-
 
     //export notification function
     deleteNotification,

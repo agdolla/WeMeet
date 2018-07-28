@@ -1,14 +1,5 @@
 import React from 'react';
-import {hashHistory} from 'react-router';
-
-
-
-
-
-import {getUserData} from '../../utils';
-
 import {Navbar} from '../containers';
-
 import {PostActivityFeed} from '../containers'
 
 

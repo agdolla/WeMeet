@@ -12,10 +12,6 @@ export default class ProfileMainFeed extends React.Component{
     }
 
     render(){
-        var location = (this.state.location === undefined ||
-            this.state.location === null ||
-            Object.keys(this.state.location).length === 0 ?
-            "Earth" : this.state.location.formatted_address);
             return(
                 <div className="panel panel-default main-panel">
                     <div className="panel-body">
@@ -29,10 +25,6 @@ export default class ProfileMainFeed extends React.Component{
                                 <div className="media" style={{textAlign:'center'}}>
                                     <h3>{this.state.fullname}</h3>
                                     {this.state.description}
-                                    <div className="location center-block">
-                                        <span className="glyphicon glyphicon-map-marker"></span>
-                                        {location}
-                                    </div>
                                 </div>
                             </div>
                         </div>

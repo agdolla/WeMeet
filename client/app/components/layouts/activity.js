@@ -1,12 +1,9 @@
 import React from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 
 //import container
 import { ActivityFeed } from '../containers';
 import { Navbar } from '../containers';
-//import request function
-import {getlocation,setlocation} from '../../utils';
-
 
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
@@ -35,12 +32,5 @@ export default class Activity extends React.Component{
                 </div>
             </div>
         );
-    }
-
-    componentDidMount(){
-        getlocation((res)=>{
-            setlocation(this.props.user._id,res.results[0]);
-        });
-
     }
 }

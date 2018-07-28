@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 //util function
 import {hideElement} from '../../utils';
 //request function

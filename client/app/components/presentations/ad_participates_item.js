@@ -1,5 +1,5 @@
 import React from 'React';
-import {hashHistory} from 'react-router';
+import {withRouter} from 'react-router-dom';
 
 //request function
 import {addFriend} from '../../utils';
@@ -10,7 +10,7 @@ import {socket,getToken} from '../../utils';
 // var debug = require('react-debug');
 
 
-export default class Ad_participates_item extends React.Component{
+class Ad_participates_item extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -20,7 +20,7 @@ export default class Ad_participates_item extends React.Component{
 
     handleRedirect(e){
         e.preventDefault();
-        hashHistory.push("profile/"+this.props.data._id);
+        this.props.history.push("profile/"+this.props.data._id);
     }
 
     checkFriendsOfUser(){
@@ -71,3 +71,5 @@ export default class Ad_participates_item extends React.Component{
         )
     }
 }
+
+export default withRouter(Ad_participates_item);

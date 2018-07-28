@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
 
 
@@ -131,12 +131,6 @@ export default class PostFeedItem extends React.Component{
                         <div className="media-body">
                             <h4 className="media-heading">{contents.author.fullname} </h4>
                             <span style={{"fontSize":"12px"}}>{time}</span>
-                            <div className="pull-right">
-                                <span className="glyphicon glyphicon-map-marker"></span>
-                                {Object.keys(contents.location).length>0 ?
-                                (contents.location.address_components[3].short_name+","+
-                                contents.location.address_components[5].short_name) : "Earth"}
-                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,9 +1,6 @@
 //xmlhttprequest function
 import {sendXHR} from './'
 
-//geolocation function
-import {getlocation} from './'
-
 export function likePost(feedItemId, user, cb){
     sendXHR('PUT', '/postItem/'+feedItemId+'/likelist/'+user,
     undefined, (xhr)=>{
@@ -28,15 +25,12 @@ export function postComment(feedItemId, author, comment, cb){
 }
 
 export function postStatus(user, text, img, cb){
-    getlocation((res)=>{
-        sendXHR('POST', '/postItem', {
-            userId:user,
-            text:text,
-            img: img,
-            location:res!=="error"&&res.status==="OK" && res.results.length>0 ? res.results[0] : {}
-        }, (xhr)=>{
-            cb(JSON.parse(xhr.responseText));
-        });
+    sendXHR('POST', '/postItem', {
+        userId:user,
+        text:text,
+        img: img
+    }, (xhr)=>{
+        cb(JSON.parse(xhr.responseText));
     });
 }
 

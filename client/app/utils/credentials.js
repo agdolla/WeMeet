@@ -1,5 +1,4 @@
 import io from 'socket.io-client';
-import {hashHistory } from 'react-router';
 // var debug = require('react-debug');
 export var socket = io();
 /**
@@ -65,7 +64,6 @@ export function isUserLoggedIn() {
    user=null;
    localStorage.removeItem('user');
    localStorage.removeItem('token');
-   hashHistory.push('/');
   }
   var xhr = new XMLHttpRequest();
   xhr.open("GET", '/logout');

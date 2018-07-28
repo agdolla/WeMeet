@@ -1,5 +1,5 @@
 import React from 'React';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 
 import {hideElement} from '../../utils'
 // var debug = require('react-debug');

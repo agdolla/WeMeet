@@ -6,7 +6,7 @@ import {getUserData, changeEmail, ChangeAvatar} from '../../utils';
 
 
 
-import AvatarCropper from "react-avatar-cropper";
+// import AvatarCropper from "react-avatar-cropper";
 import TextField from 'material-ui/TextField';
 
 var emailAlert = null;
@@ -152,15 +152,15 @@ export default class SettingSystemInfo extends React.Component{
     render(){
         return(
             <div className="setting-system-info">
-                {this.state.cropperOpen &&
-                    <AvatarCropper
-                    onRequestHide={(e)=>this.handleRequestHide(e)}
-                    cropperOpen={this.state.cropperOpen}
-                    onCrop={(e)=>this.handleCrop(e)}
-                    image={this.state.img}
-                    width={512}
-                    height={512}
-                    />
+                {this.state.cropperOpen 
+                    // <AvatarCropper
+                    // onRequestHide={(e)=>this.handleRequestHide(e)}
+                    // cropperOpen={this.state.cropperOpen}
+                    // onCrop={(e)=>this.handleCrop(e)}
+                    // image={this.state.img}
+                    // width={512}
+                    // height={512}
+                    // />
                 }
                 <div className="col-md-3 system-settings">
                     <div className="list-group">

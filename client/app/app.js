@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { IndexRoute, Router, Route, hashHistory } from 'react-router';
+import { HashRouter, Route, Switch, withRouter} from 'react-router-dom';
 
 
 import {Post} from './components/layouts';
@@ -18,17 +18,17 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './utils/credentials';
 
 
-// var debug = require('react-debug');
+var debug = require('react-debug');
 // var swal = require('sweetalert');
 var injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
 
-import Perf from 'react-addons-perf';
-window.Perf = Perf;
+// import Perf from 'react-addons-perf';
+// window.Perf = Perf;
 
 class ActivityPage extends React.Component{
     render(){
-        if(this.props.location.query.data===undefined){
+        if(this.props.location.search===""){
             if(isUserLoggedIn()){
                 var user = getUserData();
                 socket.emit('user',user._id);
@@ -38,13 +38,14 @@ class ActivityPage extends React.Component{
                 return(<Activity user={user}/>);
             }
             else{
-                hashHistory.push('/');
+                this.props.history.push('/');
                 location.reload();
             }
         }
         //facebook login
         else{
-            var data = JSON.parse(this.props.location.query.data);
+            const rawData = new URLSearchParams(this.props.location.search).get('data');
+            var data = JSON.parse(rawData);
             updateCredentials(data.user, data.token);
             socket.emit('user',data.user._id);
             window.onload = ()=>{
@@ -54,6 +55,8 @@ class ActivityPage extends React.Component{
         }
     }
 }
+withRouter(ActivityPage);
+
 class ThrendPage extends React.Component{
     render(){
         if(isUserLoggedIn()){
@@ -64,19 +67,30 @@ class ThrendPage extends React.Component{
             return (<Post user={user}/>);
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(ThrendPage);
 
 class App extends React.Component {
     render() {
         return (
             <MuiThemeProvider>
-                <div>
-                    {this.props.children}
-                </div>
+                <Switch>
+                  <Route exact path="/" component={LandingPage} />
+                  <Route path="/post" component={ThrendPage} />
+                  <Route path="/activity/:data" component={ActivityPage} />
+                  <Route path="/settings" component={SettingsPage} />
+                  <Route path="/chat" component={ChatPage} />
+                  <Route path="/notification" component={NotificationPage}/>
+                  <Route path="/profile/:user" component={ProfilePage} />
+                  <Route path="/activity_detail/:id" component={ActivityDetailPage}/>
+                  <Route path="/search" component={SearchPage}/>
+                  <Route path="/postactivity" component={PostActivityPage} />
+                  <Route path='*' component={ActivityPage} />
+                </Switch>
             </MuiThemeProvider>
         );
     }
@@ -94,11 +108,12 @@ class SettingsPage extends React.Component {
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(SettingsPage);
 
 class ChatPage extends React.Component{
     render() {
@@ -112,11 +127,12 @@ class ChatPage extends React.Component{
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(ChatPage);
 
 class NotificationPage extends React.Component{
     render(){
@@ -126,15 +142,16 @@ class NotificationPage extends React.Component{
                 socket.emit('user',user._id);
             }
             return(
-                <Notification user={user} id={this.props.params.id}/>
+                <Notification user={user} />
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(NotificationPage);
 
 class ActivityDetailPage extends React.Component{
     render(){
@@ -144,15 +161,16 @@ class ActivityDetailPage extends React.Component{
                 socket.emit('user',user._id);
             }
             return(
-                <Activity_detail user={user} id={this.props.params.id}/>
+                <Activity_detail user={user} id={this.props.match.params.id}/>
             )
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(ActivityDetailPage);
 
 class SearchPage extends React.Component{
     render(){
@@ -166,11 +184,12 @@ class SearchPage extends React.Component{
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(SearchPage);
 
 class ProfilePage extends React.Component{
     render(){
@@ -180,15 +199,16 @@ class ProfilePage extends React.Component{
                 socket.emit('user',userId);
             }
             return(
-                <Profile user={this.props.params.user} currUser={userId}/>
+                <Profile user={this.props.match.params.user} currUser={userId}/>
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(ProfilePage);
 
 class PostActivityPage extends React.Component {
     render() {
@@ -202,11 +222,12 @@ class PostActivityPage extends React.Component {
             );
         }
         else{
-            hashHistory.push('/');
+            this.props.history.push('/');
             location.reload();
         }
     }
 }
+withRouter(PostActivityPage);
 
 class LandingPage extends React.Component {
     render(){
@@ -215,26 +236,11 @@ class LandingPage extends React.Component {
         )
     }
 }
+withRouter(LandingPage);
 
 //render main
 ReactDOM.render((
-    <Router history={hashHistory}>
-        <Route path="/" component={App}>
-            <IndexRoute component={LandingPage} />
-            <Route path="post" component={ThrendPage} />
-            <Route path="activity/:data" component={ActivityPage} />
-            <Route path="settings" component={SettingsPage} />
-            <Route path="chat" component={ChatPage} />
-            <Route path="notification" component={NotificationPage}>
-                <Route path="/notification/:id" component={NotificationPage}/>
-            </Route>
-            <Route path="profile" component={ProfilePage}>
-                <Route path="/profile/:user" component={ProfilePage} />
-            </Route>
-            <Route path="activity_detail/:id" component={ActivityDetailPage}/>
-            <Route path="search" component={SearchPage}/>
-            <Route path="postactivity" component={PostActivityPage} />
-            <Route path='*' component={ActivityPage} />
-        </Route>
-    </Router>
+    <HashRouter>
+      <Route path="/" component={App} />
+    </HashRouter>
 ),document.getElementById('container'));

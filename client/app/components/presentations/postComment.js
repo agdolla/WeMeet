@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 var moment = require('moment');
 
 export default class PostComment extends React.Component{

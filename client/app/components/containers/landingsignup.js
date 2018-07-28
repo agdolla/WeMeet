@@ -1,5 +1,5 @@
 import React from 'react';
-import {hashHistory} from 'react-router';
+import {withRouter} from 'react-router-dom';
 
 //util function
 import {hideElement} from '../../utils';
@@ -13,7 +13,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 var zxcvbn = require('zxcvbn');
 
 
-export default class LandingSignup extends React.Component{
+class LandingSignup extends React.Component{
     constructor(props){
         super(props);
         this.state={
@@ -55,7 +55,7 @@ export default class LandingSignup extends React.Component{
                                 submitted:false,
                                 passwordError:false
                             });
-                            hashHistory.push('/activity');
+                            this.props.history.push('/activity');
                         }
                         else{
                             this.setState({
@@ -235,8 +235,6 @@ export default class LandingSignup extends React.Component{
             </div>
         )
     }
-
-
-
-
 }
+
+export default withRouter(LandingSignup)

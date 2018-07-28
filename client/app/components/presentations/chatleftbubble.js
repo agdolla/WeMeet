@@ -1,6 +1,6 @@
 import React from 'react';
 var moment = require('moment');
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 
 export default class ChatLeftBubble extends React.Component {
 

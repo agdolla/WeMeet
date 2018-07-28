@@ -7,13 +7,14 @@ var http = require('http');
 // var https = require('https');
 var bodyParser = require('body-parser');
 var Promise = require("bluebird");
-var fs = Promise.promisifyAll(require('fs'));
+// var fs = Promise.promisifyAll(require('fs'));
 var uuidV1 = require('uuid/v1');
 var Jimp = require("jimp");
+var dbName = 'wemeet'
 var MongoDB = Promise.promisifyAll(require('mongodb'));
 var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
-var url = 'mongodb://localhost:27017/Upao';
+var url = 'mongodb://localhost:27017/'+dbName;
 var bcrypt = Promise.promisifyAll(require('bcryptjs'));
 var jwt = require('jsonwebtoken');
 var mcache = require('memory-cache');
@@ -60,7 +61,8 @@ function isLoggedIn(req, res, next) {
     res.status(401).end();
 }
 
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, database) {
+  var db = database.db(dbName);
     if(err){
         console.log("mongodb err: "+err)
     }
@@ -171,7 +173,11 @@ MongoClient.connect(url, function(err, db) {
                     if(success){
                         jwt.sign({
                             id:user._id
-                        },secretKey,{expiresIn:'1 day'},function(token){
+                        },secretKey,{expiresIn:'1 day'},function(err,token){
+                            if(err){
+                                console.log(err);
+                                return done(err,false);
+                            }
                             var newUserObj = {}
                             newUserObj._id = user._id;
                             newUserObj.avatar = user.avatar;
@@ -876,7 +882,7 @@ MongoClient.connect(url, function(err, db) {
     }
 
     function validateEmail(email) {
-        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     }
 

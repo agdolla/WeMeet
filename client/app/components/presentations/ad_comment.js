@@ -1,5 +1,5 @@
 import React from 'React';
-import {Link} from 'react-router';
+import {Link} from 'react-router-dom';
 var moment = require('moment');
 
 export default class Ad_comment extends React.Component{

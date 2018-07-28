@@ -1,6 +1,8 @@
-var ObjectID = require('mongodb').ObjectID;
+const databaseName = "wemeet";
+const ObjectID = require('mongodb').ObjectID;
+const mongoClient = require('mongodb').MongoClient;
+const url = 'mongodb://localhost:27017/' + databaseName;
 
-var databaseName = "Upao";
 // Put the initial mock objects here.
 var initialData = {
   "userSocketIds":{
@@ -384,17 +386,16 @@ function resetDatabase(db, cb) {
 }
 
 function reset(cb){
-  var MongoClient = require('mongodb').MongoClient;
-  var url = 'mongodb://localhost:27017/' + databaseName;
-  MongoClient.connect(url, function(err, db) {
+  mongoClient.connect(url, function(err, database) {
     if (err) {
       throw new Error("Could not connect to database: " + err);
     } else {
       console.log("Resetting database...");
+      var db = database.db(databaseName)
       resetDatabase(db, function() {
         console.log("Database reset!");
         // Close the database connection so NodeJS closes.
-        db.close();
+        database.close();
         cb();
       });
     }
