@@ -18,7 +18,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './utils/credentials';
 
 
-var debug = require('react-debug');
+// var debug = require('react-debug');
 // var swal = require('sweetalert');
 var injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
@@ -31,7 +31,6 @@ class ActivityPage extends React.Component{
         if(this.props.location.search===""){
             if(isUserLoggedIn()){
                 var user = getUserData();
-                socket.emit('user',user._id);
                 window.onload = ()=>{
                     socket.emit('user',user._id);
                 }
@@ -47,7 +46,6 @@ class ActivityPage extends React.Component{
             const rawData = new URLSearchParams(this.props.location.search).get('data');
             var data = JSON.parse(rawData);
             updateCredentials(data.user, data.token);
-            socket.emit('user',data.user._id);
             window.onload = ()=>{
                 socket.emit('user',data.user._id);
             }

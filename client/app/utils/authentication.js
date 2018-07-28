@@ -1,8 +1,10 @@
 //credentials function
 import {updateCredentials} from './';
-
+import {socket} from './';
 //xmlhttprequest function
-import {sendXHR} from './'
+import {sendXHR} from './';
+
+// let debug = require('react-debug');
 
 export function signup(email, username, password, cb) {
     sendXHR('POST', '/signup', { fullname: username,
@@ -22,6 +24,8 @@ export function login(email, password, cb) {
         var authData = JSON.parse(xhr.responseText);
         // Update credentials and indicate success via the callback!
         updateCredentials(authData.user, authData.token);
+        //let server know this user is online
+        socket.emit('user',authData.user._id);
         cb(true);
     }, () => {
         // Error callback: Login failed.

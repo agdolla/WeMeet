@@ -2,11 +2,6 @@
 import {sendXHR} from './'
 
 // var debug = require('react-debug');
-
-
-
-
-
 export function getSessionId(userid,targetid,cb){
     sendXHR('GET','/getsession/'+userid+'/'+targetid, undefined ,(xhr) => {
         cb(JSON.parse(xhr.responseText));

@@ -212,8 +212,8 @@ class LandingSignup extends React.Component{
                         </div>
                         <div className="col-md-7 col-md-offset-2">
                             <TextField
-                            hintText="Repeat password"
-                            floatingLabelText="Repeat password"
+                            hintText="Confirm password"
+                            floatingLabelText="Confirm password"
                             type="password"
                             style={{width:'100%'}}
                             onChange={(e)=>this.handleChange("signUpPass2",e)}

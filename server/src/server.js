@@ -35,6 +35,7 @@ f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571b
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 app.use(compression());
+
 var cache = (duration) => {
     return (req, res, next) => {
         var key = '__express__' + req.originalUrl || req.url
@@ -48,7 +49,7 @@ var cache = (duration) => {
                 mcache.put(key, body, duration * 1000);
                 res.sendResponse(body);
             }
-            next()
+            next();
         }
     }
 }
@@ -1801,29 +1802,28 @@ MongoClient.connect(url, function(err, database) {
     // var httpsServer = https.createServer({key: privateKey, cert: certificate, requestCert: true, rejectUnauthorized: false},
     //                     app);
     var server = http.createServer(app);
-
+    var count = 0;
     var io = require('socket.io')(server);
     io.on('connection', function(socket){
-
-        socket.on('disconnect', function () {
-            db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
-                if(socketData!==null){
-                    db.collection('users').updateOneAsync({_id:socketData.userId},{
-                        $set:{
-                            online:false
-                        }
-                    })
-                    .then(()=>{
-                        var data = {
-                            user: socketData.userId,
-                            online: false
-                        }
-                        socket.broadcast.emit('online',data);
-                    })
-                }
-            });
-            db.collection('userSocketIds').remove({socketId:socket.id});
-        });
+        // socket.on('disconnect', function () {
+        //     db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
+        //         if(socketData!==null){
+        //             db.collection('users').updateOneAsync({_id:socketData.userId},{
+        //                 $set:{
+        //                     online:false
+        //                 }
+        //             })
+        //             .then(()=>{
+        //                 var data = {
+        //                     user: socketData.userId,
+        //                     online: false
+        //                 }
+        //                 socket.broadcast.emit('online',data);
+        //             })
+        //         }
+        //     });
+        //     db.collection('userSocketIds').remove({socketId:socket.id});
+        // });
 
         socket.on('logout',function(user){
             db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
@@ -1842,7 +1842,6 @@ MongoClient.connect(url, function(err, database) {
         });
 
         socket.on('user',function(user){
-
             db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
                 $set:{
                     online:true
@@ -1860,8 +1859,6 @@ MongoClient.connect(url, function(err, database) {
                     socketId:socket.id
                 }
             },{upsert: true});
-
-
         });
 
         socket.on('chat',function(data){
