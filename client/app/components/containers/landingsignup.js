@@ -149,7 +149,7 @@ class LandingSignup extends React.Component{
 
     render(){
         return(
-            <div className="col-md-6">
+            <div className="col-md-6 signup">
                 <div className={hideElement(!this.state.failedSignUp) + " alert alert-danger"} role="alert"><strong>
                     Invalid account signup.</strong><br/>
                     1.It is possible that you already have an account with that particular email address<br/>

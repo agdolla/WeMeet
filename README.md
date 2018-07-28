@@ -11,3 +11,4 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 * Writing some tests
 * Update to latest mongodb driver for nodejs
 * All code should be reviewed and revised
+* Notification is not working properly when there is new notification

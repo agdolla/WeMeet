@@ -24,7 +24,9 @@ export default class Activity extends React.Component{
                         </FloatingActionButton>
                     </Link>
                     <div className="row">
-                        <div className="col-md-7 col-md-offset-2 col-sm-8 col-sm-offset-2 col-xs-12">
+                        <div className="col-lg-8 col-lg-offset-2
+                                        col-md-8 col-md-offset-2
+                                        col-sm-8 col-sm-offset-2 col-xs-12">
                             <h4><span className="glyphicon glyphicon-flash" style={{'marginBottom':'10px',marginRight:'10px'}}></span> Recently Activities</h4>
                             <ActivityFeed socket={this.props.socket}/>
                         </div>

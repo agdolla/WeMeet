@@ -1,11 +1,11 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-
 import {ActivityFeedItem} from '../presentations';
-
 import {getAllActivities} from '../../utils';
-// var debug = require('react-debug');
 import RaisedButton from 'material-ui/RaisedButton';
+// var debug = require('react-debug');
+
+
 export default class ActivityFeed extends React.Component{
 
     constructor(props){

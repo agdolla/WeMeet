@@ -38,6 +38,12 @@ class Landing extends React.Component {
                         <LandingSignup />
                     </div>
                 </div>
+                <div className="row footer">
+                    <div className="col-md-8 col-md-offset-2">
+                        <h3 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="50px"/></span></h3>
+                        <h5>Copyright (c) 2016-2018 Copyright WeMeet. All Rights Reserved.</h5>
+                    </div>
+                </div>
             </div>
         );
       }

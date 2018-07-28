@@ -233,7 +233,7 @@ class LandingPage extends React.Component {
     render(){
         return(
             <Landing/ >
-        )
+        );
     }
 }
 withRouter(LandingPage);

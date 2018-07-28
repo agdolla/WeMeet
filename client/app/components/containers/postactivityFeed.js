@@ -1,6 +1,6 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
-import {getUserData, createActivity, sendInviteActivityRequest} from '../../utils';
+import {createActivity, sendInviteActivityRequest} from '../../utils';
 import {PostActivityFriendItem} from './';
 import {hideElement} from '../../utils';
 import {socket,getToken} from '../../utils';
@@ -21,7 +21,6 @@ class PostActivityFeed extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            userData: {},
             type:1,
             title: "",
             img:null,
@@ -38,20 +37,6 @@ class PostActivityFeed extends React.Component {
             reset:false
         }
     }
-
-    getData(){
-        getUserData(this.props.user,(userData)=>{
-            this.setState({
-                userData: userData
-            })
-        });
-    }
-
-
-    componentDidMount(){
-        this.getData();
-    }
-
 
     handleFile(e){
         e.preventDefault();
@@ -397,7 +382,7 @@ class PostActivityFeed extends React.Component {
                                                             "padding":'0px'
                                                         }}>
                                                         <ul className="media-list">
-                                                            {this.state.userData.friends === undefined ? null : this.state.userData.friends.map((friend,i)=>{
+                                                            {this.props.user.friends === undefined ? null : this.props.user.friends.map((friend,i)=>{
                                                                 return <PostActivityFriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
                                                                 })}
                                                             </ul>

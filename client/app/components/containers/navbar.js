@@ -133,8 +133,8 @@ class Navbar extends React.Component{
     <IconMenu
       iconButtonElement={<IconButton><HardwareKeyboardArrowDown/></IconButton>}
       anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
-      targetOrigin={{horizontal: 'right', vertical: 'bottom'}}
-    >
+      targetOrigin={{horizontal: 'right', vertical: 'bottom'}}>
+
       <Link style={{textDecoration:'none'}} to={"/profile/"+this.props.user._id}><MenuItem primaryText="Profile" rightIcon={<Person/>}/></Link>
       <Link style={{textDecoration:'none'}} to="/settings"><MenuItem primaryText="Settings" rightIcon={<Settings/>}/></Link>
       <Link style={{textDecoration:'none'}} to="/postactivity"><MenuItem primaryText="Create Activity" rightIcon={<Create/>}/></Link>
