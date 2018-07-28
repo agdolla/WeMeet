@@ -32,7 +32,7 @@ module.exports = {
           presets: ['es2015', 'react'],
           plugins: ["transform-class-properties"]
         }
-      }
+    }
     ]
     }),
     // new webpack.DefinePlugin({
@@ -62,7 +62,11 @@ module.exports = {
         exclude: /(node_modules|bower_components)/,
         use: 'happypack/loader'
         // loader: 'babel-loader'
-      }
+    },
+    {
+        test: /\.css$/,
+        use: [ 'style-loader', 'css-loader' ]
+    }
     ]
   },
   resolve: {

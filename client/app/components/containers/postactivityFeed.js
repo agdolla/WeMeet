@@ -4,12 +4,15 @@ import {getUserData, createActivity, sendInviteActivityRequest} from '../../util
 import {PostActivityFriendItem} from './';
 import {hideElement} from '../../utils';
 import {socket,getToken} from '../../utils';
-// import AvatarCropper from "react-avatar-cropper";
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import TimePicker from 'material-ui/TimePicker';
 import TextField from 'material-ui/TextField';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
+import Cropper from 'react-cropper';
+import 'node_modules/cropperjs/dist/cropper.css';
 // var debug = require('react-debug');
 var swal = require('sweetalert');
 
@@ -89,18 +92,17 @@ class PostActivityFeed extends React.Component {
         })
     }
 
-    handleRequestHide(e){
-        e.preventDefault();
+    handleRequestHide(){
         this.setState({
             cropperOpen: false,
             img:null
         })
     }
 
-    handleCrop(dataURI) {
+    handleCrop(){
         this.setState({
             cropperOpen: false,
-            img: dataURI
+            img: this.refs.cropper.getCroppedCanvas().toDataURL()
         });
     }
 
@@ -238,17 +240,35 @@ class PostActivityFeed extends React.Component {
 
 
     render() {
+        const actions = [
+          <FlatButton
+            label="Cancel"
+            primary={true}
+            onClick={()=>this.handleRequestHide()}
+          />,
+          <FlatButton
+            label="Submit"
+            primary={true}
+            keyboardFocused={true}
+            onClick={()=>this.handleCrop()}
+          />
+        ];
         return (
             <div className="container">
-                {this.state.cropperOpen
-                    // <AvatarCropper
-                    // onRequestHide={(e)=>this.handleRequestHide(e)}
-                    // cropperOpen={this.state.cropperOpen}
-                    // onCrop={(e)=>this.handleCrop(e)}
-                    // image={this.state.img}
-                    // width={1200}
-                    // height={500}
-                    // />
+                {this.state.cropperOpen &&
+                    <Dialog
+                      title="Adjust your header image"
+                      actions={actions}
+                      modal={false}
+                      open={this.state.cropperOpen}
+                      onRequestClose={()=>this.handleRequestHide()}
+                    >
+                    <Cropper
+                      ref='cropper'
+                      src={this.state.img}
+                      style={{height: 400, width: '100%'}}
+                      aspectRatio={18/9}/>
+                    </Dialog>
                 }
 
                 <div className="row">

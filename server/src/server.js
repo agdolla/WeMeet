@@ -440,10 +440,10 @@ MongoClient.connect(url, function(err, database) {
             .then(function(){
                 resolve(post);
                 img.forEach(function(element, index) {
-                    var buffer = new Buffer(element.split(",")[1], 'base64');
+                    var buffer = new Buffer.from(element.split(",")[1], 'base64');
                     Jimp.read(buffer)
                     .then(image =>{
-                        image.quality(30)
+                        image.quality(40)
                         .write("../client/build/"+imgPath[index]);
                     })
 
@@ -933,7 +933,7 @@ MongoClient.connect(url, function(err, database) {
             delete result.value.activity;
             delete result.value.sessions;
             res.send(result.value);
-            var buffer = new Buffer(body.img.split(',')[1], 'base64');
+            let buffer = new Buffer.from(body.img.split(',')[1], 'base64');
             Jimp.read(buffer)
             .then(image => {
                 image.quality(10)
@@ -981,7 +981,7 @@ MongoClient.connect(url, function(err, database) {
             var name = uuidV1();
             var img = data.img;
             data.img = "img/activity/"+name+'.jpg';
-            var buffer = new Buffer(img.split(",")[1], 'base64');
+            var buffer = new Buffer.from(img.split(",")[1], 'base64');
             Jimp.read(buffer)
             .then(image => {
                 image.quality(30)

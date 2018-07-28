@@ -1,19 +1,14 @@
 import React from 'react'
-
-
-
 import {getUserData, changeEmail, ChangeAvatar} from '../../utils';
-
-
-
-// import AvatarCropper from "react-avatar-cropper";
 import TextField from 'material-ui/TextField';
-
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
+import Cropper from 'react-cropper';
+import 'node_modules/cropperjs/dist/cropper.css';
+import {hideElement} from '../../utils';
+var swal = require('sweetalert');
 var emailAlert = null;
 
-
-
-import {hideElement} from '../../utils';
 
 export default class SettingSystemInfo extends React.Component{
     constructor(props){
@@ -39,8 +34,6 @@ export default class SettingSystemInfo extends React.Component{
     componentDidMount(){
         this.getData();
     }
-
-
 
     handleOldEmail(e){
         e.preventDefault();
@@ -119,18 +112,17 @@ export default class SettingSystemInfo extends React.Component{
         e.target.value = null;
     }
 
-    handleRequestHide(e){
-        e.preventDefault();
+    handleRequestHide(){
         this.setState({
             cropperOpen: false,
             img: null
         })
     }
 
-    handleCrop(dataURI) {
+    handleCrop(){
         this.setState({
             cropperOpen: false,
-            img: dataURI
+            img: this.refs.cropper.getCroppedCanvas().toDataURL()
         });
     }
 
@@ -145,22 +137,48 @@ export default class SettingSystemInfo extends React.Component{
                 user.friends = userData.friends;
                 user.fullname = userData.fullname;
                 localStorage.setItem('user', JSON.stringify(user));
+                swal({
+                  title: "Success!",
+                  icon: "success",
+                  button: "OK",
+                })
+                .then(()=>{
+                    this.handleRequestHide();
+                    location.reload();
+                });
             });
         }
     }
-
     render(){
+        const actions = [
+          <FlatButton
+            label="Cancel"
+            primary={true}
+            onClick={()=>this.handleRequestHide()}
+          />,
+          <FlatButton
+            label="Submit"
+            primary={true}
+            keyboardFocused={true}
+            onClick={()=>this.handleCrop()}
+          />
+        ];
         return(
             <div className="setting-system-info">
-                {this.state.cropperOpen 
-                    // <AvatarCropper
-                    // onRequestHide={(e)=>this.handleRequestHide(e)}
-                    // cropperOpen={this.state.cropperOpen}
-                    // onCrop={(e)=>this.handleCrop(e)}
-                    // image={this.state.img}
-                    // width={512}
-                    // height={512}
-                    // />
+                {this.state.cropperOpen &&
+                    <Dialog
+                      title="Adjust your avatar image "
+                      actions={actions}
+                      modal={false}
+                      open={this.state.cropperOpen}
+                      onRequestClose={()=>this.handleRequestHide()}
+                    >
+                    <Cropper
+                      ref='cropper'
+                      src={this.state.img}
+                      style={{height: 400, width: '100%'}}
+                      aspectRatio={1/1}/>
+                    </Dialog>
                 }
                 <div className="col-md-3 system-settings">
                     <div className="list-group">
@@ -244,7 +262,7 @@ export default class SettingSystemInfo extends React.Component{
                                         <div className="btn-group" role="group">
                                             <label htmlFor="pic">
                                                 <a>
-                                                    <div className="thumbnail" style={{border: "1px dashed black", width: "100px", height: "110px" }}>
+                                                    <div className="thumbnail" style={{border: "1px dashed black", width: "100px", height: "120px" }}>
                                                         <i className="fa fa-camera" aria-hidden="true"></i>
                                                         <img src={this.state.img} className={hideElement(this.state.cropperOpen)}
                                                         width="100px" height="100px"/>
