@@ -1,48 +1,46 @@
 import React from 'react'
-import {getUserData, changeEmail, ChangeAvatar} from '../../utils';
+import {changeEmail, ChangeAvatar} from '../../utils';
 import TextField from 'material-ui/TextField';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
+import Snackbar from 'material-ui/Snackbar';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
 import {hideElement} from '../../utils';
 var swal = require('sweetalert');
-var emailAlert = null;
 
 
 export default class SettingSystemInfo extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            userData:{},
+            userData: props.userData,
             oldEmail:"",
             newEmail:"",
             img: null,
-            cropperOpen: false,
-            fileTooLarge:false,
-            fileWrongType:false
+            cropperOpen:false,
+            snackBarColor:"",
+            snackBarMsg:"",
+            open: false
         }
     }
-    getData(){
-        getUserData(this.props.user,(userData)=>{
-            this.setState({
-                userData:userData,
-            });
-        });
-    }
 
-    componentDidMount(){
-        this.getData();
+    componentWillReceiveProps(nextProps) {
+        this.setState({
+            userData: nextProps.userData
+        });
     }
 
     handleOldEmail(e){
         e.preventDefault();
         this.setState({oldEmail: e.target.value});
     }
+
     handleNewEmail(e){
         e.preventDefault();
         this.setState({newEmail: e.target.value});
     }
+
     handleEmailChange(e){
         e.preventDefault();
         if(this.state.oldEmail!=="" && this.state.newEmail!==""){
@@ -51,32 +49,31 @@ export default class SettingSystemInfo extends React.Component{
                 oldEmail: this.state.oldEmail,
                 newEmail: this.state.newEmail
             },(error)=>{
+                var msg = "";
                 if(error){
-                    emailAlert = (<div className="alert alert-warning" role="alert">
-                    <strong>Old email is wrong or new email has wrong format</strong>
-                    </div>);
+                    msg = "Old email is wrong or new email has wrong format";
                 }
                 else{
-                    emailAlert = (<div className="alert alert-success" role="alert">
-                    <strong>Change email succeed!</strong>
-                    </div>);
+                    msg = "Successfully Changed  Email";
                 }
                 this.setState({
-                    oldEmail:"",
-                    newEmail:""
-                })
+                    oldEmail: "",
+                    newEmail: "",
+                    snackBarColor: "#d32f2f",
+                    snackBarMsg: msg,
+                    open: true
+                });
             });
         }
         else{
-            emailAlert = (<div className="alert alert-warning" role="alert">
-            <strong>Please fill in blanks</strong>
-            </div>);
+            this.setState({
+                oldEmail: "",
+                newEmail: "",
+                snackBarColor: "#d32f2f",
+                snackBarMsg: "Please fill in blanks",
+                open: true
+            });
         }
-
-        this.setState({
-            oldEmail:"",
-            newEmail:""
-        })
     }
 
     handleFile(e){
@@ -86,25 +83,21 @@ export default class SettingSystemInfo extends React.Component{
         var reader = new FileReader();
         var file = e.target.files[0];
         // Called once the browser finishes loading the image.
-        if(file.size > 1100000){
-            return this.setState({
-                fileTooLarge:true
-            })
-        }
-        else if(!file.type.match('image.*')){
-            return this.setState({
-                fileWrongType:true
-            })
+        if(file.size > 1100000 || !file.type.match('image.*')){
+            let msg = file.size > 1100000 ? "File should be less than 1.1 MB" : "File is not an image file";
+            this.setState({
+                snackBarColor: "#d32f2f",
+                snackBarMsg: msg,
+                open: true
+            });
+            return;
         }
         reader.onload = (upload) => {
             this.setState({
                 img: upload.target.result,
-                cropperOpen:true,
-                fileTooLarge:false,
-                fileWrongType:false
+                cropperOpen:true
             });
         };
-
         reader.readAsDataURL(file);
     }
 
@@ -116,7 +109,7 @@ export default class SettingSystemInfo extends React.Component{
         this.setState({
             cropperOpen: false,
             img: null
-        })
+        });
     }
 
     handleCrop(){
@@ -124,6 +117,10 @@ export default class SettingSystemInfo extends React.Component{
             cropperOpen: false,
             img: this.refs.cropper.getCroppedCanvas().toDataURL()
         });
+    }
+
+    handleSnackBarClose = () =>{
+        this.setState({open:false});
     }
 
     handleAvatarChange(e){
@@ -180,6 +177,16 @@ export default class SettingSystemInfo extends React.Component{
                       aspectRatio={1/1}/>
                     </Dialog>
                 }
+                <Snackbar
+                    bodyStyle = {{
+                        backgroundColor:this.state.snackBarColor,
+                        textAlign:'center'
+                    }}
+                    open = {this.state.open}
+                    autoHideDuration = {3000}
+                    message = {this.state.snackBarMsg}
+                    onRequestClose={this.handleSnackBarClose}
+                />
                 <div className="col-md-3 system-settings">
                     <div className="list-group">
                         <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#reset-password" aria-expanded="true" aria-controls="reset-password">
@@ -188,30 +195,30 @@ export default class SettingSystemInfo extends React.Component{
                         <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div className="panel-body">
                                 <TextField
-                                hintText="Old password"
-                                floatingLabelText="Old password"
-                                style={{width:'100%'}}
-                                type='password'
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                    hintText="Old password"
+                                    floatingLabelText="Old password"
+                                    style={{width:'100%'}}
+                                    type='password'
+                                    floatingLabelStyle={{color:'#607D8B'}}
+                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
                                 />
 
                                 <TextField
-                                hintText="New password"
-                                floatingLabelText="New password"
-                                style={{width:'100%'}}
-                                type='password'
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                    hintText="New password"
+                                    floatingLabelText="New password"
+                                    style={{width:'100%'}}
+                                    type='password'
+                                    floatingLabelStyle={{color:'#607D8B'}}
+                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
                                 />
 
                                 <TextField
-                                hintText="Repeat password"
-                                floatingLabelText="Repeat password"
-                                style={{width:'100%'}}
-                                type='password'
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                    hintText="Repeat password"
+                                    floatingLabelText="Repeat password"
+                                    style={{width:'100%'}}
+                                    type='password'
+                                    floatingLabelStyle={{color:'#607D8B'}}
+                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
                                 />
                                 <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
                             </div>
@@ -221,25 +228,24 @@ export default class SettingSystemInfo extends React.Component{
                         </a>
                         <div id="reset-email" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div className="panel-body">
-                                {emailAlert}
                                 <TextField
-                                hintText="Old Email"
-                                floatingLabelText="Old Email"
-                                style={{width:'100%'}}
-                                value={this.state.oldEmail}
-                                onChange={(e)=>this.handleOldEmail(e)}
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                    hintText="Old Email"
+                                    floatingLabelText="Old Email"
+                                    style={{width:'100%'}}
+                                    value={this.state.oldEmail}
+                                    onChange={(e)=>this.handleOldEmail(e)}
+                                    floatingLabelStyle={{color:'#607D8B'}}
+                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
                                 />
 
                                 <TextField
-                                hintText="New Email"
-                                floatingLabelText="New Email"
-                                style={{width:'100%'}}
-                                value={this.state.newEmail}
-                                onChange={(e)=>this.handleNewEmail(e)}
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                    hintText="New Email"
+                                    floatingLabelText="New Email"
+                                    style={{width:'100%'}}
+                                    value={this.state.newEmail}
+                                    onChange={(e)=>this.handleNewEmail(e)}
+                                    floatingLabelStyle={{color:'#607D8B'}}
+                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
                                 />
                                 <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleEmailChange(e)}>Submit</button>
                             </div>
@@ -251,12 +257,6 @@ export default class SettingSystemInfo extends React.Component{
 
                         <div id="change-avatar" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div className="panel-body">
-                                <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileTooLarge)} role="alert">
-                                    <strong>File is too large</strong>
-                                </div>
-                                <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileWrongType)} role="alert">
-                                    <strong>File is not a image file</strong>
-                                </div>
                                 <div className="row">
                                     <div className="col-md-8 col-md-offset-3">
                                         <div className="btn-group" role="group">

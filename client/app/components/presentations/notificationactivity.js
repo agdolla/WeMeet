@@ -48,7 +48,7 @@ export default class NotificationActivity extends React.Component{
                     <div className="col-md-8">
                         <div className="media">
                             <div className="media-left">
-                                <Link to={"profile/"+this.props.data.sender._id}>
+                                <Link to={"/profile/"+this.props.data.sender._id}>
                                     <img className="media-object" src="img/user.png" width="50px" height="50px" alt="..." />
                                 </Link>
                             </div>
@@ -56,7 +56,7 @@ export default class NotificationActivity extends React.Component{
                                 <h4 className="media-heading">{this.props.data.sender.fullname}</h4>
                                 {text}
 
-                                <Link to={"activity_detail/"+this.props.data.activityid}>
+                                <Link to={"/activity_detail/"+this.props.data.activityid}>
                                     {this.state.activityname}
                                 </Link>
                             </div>

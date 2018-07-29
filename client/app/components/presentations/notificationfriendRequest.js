@@ -17,7 +17,7 @@ export default class NotificationFriendRequest extends React.Component{
                     <div className="col-md-8">
                         <div className="media">
                             <div className="media-left">
-                                <Link to={"profile/"+this.props.data.sender._id}>
+                                <Link to={"/profile/"+this.props.data.sender._id}>
                                     <img className="media-object" src="img/user.png" width="50px" height="50px" alt="..." />
                                 </Link>
                             </div>

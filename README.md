@@ -12,3 +12,9 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 * Update to latest mongodb driver for nodejs
 * All code should be reviewed and revised
 * Notification is not working properly when there is new notification
+
+
+* didUserLike can be put into a util file
+* check of PostFeedItem can replace ProfileRecentPostItem, same for activity
+* activity detail comment should be descending sorted according to timestamp
+* fix naming 

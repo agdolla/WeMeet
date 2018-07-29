@@ -1,11 +1,7 @@
 import React from 'react';
-
-//import containers
 import {Navbar} from '../containers';
 import {SettingProfileInfo, SettingSystemInfo} from '../containers'
-//request function
 import {getUserData} from '../../utils';
-
 
 // var debug = require('react-debug');
 
@@ -21,12 +17,12 @@ export default class Settings extends React.Component{
     getData(){
         getUserData(this.props.user,(userData)=>{
             this.setState({
-                userData:userData
+                userData: userData
             });
         });
     }
-    
-    componentDidMount(){
+
+    componentWillMount(){
         this.getData();
     }
 
@@ -36,8 +32,8 @@ export default class Settings extends React.Component{
                 <Navbar user={this.state.userData}/>
                 <div className="container settings">
                     <div className="row">
-                        <SettingProfileInfo user={this.props.user}/>
-                        <SettingSystemInfo user={this.props.user}/>
+                        <SettingProfileInfo userData={this.state.userData}/>
+                        <SettingSystemInfo userData={this.state.userData}/>
                     </div>
                 </div>
             </div>

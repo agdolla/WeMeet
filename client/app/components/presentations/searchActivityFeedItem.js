@@ -23,10 +23,9 @@ export default class SearchActivityFeedItem extends React.Component{
                 subtitle={this.state.author.description}
                 avatar={<Link to={"/profile/"+this.state.author._id}><Avatar src={this.state.author.avatar} backgroundColor="white"/></Link>}
                 />
-                <Link to={"activity_detail/"+this.state._id}>
+                <Link to={"/activity_detail/"+this.state._id}>
                     <CardMedia
-                    overlay={<CardTitle title="Location" subtitle={this.state.location}/>}
-                    >
+                    overlay={<CardTitle title="Location" subtitle={this.state.location}/>}>
                     <img src={this.state.img} />
                     </CardMedia>
                 </Link>

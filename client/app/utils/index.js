@@ -131,10 +131,6 @@ export{
     hideElement,
     disabledElement,
 
-    //export xhr function
-    sendXHR
-
     //unsolve repeate name
     //,getUserData
-
 }

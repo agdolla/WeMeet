@@ -124,7 +124,7 @@ export default class SearchPostFeedItem extends React.Component{
                 <div className="panel-heading">
                     <div className="media">
                         <div className="media-left">
-                            <Link to={"profile/"+contents.author._id}>
+                            <Link to={"/profile/"+contents.author._id}>
                                 <img className="media-object" src={contents.author.avatar} height="50px" alt="..."></img>
                             </Link>
                         </div>

@@ -227,7 +227,7 @@ export default class Ad_body extends React.Component{
                       <span className="glyphicon glyphicon-user"
                         style={{'paddingRight':'10px','paddingTop':'5px','paddingLeft': '15px'}}>
                       </span>
-                      <Link to={"profile/"+authorid}>
+                      <Link to={"/profile/"+authorid}>
                           {name}
                         </Link>
                     </div>

@@ -34,7 +34,7 @@ export default class ChatNavChatItem extends React.Component {
             <div>
                 <ListItem
                 onClick={(e)=>this.handleClick(e)}
-                leftAvatar={<Link to={"profile/"+this.props.data._id}><Avatar src={this.props.data.avatar} backgroundColor="white"/></Link>}
+                leftAvatar={<Link to={"/profile/"+this.props.data._id}><Avatar src={this.props.data.avatar} backgroundColor="white"/></Link>}
                 primaryText={this.props.data.fullname}
                 rightIcon={icon}
                 secondaryText={

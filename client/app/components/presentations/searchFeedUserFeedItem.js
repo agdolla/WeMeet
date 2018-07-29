@@ -54,7 +54,7 @@ export default class SearchFeedUserFeedItem extends React.Component{
                 <div className={"alert alert-success "+hideElement(!this.state.success)} role="alert">Request sent!</div>
                 <div className="media">
                     <div className="media-left">
-                        <Link to={"profile/"+this.state.data._id}>
+                        <Link to={"/profile/"+this.state.data._id}>
                             <img className="media-object" src={this.state.data.avatar} width="50px" height="50px" alt="..." />
                         </Link>
                     </div>

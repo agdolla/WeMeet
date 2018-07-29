@@ -35,6 +35,7 @@ export default class ProfileRecentPostItem extends React.Component{
         }
 
     }
+
     handleImgClick(index,e){
         e.preventDefault();
         this.setState({
@@ -42,6 +43,7 @@ export default class ProfileRecentPostItem extends React.Component{
             isOpen:true
         });
     }
+
     closeLightbox(e){
         e.preventDefault();
         this.setState({
@@ -49,14 +51,9 @@ export default class ProfileRecentPostItem extends React.Component{
         })
     }
 
-    didUserLike(user) {
-        var likeCounter = this.state.data.likeCounter;
-
-        for (var i = 0; i < likeCounter.length; i++) {
-            if (likeCounter[i]._id === user)
-            return true;
-        }
-        return false;
+    didUserLike(userId) {
+        let likeCounter = this.state.data.likeCounter;
+        return likeCounter.filter(counter => counter._id === userId).length > 0;
     }
 
     render(){
@@ -64,30 +61,30 @@ export default class ProfileRecentPostItem extends React.Component{
         var contents;
         switch(data.type){
             case "general":
-            contents = data.contents;
-            break;
+                contents = data.contents;
+                break;
             default:
             throw new Error("Unknown FeedItem: " + data.type);
         }
-        var imgs = [];
+        let imgs = contents.img;
         var images = [];
-        imgs = contents.img;
         var display = [];
         imgs.map((obj,i)=>{
             display.push(
                 <a onClick={(e)=>this.handleImgClick(i,e)} key={i} style={{"width":"calc("+(100/(imgs.length>2?2:imgs.length))+"% - 4px)"}}>
-                <img src={obj} style={{'width':"100%"}}/>
+                    <img src={obj} style={{'width':"100%"}}/>
                 </a>
             );
             images.push({
                 src: obj,
                 caption: contents.text
-            })
+            });
         });
+
         var time = moment(contents.postDate).calendar();
 
         if((new Date().getTime()) - contents.postDate <= 86400000)
-        time = moment(contents.postDate).fromNow();
+            time = moment(contents.postDate).fromNow();
 
         return(
             <div className="panel panel-default">

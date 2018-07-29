@@ -27,7 +27,7 @@ export default class ChatLeftBubble extends React.Component {
                 </div>
                 <div className="media-left">
                     <div className="media-left" >
-                        <Link to={"profile/"+this.state.sender._id}>
+                        <Link to={"/profile/"+this.state.sender._id}>
                             <img className="media-object" src={this.state.sender.avatar} alt="image" height="40" width="40"></img>
                         </Link>
                     </div>

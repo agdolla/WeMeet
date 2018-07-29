@@ -10,7 +10,7 @@ export default class Ad_signeduser extends React.Component{
     render(){
         return(
 
-            <Link to={"profile/"+this.state._id}>
+            <Link to={"/profile/"+this.state._id}>
                 <img src={this.state.avatar} width="35px" alt=""/>
             </Link>
         )

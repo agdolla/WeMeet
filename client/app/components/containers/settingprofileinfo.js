@@ -1,93 +1,88 @@
 import React from 'react'
-
-import {getUserData,changeUserInfo} from '../../utils';
-
-
-var alert = null;
-var moment = require('moment');
-
 import TextField from 'material-ui/TextField';
 import DatePicker from 'material-ui/DatePicker';
+import Snackbar from 'material-ui/Snackbar';
+import {changeUserInfo} from '../../utils';
 
-import {hideElement} from '../../utils';
+var moment = require('moment');
+// const debug = require('react-debug');
 
 export default class SettingProfileInfo extends React.Component{
 
     constructor(props){
         super(props);
         this.state = {
-            userData:{},
-            profileInfo:{
-                username:"",
+            userData:{
+                fullname: "",
                 nickname: "",
-                description: "",
-                birthday:null,
+                description: ""
             },
             changeInfoFailed:false,
+            open: false,
+            snackBarMsg: "",
+            snackBarColor: ""
         }
     }
 
-    getData(){
-        getUserData(this.props.user,(userData)=>{
-            this.setState({
-                userData:userData,
-                profileInfo:{
-                    username:userData.fullname,
-                    nickname: userData.nickname,
-                    description: userData.description,
-                    birthday: moment(userData.birthday).toDate()
-                }
-            });
-        });
-    }
-    componentDidMount(){
-        this.getData();
-    }
+    // componentDidMount(){
+    //
+    // }
 
-
+    componentWillReceiveProps(nextProps) {
+        this.setState({
+            userData: nextProps.userData
+        })
+    }
 
     handleChangeUserInfo(e){
         e.preventDefault();
-        if(this.state.username!==""&&
-        this.state.nickname!==""&&
-        this.state.description!==""){
+        if(this.state.userData.fullname!=="" && this.state.userData.description!==""){
             changeUserInfo({
                 userId: this.state.userData._id,
-                fullname:this.state.profileInfo.username,
-                nickname: this.state.profileInfo.nickname,
-                description: this.state.profileInfo.description,
-                birthday:this.state.profileInfo.birthday
+                fullname:this.state.userData.fullname,
+                nickname: this.state.userData.nickname,
+                description: this.state.userData.description,
+                birthday:moment(this.state.userData.birthday).toDate()
             },(userData)=>{
-                alert = <div className={"alert alert-success alert-dismissible"} role="alert">
-                <strong>Change info succeed!</strong>
-                </div>
                 this.setState({
                     userData: userData,
-                    changeInfoFailed:false
+                    changeInfoFailed:false,
+                    snackBarMsg: "Successfully Changed Info!",
+                    snackBarColor: "#2E7D32",
+                    open:true
                 });
             });
         }
         else{
-            alert = null;
             this.setState({
-                changeInfoFailed:true
+                changeInfoFailed:true,
+                snackBarColor: "#d32f2f",
+                snackBarMsg: "Your Name and About You can not be empty!",
+                open: true
             });
         }
-
     }
 
     handleChange(e){
         e.preventDefault();
-        var updateProfileInfo=Object.assign({},this.state.profileInfo);
-        updateProfileInfo[e.target.id]=e.target.value;
-        this.setState({profileInfo:updateProfileInfo});
+        var updatedProfileInfo = Object.assign({},this.state.userData);
+        updatedProfileInfo[e.target.id] = e.target.value;
+        this.setState({
+            userData: updatedProfileInfo
+        });
     }
 
     handleBirthday = (e, date) => {
+        var updatedProfileInfo = Object.assign({},this.state.userData);
+        updatedProfileInfo['birthday'] = date;
         this.setState({
-            birthday: date,
+            userData: updatedProfileInfo
         });
     };
+
+    handleSnackBarClose = () =>{
+        this.setState({open:false});
+    }
 
     render(){
         return(
@@ -100,19 +95,25 @@ export default class SettingProfileInfo extends React.Component{
                                 <div className="col-md-12">
                                     <h4>Personal Info</h4>
                                     <div>
-                                        {alert}
-                                        <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.changeInfoFailed)} role="alert">
-                                            <strong>Please fill in blanks</strong>
-                                        </div>
+                                        <Snackbar
+                                            bodyStyle = {{
+                                                backgroundColor:this.state.snackBarColor,
+                                                textAlign:'center'
+                                            }}
+                                            open = {this.state.open}
+                                            autoHideDuration = {3000}
+                                            message = {this.state.snackBarMsg}
+                                            onRequestClose={this.handleSnackBarClose}
+                                        />
                                     </div>
                                     <div className="row">
                                         <div className="col-md-12">
                                             <TextField
-                                                id="username"
+                                                id="fullname"
                                                 hintText="Your name"
                                                 floatingLabelText="Your name"
                                                 style={{width:'100%'}}
-                                                value={this.state.profileInfo.username}
+                                                value={this.state.userData.fullname}
                                                 onChange={(e)=>this.handleChange(e)}
                                                 floatingLabelStyle={{color:'#607D8B'}}
                                                 underlineFocusStyle={{borderColor:'#90A4AE'}}
@@ -126,14 +127,14 @@ export default class SettingProfileInfo extends React.Component{
                                                 hintText="NickName"
                                                 floatingLabelText="NickName"
                                                 style={{width:'100%'}}
-                                                value={this.state.profileInfo.nickname}
+                                                value={this.state.userData.nickname}
                                                 onChange={(e)=>this.handleChange(e)}
                                                 floatingLabelStyle={{color:'#607D8B'}}
                                                 underlineFocusStyle={{borderColor:'#90A4AE'}}
                                             />
                                             <div className="md-form">
                                                 <h5>Birthday</h5>
-                                                <DatePicker hintText="Choose your birthday" value={this.state.profileInfo.birthday}
+                                                <DatePicker hintText="Choose your birthday" value={moment(this.state.userData.birthday).toDate()}
                                                 onChange={(e,date)=>{this.handleBirthday(e,date)}} textFieldStyle={{width:"100%"}}/>
                                             </div>
                                             <TextField
@@ -144,7 +145,7 @@ export default class SettingProfileInfo extends React.Component{
                                                 hintText="About you"
                                                 floatingLabelText="About you"
                                                 style={{width:'100%'}}
-                                                value={this.state.profileInfo.description}
+                                                value={this.state.userData.description}
                                                 onChange={(e)=>this.handleChange(e)}
                                                 floatingLabelStyle={{color:'#607D8B'}}
                                                 underlineFocusStyle={{borderColor:'#90A4AE'}}
@@ -169,6 +170,4 @@ export default class SettingProfileInfo extends React.Component{
             </div>
         )
     }
-
-
 }

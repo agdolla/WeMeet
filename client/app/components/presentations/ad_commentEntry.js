@@ -27,7 +27,7 @@ export default class PostCommentEntry extends React.Component{
             <div className="panel-heading">
                 <div className="media">
                     <div className="media-left">
-                        <Link to={"profile/"+this.props.user}>
+                        <Link to={"/profile/"+this.props.user}>
                             <img className="media-object" src={this.props.avatar} height="45px" style={{marginTop:'1px'}}/>
                         </Link>
                     </div>
@@ -38,7 +38,7 @@ export default class PostCommentEntry extends React.Component{
                     </div>
                 </div>
             </div>
-            
+
 
         );
     }
