@@ -8,8 +8,8 @@ import {Chat} from './components/layouts';
 import {Notification} from './components/layouts';
 import { Search } from './components/layouts';
 import { Profile } from './components/layouts';
-import { PostActivity } from './components/layouts';
-import {Activity_detail} from './components/layouts';
+import { CreateActivity } from './components/layouts';
+import { ActivityDetail} from './components/layouts';
 import { Activity } from './components/layouts';
 import { Settings } from './components/layouts';
 import { Landing } from './components/layouts';
@@ -84,9 +84,9 @@ class App extends React.Component {
                   <Route path="/chat" component={ChatPage} />
                   <Route path="/notification" component={NotificationPage}/>
                   <Route path="/profile/:user" component={ProfilePage} />
-                  <Route path="/activity_detail/:id" component={ActivityDetailPage}/>
+                  <Route path="/activityDetail/:id" component={ActivityDetailPage}/>
                   <Route path="/search" component={SearchPage}/>
-                  <Route path="/postactivity" component={PostActivityPage} />
+                  <Route path="/createActivity" component={PostActivityPage} />
                   <Route path='*' component={ActivityPage} />
                 </Switch>
             </MuiThemeProvider>
@@ -159,7 +159,7 @@ class ActivityDetailPage extends React.Component{
                 socket.emit('user',user._id);
             }
             return(
-                <Activity_detail user={user} id={this.props.match.params.id}/>
+                <ActivityDetail user={user} id={this.props.match.params.id}/>
             )
         }
         else{
@@ -216,7 +216,7 @@ class PostActivityPage extends React.Component {
                 socket.emit('user',userId);
             }
             return (
-                <PostActivity user={userId}/>
+                <CreateActivity user={userId}/>
             );
         }
         else{

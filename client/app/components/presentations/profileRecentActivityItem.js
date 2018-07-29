@@ -44,7 +44,7 @@ export default class ProfileRecentActivityItem extends React.Component{
                 <div className="panel-body">
                     <div className="row">
                         <div className="col-md-12">
-                            <Link to={"/activity_detail/"+this.state._id}>
+                            <Link to={"/activityDetail/"+this.state._id}>
                                 <div className="media">
                                     <h3>{this.state.title} <span className="badge pull-right">{this.state.type}</span></h3>
                                     {startTime}--{endTime}
@@ -56,7 +56,7 @@ export default class ProfileRecentActivityItem extends React.Component{
                         <div className="panel-body">
                             <div className="media">
                                 <div className="media-body">
-                                    <Link to={"/activity_detail/"+this.state._id}>
+                                    <Link to={"/activityDetail/"+this.state._id}>
                                         <center><img className="media-object" src={this.state.img} width="100%" height="100%" alt="" /></center>
                                     </Link>
                                     <p>

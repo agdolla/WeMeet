@@ -18,7 +18,7 @@ export default class Activity extends React.Component{
             <div style={{marginTop:'70px'}}>
                 <Navbar activity="active" user={this.props.user}/>
                 <div className="container index">
-                    <Link to="/postactivity" className="c-btn" name = "button">
+                    <Link to="/createActivity" className="c-btn" name = "button">
                         <FloatingActionButton backgroundColor='#607D8B'>
                             <ContentAdd />
                         </FloatingActionButton>

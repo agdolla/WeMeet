@@ -1,7 +1,7 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
 
-export default class Ad_signeduser extends React.Component{
+export default class ActivityDetailSignedUpUserAvatar extends React.Component{
     constructor(props){
         super(props);
         this.state = props.data;
@@ -9,7 +9,6 @@ export default class Ad_signeduser extends React.Component{
 
     render(){
         return(
-
             <Link to={"/profile/"+this.state._id}>
                 <img src={this.state.avatar} width="35px" alt=""/>
             </Link>

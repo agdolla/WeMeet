@@ -10,7 +10,7 @@ import {socket,getToken} from '../../utils';
 // var debug = require('react-debug');
 
 
-class Ad_participates_item extends React.Component{
+class ActivityDetailSignedUpUserItem extends React.Component{
     constructor(props){
         super(props);
         this.state = {
@@ -72,4 +72,4 @@ class Ad_participates_item extends React.Component{
     }
 }
 
-export default withRouter(Ad_participates_item);
+export default withRouter(ActivityDetailSignedUpUserItem);

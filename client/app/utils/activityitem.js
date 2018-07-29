@@ -3,7 +3,7 @@ let axios = require('axios');
 // let debug = require('react-debug');
 
 export function createActivity(data,cb){
-    axios.post('/postActivity',{
+    axios.post('/createActivity',{
         postDate: new Date().getTime(),
         type: data.type,
         author:data.userData._id,

@@ -89,7 +89,7 @@ describe("test 'activity'", function() {
        "text": "data.detail"
       }
     }
-    agent.post('/postActivity')
+    agent.post('/createActivity')
     .set('content-type', 'application/json;charset=UTF-8')
     .send(activity)
     .end((err,res)=>{

@@ -1,7 +1,7 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
 import {createActivity, sendInviteActivityRequest} from '../../utils';
-import {PostActivityFriendItem} from './';
+import {CreateActivityFriendItem} from './';
 import {hideElement} from '../../utils';
 import {socket,getToken} from '../../utils';
 import SelectField from 'material-ui/SelectField';
@@ -16,7 +16,7 @@ import 'node_modules/cropperjs/dist/cropper.css';
 // var debug = require('react-debug');
 var swal = require('sweetalert');
 
-class PostActivityFeed extends React.Component {
+class CreateActivityFeed extends React.Component {
 
     constructor(props){
         super(props);
@@ -384,7 +384,7 @@ class PostActivityFeed extends React.Component {
                                                         }}>
                                                         <ul className="media-list">
                                                             {this.props.user.friends === undefined ? null : this.props.user.friends.map((friend,i)=>{
-                                                                return <PostActivityFriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
+                                                                return <CreateActivityFriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
                                                                 })}
                                                             </ul>
                                                         </div>
@@ -423,4 +423,4 @@ class PostActivityFeed extends React.Component {
     }
 }
 
-export default withRouter(PostActivityFeed)
+export default withRouter(CreateActivityFeed)

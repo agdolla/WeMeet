@@ -137,7 +137,7 @@ class Navbar extends React.Component{
 
       <Link style={{textDecoration:'none'}} to={"/profile/"+this.props.user._id}><MenuItem primaryText="Profile" rightIcon={<Person/>}/></Link>
       <Link style={{textDecoration:'none'}} to="/settings"><MenuItem primaryText="Settings" rightIcon={<Settings/>}/></Link>
-      <Link style={{textDecoration:'none'}} to="/postactivity"><MenuItem primaryText="Create Activity" rightIcon={<Create/>}/></Link>
+      <Link style={{textDecoration:'none'}} to="/createActivity"><MenuItem primaryText="Create Activity" rightIcon={<Create/>}/></Link>
       <Divider/>
       <MenuItem primaryText="Log out" onClick={(e)=>this.handleLogOut(e)}/>
     </IconMenu>

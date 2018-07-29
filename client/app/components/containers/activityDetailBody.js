@@ -2,10 +2,10 @@ import React from 'React';
 import {Link} from 'react-router-dom';
 
 //import presentations
-import {Ad_comment} from '../presentations';
-import {Ad_commentThread} from '../presentations';
-import {Ad_participates_item} from '../presentations';
-import {Ad_signeduser} from '../presentations'
+import {ActivityDetailComment} from '../presentations';
+import {ActivityCommentThread} from '../presentations';
+import {ActivityDetailSignedUpUserItem} from '../presentations';
+import {ActivityDetailSignedUpUserAvatar} from '../presentations'
 
 //request function
 import {getActivityDetail} from '../../utils';
@@ -25,7 +25,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 
 // var debug = require('react-debug');
 
-export default class Ad_body extends React.Component{
+export default class ActivityDetailBody extends React.Component{
   constructor(props){
     super(props);
     this.state = {
@@ -195,7 +195,7 @@ export default class Ad_body extends React.Component{
                     this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
                     this.state.activity.participants.map((p,i)=>{
                     return (
-                      <Ad_participates_item key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
+                      <ActivityDetailSignedUpUserItem key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
                     )
                   })}
                 </ul>
@@ -241,7 +241,7 @@ export default class Ad_body extends React.Component{
                       <br/>
 
                       {this.state.activity.participants === undefined ? 0:this.state.activity.participants.map((p,i)=>{
-                        return (<Ad_signeduser key={i} data={p} />)
+                        return (<ActivityDetailSignedUpUserAvatar key={i} data={p} />)
                       })}
 
                     </div>
@@ -286,13 +286,13 @@ export default class Ad_body extends React.Component{
         </div>
       </div>
     </div>
-    <Ad_commentThread count={this.state.activity.comments === undefined ? 0:this.state.activity.comments.length} user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}>
+    <ActivityCommentThread count={this.state.activity.comments === undefined ? 0:this.state.activity.comments.length} user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}>
       {this.state.activity.comments === undefined ? 0:this.state.activity.comments.map((comment,i)=>{
         return (
-          <Ad_comment key={i} data={comment} />
+          <ActivityDetailComment key={i} data={comment} />
         )
       })}
-    </Ad_commentThread>
+    </ActivityCommentThread>
   </div>
   )
 }

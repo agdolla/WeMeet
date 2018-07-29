@@ -1,6 +1,6 @@
 import ActivityFeed from './activityFeed';
 
-import Ad_body from './ad_body';
+import ActivityDetailBody from './activityDetailBody';
 
 import ChatNavBody from './chatnavbody';
 import ChatWindow from './chatwindow';
@@ -13,8 +13,8 @@ import Navbar from './navbar';
 
 import NotificationBody from './notificationBody';
 
-import PostActivityFeed from './postactivityFeed';
-import PostActivityFriendItem from './postactivityfriendItem';
+import CreateActivityFeed from './createActivityFeed';
+import CreateActivityFriendItem from './createActivityFriendItem';
 
 import PostFeed from './postFeed';
 
@@ -30,8 +30,7 @@ import SettingSystemInfo from './settingsysteminfo';
 
 export{
     ActivityFeed,
-
-    Ad_body,
+    ActivityDetailBody,
 
     ChatNavBody,
     ChatWindow,
@@ -44,8 +43,8 @@ export{
 
     NotificationBody,
 
-    PostActivityFeed,
-    PostActivityFriendItem,
+    CreateActivityFeed,
+    CreateActivityFriendItem,
 
     PostFeed,
 

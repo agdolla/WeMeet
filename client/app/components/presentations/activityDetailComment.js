@@ -2,7 +2,7 @@ import React from 'React';
 import {Link} from 'react-router-dom';
 var moment = require('moment');
 
-export default class Ad_comment extends React.Component{
+export default class ActivityDetailComment extends React.Component{
 
     constructor(props){
         super(props);

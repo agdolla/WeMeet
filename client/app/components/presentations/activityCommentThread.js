@@ -1,7 +1,7 @@
 import React from 'react';
-import {Ad_commentEntry} from './';
+import {ActivityDetailCommentEntry} from './';
 
-export default class Ad_commentThread extends React.Component{
+export default class ActivityCommentThread extends React.Component{
     constructor(props){
         super(props);
         this.state = {};
@@ -18,7 +18,7 @@ export default class Ad_commentThread extends React.Component{
                                 <font style={{color:"grey",fontSize:"20px"}}>Wonderful comments (
                                     {this.props.count}
                                 )</font>
-                                <Ad_commentEntry user={this.props.user}  avatar ={this.props.avatar} onPost={this.props.onPost}/>
+                                <ActivityDetailCommentEntry user={this.props.user} avatar ={this.props.avatar} onPost={this.props.onPost}/>
                                 <hr/>
                                 <ul className="media-list">
                                     {React.Children.map(this.props.children,function(child){

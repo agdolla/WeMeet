@@ -56,7 +56,7 @@ export default class NotificationActivity extends React.Component{
                                 <h4 className="media-heading">{this.props.data.sender.fullname}</h4>
                                 {text}
 
-                                <Link to={"/activity_detail/"+this.props.data.activityid}>
+                                <Link to={"/activityDetail/"+this.props.data.activityid}>
                                     {this.state.activityname}
                                 </Link>
                             </div>

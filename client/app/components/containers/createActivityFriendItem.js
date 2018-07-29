@@ -1,7 +1,7 @@
 import React from 'react';
 import {hideElement} from '../../utils';
 
-export default class PostActivityFriendItem extends React.Component{
+export default class CreateActivityFriendItem extends React.Component{
 
     constructor(props){
         super(props);
@@ -32,7 +32,7 @@ export default class PostActivityFriendItem extends React.Component{
 
     render(){
         return(
-            <li className="media postactivity-media" style={{"paddingLeft":'10px'}}>
+            <li className="media createActivity-media" style={{"paddingLeft":'10px'}}>
                 <div className="media-left">
                     <img style={{marginRight:'20px'}} className="media-object" src={this.props.data.avatar} width="55px" alt="..." />
                 </div>

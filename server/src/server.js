@@ -976,7 +976,7 @@ MongoClient.connect(url, function(err, database) {
         });
     });
 
-    function postActivity(data,callback) {
+    function createActivity(data,callback) {
 
         if(data.img!=="./img/default.png"){
             var name = uuidV1();
@@ -1017,10 +1017,10 @@ MongoClient.connect(url, function(err, database) {
         .catch(err=>{callback(err);})
     }
     //post activity
-    app.post('/postActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
+    app.post('/createActivity', validate({body: activitySchema}), isLoggedIn,function(req, res) {
         var body = req.body;
         if(body.author.str!==req.user._id.str) return res.status(401).end();
-        postActivity(body,function(err,activityData){
+        createActivity(body,function(err,activityData){
             if(err)
             return sendDatabaseError(res,err);
             else{
@@ -1802,38 +1802,40 @@ MongoClient.connect(url, function(err, database) {
     // var httpsServer = https.createServer({key: privateKey, cert: certificate, requestCert: true, rejectUnauthorized: false},
     //                     app);
     var server = http.createServer(app);
-    var count = 0;
     var io = require('socket.io')(server);
     io.on('connection', function(socket){
-        // socket.on('disconnect', function () {
-        //     db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
-        //         if(socketData!==null){
-        //             db.collection('users').updateOneAsync({_id:socketData.userId},{
-        //                 $set:{
-        //                     online:false
-        //                 }
-        //             })
-        //             .then(()=>{
-        //                 var data = {
-        //                     user: socketData.userId,
-        //                     online: false
-        //                 }
-        //                 socket.broadcast.emit('online',data);
-        //             })
-        //         }
-        //     });
-        //     db.collection('userSocketIds').remove({socketId:socket.id});
-        // });
 
-        socket.on('logout',function(user){
-            db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
+        //disconnect means user logs out
+        socket.on('disconnect', function () {
+            db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
+                if(socketData!==null){
+                    db.collection('users').updateOneAsync({_id:socketData.userId},{
+                        $set:{
+                            online:false
+                        }
+                    })
+                    .then(()=>{
+                        var data = {
+                            user: socketData.userId,
+                            online: false
+                        }
+                        socket.broadcast.emit('online',data);
+                        db.collection('userSocketIds').remove({socketId:socket.id});
+                    })
+                }
+            });
+        });
+
+        //when user
+        socket.on('logout',function(userId){
+            db.collection('users').updateOneAsync({_id:new ObjectID(userId)},{
                 $set:{
                     online:false
                 }
             })
             .then(()=>{
                 var data = {
-                    user: user,
+                    user: userId,
                     online: false
                 }
                 socket.broadcast.emit('online',data);

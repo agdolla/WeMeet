@@ -2,12 +2,12 @@
 import ActivityFeedItem from './activityFeedItem'
 
 
-//import Activity_detail presentations
-import Ad_comment from './ad_comment'
-import Ad_commentEntry from './ad_commentEntry'
-import Ad_commentThread from './ad_commentThread'
-import Ad_participates_item from './ad_participates_item'
-import Ad_signeduser from './ad_signeduser'
+//import activityDetail presentations
+import ActivityDetailComment from './activityDetailComment'
+import ActivityDetailCommentEntry from './activityDetailCommentEntry'
+import ActivityCommentThread from './activityCommentThread'
+import ActivityDetailSignedUpUserItem from './activityDetailSignedUpUserItem'
+import ActivityDetailSignedUpUserAvatar from './activityDetailSignedUpUserAvatar'
 
 //import Post presentations
 import PostComment from './postComment'
@@ -40,11 +40,11 @@ import SearchPostFeedItem from './searchPostFeedItem'
 export{
     ActivityFeedItem,
 
-    Ad_comment,
-    Ad_commentEntry,
-    Ad_commentThread,
-    Ad_participates_item,
-    Ad_signeduser,
+    ActivityDetailComment,
+    ActivityDetailCommentEntry,
+    ActivityCommentThread,
+    ActivityDetailSignedUpUserItem,
+    ActivityDetailSignedUpUserAvatar,
 
 
     PostComment,

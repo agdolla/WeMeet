@@ -61,7 +61,7 @@ export default class ActivityFeed extends React.Component{
                 <div className="alert alert-info" role="alert">
                     No one has posted any activities yet.
                     Post your first activity
-                    <Link to="/postactivity">
+                    <Link to="/createActivity">
                         <strong>
                             here
                         </strong>
