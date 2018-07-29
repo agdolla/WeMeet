@@ -19,3 +19,4 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 * activity detail comment should be descending sorted according to timestamp
 * fix naming
 * study the new react router
+* send friend request and send activity invitation are not working properly
