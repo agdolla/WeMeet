@@ -1,19 +1,16 @@
-//xmlhttprequest function
-import {sendXHR} from './'
-
+let axios = require('axios');
 
 export function getMessages(time,userid,id,cb){
-    sendXHR('GET','/user/'+userid+'/chatsession/'+id+"/"+time, undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.get('/user/'+userid+'/chatsession/'+id+"/"+time)
+    .then(response=>cb(response.data));
 }
 
 export function postMessage(sessionId,sender,target, text, cb){
-    sendXHR('POST','/chatsession/'+sessionId,{
+    axios.post('/chatsession/'+sessionId,{
         sender:sender,
         target:target,
         text:text
-    },(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
     })
+    .then(response=>cb(response.data))
+    .catch(err=>{});
 }

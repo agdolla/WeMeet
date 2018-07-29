@@ -1,21 +1,19 @@
-//xmlhttprequest function
-import {sendXHR} from './'
+const axios = require('axios');
 
 
 export function changeUserInfo(data, cb){
-    sendXHR('PUT','/settings/user/'+data.userId,data,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
+    axios.put('/settings/user/'+data.userId,data)
+    .then(response=>cb(response.data));
 }
 
 export function ChangeAvatar(user,img,cb){
-    sendXHR('PUT','/settings/avatar/user/'+user,{"img":img},(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.put('/settings/avatar/user/'+user,{
+        img:img
+    })
+    .then(response=>cb(response.data));
 }
 
 export function changeEmail(data,cb){
-    sendXHR('PUT','/settings/emailChange/user/'+data.userId, data,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
+    axios.put('/settings/emailChange/user/'+data.userId,data)
+    .then(response=>cb(response.data));
 }

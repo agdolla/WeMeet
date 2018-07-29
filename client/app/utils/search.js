@@ -1,8 +1,10 @@
-//xmlhttprequest function
-import {sendXHR} from './'
+let axios = require('axios');
+const debug = require('react-debug');
 
 export function searchquery(querytext,cb){
-    sendXHR('GET','/search/'+querytext, undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
+    axios.get('/search/'+querytext)
+    .then(response=>{
+        debug(response.data);
+        cb(response.data)
     });
 }

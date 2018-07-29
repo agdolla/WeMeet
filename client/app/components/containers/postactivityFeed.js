@@ -106,6 +106,7 @@ class PostActivityFeed extends React.Component {
         {
             //activity created succesfully
             var data = Object.assign({},this.state);
+            data.userData = this.props.user;
             var type = "";
             switch (data.type) {
                 case 1:

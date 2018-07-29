@@ -62,9 +62,6 @@ import {getSessions} from './usergetrequest'
 import {hideElement} from './util'
 import {disabledElement} from './util'
 
-//client side shedXHR function
-import {sendXHR} from './xmlhttprequest'
-
 //unsolve repeate name
 //import {getUserData} from './credentials'
 

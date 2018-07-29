@@ -73,14 +73,14 @@ render(){
             {
                 this.state.searchDataResult.activities === undefined ? [] : this.state.searchDataResult.activities.map((activity,i)=>{
                     return (
-                    <ActivityFeedItem key={i} data={activity}/>
+                    <SearchActivityFeedItem key={i} data={activity}/>
                     )
                 })
             }
             {
                 this.state.searchDataResult.posts === undefined ? [] : this.state.searchDataResult.posts.map((post,i)=>{
                     return (
-                    <PostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
+                    <SearchPostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
                     )
                 })
             }

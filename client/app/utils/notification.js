@@ -1,15 +1,11 @@
-//xmlhttprequest function
-import {sendXHR} from './'
-
+const axios = require('axios');
 
 export function deleteNotification(id, user ,cb){
-    sendXHR('DELETE','/notification/'+id+'/'+user,undefined,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.delete('/notification/'+id+'/'+user)
+    .then(response=>cb(response.data));
 }
 
 export function acceptFriendRequest(id,user,cb){
-    sendXHR('PUT','/notification/'+id+'/'+user,undefined,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.put('/notification/'+id+'/'+user)
+    .then(response=>cb(response.data));
 }

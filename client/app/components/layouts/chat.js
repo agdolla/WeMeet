@@ -12,7 +12,7 @@ import {socket} from '../../utils';
 
 
 import Drawer from 'material-ui/Drawer';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 
 export default class Chat extends React.Component {
 
@@ -32,8 +32,8 @@ export default class Chat extends React.Component {
     componentDidMount() {
         this.getData();
         socket.on('online',(data)=>{
-            var tmp = Object.assign({},this.state.user); 
-            tmp.friends.forEach((i)=>{if(i._id===data.user)i.online=data.online}) 
+            var tmp = Object.assign({},this.state.user);
+            tmp.friends.forEach((i)=>{if(i._id===data.user)i.online=data.online})
             this.setState({ user:tmp })
         })
     }
@@ -107,7 +107,8 @@ export default class Chat extends React.Component {
             getSessionId(this.props.user,friend,(session)=>{
                 return callback(session._id);
             });
-        }else callback(result);
+        }
+        else callback(result);
     }
 
     handlePostMessage(message){

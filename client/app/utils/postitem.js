@@ -1,43 +1,35 @@
-//xmlhttprequest function
-import {sendXHR} from './'
+let axios = require('axios');
 
 export function likePost(feedItemId, user, cb){
-    sendXHR('PUT', '/postItem/'+feedItemId+'/likelist/'+user,
-    undefined, (xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.put('/postItem/'+feedItemId+'/likelist/'+user)
+    .then(response=>cb(response.data));
 }
 
 export function unLikePost(feedItemId, user, cb){
-    sendXHR('DELETE', '/postItem/'+feedItemId+'/likelist/'+user,
-    undefined, (xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.delete('/postItem/'+feedItemId+'/likelist/'+user)
+    .then(response=>cb(response.data));
 }
 
 export function postComment(feedItemId, author, comment, cb){
-    sendXHR('POST','/postItem/'+feedItemId+'/commentThread/comment',{
+    axios.post('/postItem/'+feedItemId+'/commentThread/comment',{
         author:author,
         text:comment
-    },(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
     })
+    .then(response=>cb(response.data))
+    .catch(err=>{});
 }
 
 export function postStatus(user, text, img, cb){
-    sendXHR('POST', '/postItem', {
+    axios.post('/postItem',{
         userId:user,
         text:text,
         img: img
-    }, (xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    });
+    })
+    .then(response=>cb(response.data))
+    .catch(err=>{});
 }
 
 export function getAllPosts(time,cb){
-    // We don't need to send a body, so pass in 'undefined' for the body.
-    sendXHR('GET', '/posts/'+time, undefined, (xhr) => {
-        // Call the callback with the data.
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.get('/posts/'+time)
+    .then((response)=>cb(response.data));
 }

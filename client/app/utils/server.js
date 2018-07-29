@@ -1,39 +1,33 @@
-//xmlhttprequest function
-import {sendXHR} from './'
+let axios = require('axios');
 
-// var debug = require('react-debug');
+var debug = require('react-debug');
+
 export function getSessionId(userid,targetid,cb){
-    sendXHR('GET','/getsession/'+userid+'/'+targetid, undefined ,(xhr) => {
-        cb(JSON.parse(xhr.responseText));
+    axios.get('/getsession/'+userid+'/'+targetid)
+    .then((response)=>{
+        cb(response.data);
     });
 }
 
 export function acceptActivityRequest(notificationid,fromuser,cb){
-    sendXHR('PUT','/acceptactivity/'+notificationid+'/'+fromuser,undefined,(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
-    })
+    axios.put('/acceptactivity/'+notificationid+'/'+fromuser)
+    .then(response=>cb(response.data));
 }
 
 export function addFriend(sender,target,cb){
-    sendXHR('POST','/friendRequest/'+sender+"/"+target,undefined,()=>{
-        cb(true);
-    },()=>{
-        cb(false);
-    });
+    axios.post('/friendRequest/'+sender+"/"+target,{})
+    .then(response=>{cb(true)})
+    .catch(err=>{cb(false)});
 }
 
 export function sendJoinActivityRequest(sender,target,activityid,cb){
-    sendXHR('POST','/activityJoinRequest/'+sender+'/'+target+'/'+activityid,undefined,()=>{
-        cb(true);
-    },()=>{
-        cb(false);
-    })
+    axios.post('/activityJoinRequest/'+sender+'/'+target+'/'+activityid,{})
+    .then(response=>{cb(true)})
+    .catch(err=>{cb(false)});
 }
 
 export function sendInviteActivityRequest(sender,target,activityid,cb){
-    sendXHR('POST','/activityInviteRequest/'+sender+'/'+target+'/'+activityid,undefined,()=>{
-        cb(true);
-    },()=>{
-        cb(false);
-    })
+    axios.post('/activityInviteRequest/'+sender+'/'+target+'/'+activityid,{})
+    .then(response=>{cb(true)})
+    .catch(err=>{cb(false)});
 }

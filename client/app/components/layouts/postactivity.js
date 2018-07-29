@@ -25,7 +25,6 @@ export default class PostActivity extends React.Component {
     }
 
     render() {
-        debug(this.props);
         return (
             <div className='postactivity' style={{marginTop:'70px'}}>
                 <Navbar user={this.state.userData}/>

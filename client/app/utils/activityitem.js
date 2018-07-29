@@ -1,12 +1,9 @@
 var moment = require('moment');
-
-//xmlhttprequest function
-import {sendXHR} from './'
-
-
+let axios = require('axios');
+// let debug = require('react-debug');
 
 export function createActivity(data,cb){
-    sendXHR('POST','/postActivity',{
+    axios.post('/postActivity',{
         postDate: new Date().getTime(),
         type: data.type,
         author:data.userData._id,
@@ -19,46 +16,36 @@ export function createActivity(data,cb){
         contents: {
             "text": data.detail
         }
-    }
-    , (xhr) => {
-        cb(JSON.parse(xhr.responseText));
+    })
+    .then(response=>{
+        cb(response.data);
     });
-
 }
 
 export function likeActivity(activityId, user, cb){
-    sendXHR('PUT', '/activityItem/' + activityId + '/likelist/' + user,
-    undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.put('/activityItem/' + activityId + '/likelist/' + user)
+    .then((response=>cb(response.data)));
 }
 
 export function unLikeActivity(activityId, user, cb){
-    sendXHR('DELETE', '/activityItem/' + activityId +'/likelist/' + user,
-    undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.delete('/activityItem/' + activityId +'/likelist/' + user)
+    .then(response=>cb(response.data));
 }
 
 export function getAllActivities(time,cb){
-    // We don't need to send a body, so pass in 'undefined' for the body.
-    sendXHR('GET', '/activities/'+time, undefined, (xhr) => {
-        // Call the callback with the data.
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.get('/activities/'+time)
+    .then((response)=>cb(response.data));
 }
 
 export function getActivityDetail(id,cb){
-    sendXHR('GET','/activityItem/'+id, undefined, (xhr) => {
-        cb(JSON.parse(xhr.responseText));
-    });
+    axios.get('/activityItem/'+id)
+    .then((response)=>cb(response.data));
 }
 
 export function adpostComment(activityId, author, comment, cb){
-    sendXHR('POST','/activityItem/'+activityId+'/commentThread/comment',{
+    axios.post('/activityItem/'+activityId+'/commentThread/comment',{
         author:author,
         text:comment
-    },(xhr)=>{
-        cb(JSON.parse(xhr.responseText));
     })
+    .then(response=>cb(response.data));
 }

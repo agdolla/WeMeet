@@ -1,34 +1,31 @@
-//credentials function
 import {updateCredentials} from './';
 import {socket} from './';
-//xmlhttprequest function
-import {sendXHR} from './';
-
+let axios = require('axios');
 // let debug = require('react-debug');
 
 export function signup(email, username, password, cb) {
-    sendXHR('POST', '/signup', { fullname: username,
+    axios.post('/signup',{
+        fullname: username,
         email: email,
-        password: password }, () => {
-            cb(true);
-        }, () => {
-            cb(false);
-        }
-    );
+        password: password
+    })
+    .then(response=>cb(true))
+    .catch(err=>cb(false));
 }
 
 export function login(email, password, cb) {
-    sendXHR('POST', '/login', { email: email, password: password},
-    (xhr) => {
+    axios.post('/login',{
+        email: email,
+        password: password
+    })
+    .then(response=>{
         // Success callback: Login succeeded.
-        var authData = JSON.parse(xhr.responseText);
+        var authData = response.data;
         // Update credentials and indicate success via the callback!
         updateCredentials(authData.user, authData.token);
         //let server know this user is online
         socket.emit('user',authData.user._id);
         cb(true);
-    }, () => {
-        // Error callback: Login failed.
-        cb(false);
-    });
+    })
+    .catch(err=>cb(false));
 }
