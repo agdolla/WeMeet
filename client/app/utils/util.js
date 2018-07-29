@@ -16,3 +16,7 @@ export function disabledElement(shouldHide) {
     return '';
   }
 }
+
+export function didUserLike(likeCounter, userId) {
+    return likeCounter.filter(counter => counter._id === userId).length > 0;
+}

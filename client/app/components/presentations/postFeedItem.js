@@ -2,7 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
 import {PostComment, PostCommentThread} from './';
-import {likePost, unLikePost, postComment} from '../../utils';
+import {likePost, unLikePost, postComment, didUserLike} from '../../utils';
 import {RadioButton} from 'material-ui/RadioButton';
 import FontIcon from 'material-ui/FontIcon';
 
@@ -56,18 +56,13 @@ export default class PostFeedItem extends React.Component{
                 );
             };
 
-            if(!this.didUserLike(this.props.currentUser)){
+            if(!didUserLike(this.state.data.likeCounter,this.props.currentUser)){
                 likePost(this.state.data._id,this.props.currentUser,cb);
             }
             else{
                 unLikePost(this.state.data._id,this.props.currentUser,cb);
             }
         }
-    }
-
-    didUserLike(userId) {
-        var likeCounter = this.state.data.likeCounter;
-        return likeCounter.filter(counter => counter._id === userId).length > 0;
     }
 
     componentWillReceiveProps(nextProps){
@@ -162,7 +157,7 @@ export default class PostFeedItem extends React.Component{
                                 style={{width:'50px'}}
                                 iconStyle={{marginRight:'2px'}}
                                 onClick={(e)=>this.handleLikeClick(e)}
-                                checked={this.didUserLike(this.props.currentUser)}
+                                checked={didUserLike(this.state.data.likeCounter,this.props.currentUser)}
                                 label={data.likeCounter.length}
                                 labelStyle = {{fontWeight: 'normal'}}
                                 checkedIcon={<FontIcon className="material-icons" style={{color:'red',fontSize:'20px'}}>favorite</FontIcon>}

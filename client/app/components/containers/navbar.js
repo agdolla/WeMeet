@@ -179,8 +179,7 @@ class Navbar extends React.Component{
                 disabled={true}
                 leftAvatar={
                   <Avatar style={{backgroundColor:'none'}} src={this.props.user.avatar} />
-                }
-              >
+                }>
                 {this.props.user.fullname}
               </ListItem>
               <Link style={{textDecoration:'none'}} to='/activity'>

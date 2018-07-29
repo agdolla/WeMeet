@@ -8,16 +8,9 @@ import {ActivityDetailSignedUpUserItem} from '../presentations';
 import {ActivityDetailSignedUpUserAvatar} from '../presentations'
 
 //request function
-import {getActivityDetail} from '../../utils';
-import {adpostComment,sendJoinActivityRequest} from '../../utils';
-import {likeActivity} from '../../utils';
-import {unLikeActivity} from '../../utils';
-
-//credentials function
-import {socket,getToken} from '../../utils';
-
-//util function
-import {hideElement} from '../../utils';
+import {getActivityDetail,adpostComment,
+    sendJoinActivityRequest,likeActivity,
+    unLikeActivity,socket,getToken, hideElement,didUserLike} from '../../utils';
 
 var moment = require('moment');
 
@@ -36,15 +29,6 @@ export default class ActivityDetailBody extends React.Component{
     };
   }
 
-  didUserLike(user) {
-    var likeCounter = this.state.activity.likeCounter;
-    for (var i = 0; i < likeCounter.length; i++) {
-      if (likeCounter[i]._id === user)
-        return true;
-    }
-    return false;
-  }
-
   handleLikeClick(e){
     e.preventDefault();
 
@@ -57,7 +41,7 @@ export default class ActivityDetailBody extends React.Component{
         );
       };
 
-      if(!this.didUserLike(this.props.currentUser)){
+      if(!didUserLike(this.state.activity.likeCounter,this.props.currentUser)){
         likeActivity(this.state.activity._id,this.props.currentUser,cb);
       }
       else{

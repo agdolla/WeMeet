@@ -59,8 +59,7 @@ import {getUserData} from './usergetrequest'
 import {getSessions} from './usergetrequest'
 
 //client side util function
-import {hideElement} from './util'
-import {disabledElement} from './util'
+import {hideElement, disabledElement, didUserLike} from './util';
 
 //unsolve repeate name
 //import {getUserData} from './credentials'
@@ -130,7 +129,7 @@ export{
     //export util function
     hideElement,
     disabledElement,
-
+    didUserLike
     //unsolve repeate name
     //,getUserData
 }

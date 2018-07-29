@@ -1,18 +1,14 @@
 import React from 'react';
-
 import {Navbar} from '../containers';
 import {ChatNavBody} from '../containers';
 import {ChatWindow} from '../containers';
-
 //request function
 import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
 //credentials function
 import {socket} from '../../utils';
 
-
-
 import Drawer from 'material-ui/Drawer';
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export default class Chat extends React.Component {
 

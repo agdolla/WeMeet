@@ -2,7 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 //request function
-import {likeActivity, unLikeActivity} from '../../utils';
+import {likeActivity, unLikeActivity, didUserLike} from '../../utils';
 
 var moment = require('moment');
 
@@ -21,7 +21,7 @@ export default class ProfileRecentActivityItem extends React.Component{
                 this.setState({likeCounter:likeCounter});
             };
 
-            if(!this.didUserLike(this.props.currentUser)){
+            if(!didUserLike(this.state.likeCounter,this.props.currentUser)){
                 likeActivity(this.state._id,this.props.currentUser,cb);
             }
             else{
@@ -29,11 +29,6 @@ export default class ProfileRecentActivityItem extends React.Component{
             }
         }
 
-    }
-
-    didUserLike(userId) {
-        let likeCounter = this.state.likeCounter;
-        return likeCounter.filter((counter)=> counter._id === userId).length > 0;
     }
 
     render(){

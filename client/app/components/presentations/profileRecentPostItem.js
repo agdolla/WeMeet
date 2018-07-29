@@ -3,7 +3,7 @@ import Lightbox from 'react-images';
 var moment = require('moment');
 
 //request function
-import {likePost, unLikePost} from '../../utils';
+import {likePost, unLikePost, didUserLike} from '../../utils';
 
 export default class ProfileRecentPostItem extends React.Component{
 
@@ -26,7 +26,7 @@ export default class ProfileRecentPostItem extends React.Component{
                 this.setState({data:newData});
             };
 
-            if(!this.didUserLike(this.props.currentUser)){
+            if(!didUserLike(this.state.data.likeCounter, this.props.currentUser)){
                 likePost(this.state.data._id,this.props.currentUser,cb);
             }
             else{
@@ -49,11 +49,6 @@ export default class ProfileRecentPostItem extends React.Component{
         this.setState({
             isOpen:false
         })
-    }
-
-    didUserLike(userId) {
-        let likeCounter = this.state.data.likeCounter;
-        return likeCounter.filter(counter => counter._id === userId).length > 0;
     }
 
     render(){

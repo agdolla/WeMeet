@@ -1,20 +1,13 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
-
-
-
-import {PostComment} from './';
-import {PostCommentThread} from './';
-
-import {postComment} from '../../utils';
-import {likePost} from '../../utils';
-import {unLikePost} from '../../utils';
+import {PostComment, PostCommentThread} from './';
+import {postComment, didUserLike, likePost, unLikePost} from '../../utils';
+import FontIcon from 'material-ui/FontIcon';
+import {RadioButton} from 'material-ui/RadioButton';
 
 var moment = require('moment');
 // var debug = require('react-debug');
-import {RadioButton} from 'material-ui/RadioButton';
-import FontIcon from 'material-ui/FontIcon';
 
 export default class SearchPostFeedItem extends React.Component{
 
@@ -62,24 +55,13 @@ export default class SearchPostFeedItem extends React.Component{
                     }
                 );
             };
-
-            if(!this.didUserLike(this.props.currentUser)){
+            if(!didUserLike(this.state.data.likeCounter,this.props.currentUser)){
                 likePost(this.state.data._id,this.props.currentUser,cb);
             }
             else{
                 unLikePost(this.state.data._id,this.props.currentUser,cb);
             }
         }
-    }
-
-    didUserLike(user) {
-        var likeCounter = this.state.data.likeCounter;
-
-        for (var i = 0; i < likeCounter.length; i++) {
-            if (likeCounter[i]._id === user)
-            return true;
-        }
-        return false;
     }
 
     componentWillReceiveProps(nextProps){
@@ -131,12 +113,6 @@ export default class SearchPostFeedItem extends React.Component{
                         <div className="media-body">
                             <h4 className="media-heading">{contents.author.fullname} </h4>
                             <span style={{"fontSize":"12px"}}>{time}</span>
-                            <div className="pull-right">
-                                <span className="glyphicon glyphicon-map-marker"></span>
-                                {Object.keys(contents.location).length>0 ?
-                                (contents.location.address_components[3].short_name+","+
-                                contents.location.address_components[5].short_name) : "Earth"}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,7 +157,7 @@ export default class SearchPostFeedItem extends React.Component{
                                     style={{width:'50px'}}
                                     iconStyle={{marginRight:'2px'}}
                                     onClick={(e)=>this.handleLikeClick(e)}
-                                    checked={this.didUserLike(this.props.currentUser)===true}
+                                    checked={didUserLike(this.state.data.likeCounter,this.props.currentUser)}
                                     label={data.likeCounter.length}
                                     checkedIcon={<FontIcon className="material-icons" style={{color:'red',fontSize:'20px'}}>favorite</FontIcon>}
                                     uncheckedIcon={<FontIcon className="material-icons" style={{fontSize:'20px'}}>favorite_border</FontIcon>}

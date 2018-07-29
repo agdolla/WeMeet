@@ -15,9 +15,9 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 
 <br/>
 
-* didUserLike can be put into a util file
 * check of PostFeedItem can replace ProfileRecentPostItem, same for activity
 * activity detail comment should be descending sorted according to timestamp
 * fix naming
 * study the new react router
 * send friend request and send activity invitation are not working properly
+* promisify all the util functions
