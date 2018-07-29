@@ -13,6 +13,7 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 * All code should be reviewed and revised
 * Notification is not working properly when there is new notification
 
+<br/>
 
 * didUserLike can be put into a util file
 * check of PostFeedItem can replace ProfileRecentPostItem, same for activity
