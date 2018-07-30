@@ -2,9 +2,9 @@ import React from 'react';
 
 import {searchquery} from '../../utils';
 
-import {SearchActivityFeedItem} from '../presentations';
+import {ActivityFeedItem} from '../presentations';
 import {SearchFeedUserFeedItem} from '../presentations';
-import {SearchPostFeedItem} from '../presentations';
+import {PostFeedItem} from '../presentations';
 
 import TextField from 'material-ui/TextField';
 // var debug = require('react-debug');
@@ -73,14 +73,14 @@ render(){
             {
                 this.state.searchDataResult.activities === undefined ? [] : this.state.searchDataResult.activities.map((activity,i)=>{
                     return (
-                    <SearchActivityFeedItem key={i} data={activity}/>
+                    <ActivityFeedItem key={i} data={activity}/>
                     )
                 })
             }
             {
                 this.state.searchDataResult.posts === undefined ? [] : this.state.searchDataResult.posts.map((post,i)=>{
                     return (
-                    <SearchPostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
+                    <PostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
                     )
                 })
             }

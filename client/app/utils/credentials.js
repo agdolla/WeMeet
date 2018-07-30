@@ -1,5 +1,7 @@
 import io from 'socket.io-client';
-// var debug = require('react-debug');
+const axios = require('axios');
+var debug = require('react-debug');
+
 export var socket = io();
 /**
  * Stores authentication credentials.
@@ -59,15 +61,15 @@ export function isUserLoggedIn() {
  * You will implement this during the workshop.
  */
  export function logout() {
-  if(user!==null){
-   socket.emit('logout',user._id);
-   user=null;
-   localStorage.removeItem('user');
-   localStorage.removeItem('token');
-  }
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", '/logout');
-  xhr.send();
+     debug("here1");
+     if(user!==null){
+         debug("here");
+         socket.emit('logout',user._id);
+         user=null;
+         localStorage.removeItem('user');
+         localStorage.removeItem('token');
+     }
+     axios.get('/logout');
  }
 
  export function getUserData(){

@@ -32,9 +32,7 @@ import ProfileRecentActivityItem from './profileRecentActivityItem'
 import ProfileRecentPostItem from './profileRecentPostItem'
 
 //import Search presentations
-import SearchActivityFeedItem from './searchActivityFeedItem'
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
-import SearchPostFeedItem from './searchPostFeedItem'
 
 
 export{
@@ -64,8 +62,5 @@ export{
     ProfileRecentActivityItem,
     ProfileRecentPostItem,
 
-    SearchActivityFeedItem,
-    SearchFeedUserFeedItem,
-    SearchPostFeedItem
-
+    SearchFeedUserFeedItem
 }

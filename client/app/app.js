@@ -43,13 +43,19 @@ class ActivityPage extends React.Component{
         }
         //facebook login
         else{
-            const rawData = new URLSearchParams(this.props.location.search).get('data');
-            var data = JSON.parse(rawData);
-            updateCredentials(data.user, data.token);
-            window.onload = ()=>{
-                socket.emit('user',data.user._id);
+            if(isUserLoggedIn){
+                const rawData = new URLSearchParams(this.props.location.search).get('data');
+                var data = JSON.parse(rawData);
+                updateCredentials(data.user, data.token);
+                window.onload = ()=>{
+                    socket.emit('user',data.user._id);
+                }
+                return(<Activity user={data.user}/>);
             }
-            return(<Activity user={data.user}/>);
+            else{
+                this.props.history.push('/');
+                location.reload();
+            }
         }
     }
 }
