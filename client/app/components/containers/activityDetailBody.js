@@ -8,7 +8,7 @@ import {ActivityDetailSignedUpUserItem} from '../presentations';
 import {ActivityDetailSignedUpUserAvatar} from '../presentations'
 
 //request function
-import {getActivityDetail,adpostComment,
+import {getActivityDetail,postActivityDetailComment,
     sendJoinActivityRequest,likeActivity,
     unLikeActivity,socket,getToken, hideElement,didUserLike} from '../../utils';
 
@@ -33,7 +33,7 @@ export default class ActivityDetailBody extends React.Component{
     e.preventDefault();
 
     if(e.button === 0){
-      var cb = (likeCounter) => {
+      var handler = (likeCounter) => {
         var activity = this.state.activity;
         activity.likeCounter = likeCounter;
         this.setState(
@@ -42,22 +42,30 @@ export default class ActivityDetailBody extends React.Component{
       };
 
       if(!didUserLike(this.state.activity.likeCounter,this.props.currentUser)){
-        likeActivity(this.state.activity._id,this.props.currentUser,cb);
+        likeActivity(this.state.activity._id,this.props.currentUser)
+        .then(response => {handler(response.data)})
       }
       else{
-        unLikeActivity(this.state.activity._id,this.props.currentUser,cb);
+        unLikeActivity(this.state.activity._id,this.props.currentUser)
+        .then(response=>handler(response.data));
       }
     }
   }
 
   handlePostComment(comment){
-    adpostComment(this.state.activity._id, this.props.currentUser ,comment, (newFeedItem)=>{
-      this.setState({activity:newFeedItem});
-    })
+    postActivityDetailComment(this.state.activity._id, this.props.currentUser ,comment)
+    .then(response=>{
+      let newFeedItem = response.data;
+      this.setState({
+        activity: newFeedItem
+      });
+    });
   }
 
   getData(){
-    getActivityDetail(this.props.id,(activitydata)=>{
+    getActivityDetail(this.props.id)
+    .then(response=>{
+      let activitydata = response.data;
       this.setState({activity:activitydata},()=>{
         if(this.isHost()){
           this.setState({ishost:true});
@@ -67,8 +75,7 @@ export default class ActivityDetailBody extends React.Component{
           this.setState({joined:true});
         }
       });
-    });
-
+    })
   }
 
   isHost(){
@@ -89,19 +96,20 @@ export default class ActivityDetailBody extends React.Component{
 
   handleRequestJoin(e){
     e.preventDefault();
-    sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id,(success)=>{
-      if(success){
-        socket.emit('notification',{
-          authorization:getToken(),
-          sender: this.props.currentUser,
-          target: this.state.activity.author._id
-        });
-        this.setState({
-          success:true
-        });
-
-      }
-    });
+    sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id)
+    .then(response=>{
+      socket.emit('notification',{
+        authorization:getToken(),
+        sender: this.props.currentUser,
+        target: this.state.activity.author._id
+      });
+      this.setState({
+        success:true
+      });
+    })
+    .catch(err=>{
+      //todo: hande err
+    })
   }
 
 

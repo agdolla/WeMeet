@@ -14,6 +14,9 @@ import FontIcon from 'material-ui/FontIcon';
 import Badge from 'material-ui/Badge';
 // import IconButton from 'material-ui/IconButton';
 
+let debug = require('react-debug');
+
+
 Array.prototype.insert = function (index, item) {
     this.splice(index, 0, item);
 };
@@ -32,7 +35,9 @@ export default class NotificationBody extends React.Component{
 
 
     getData(){
-        getNotificationData(this.props.user,(notificationData)=>{
+        getNotificationData(this.props.user)
+        .then(response=>{
+            let notificationData = response.data;
             var FR = [];
             var AN = [];
             notificationData.contents.map((notification)=>{
@@ -47,11 +52,13 @@ export default class NotificationBody extends React.Component{
                 FR: FR,
                 AN: AN
             });
-        })
+        });
     }
 
     handleDelete(id){
-        deleteNotification(id,this.props.user,(notificationData)=>{
+        deleteNotification(id,this.props.user)
+        .then(response=>{
+            let notificationData = response.data;
             var FR = [];
             var AN = [];
             notificationData.contents.map((notification)=>{
@@ -70,7 +77,8 @@ export default class NotificationBody extends React.Component{
     }
 
     handleFriendAccept(id,user){
-        acceptFriendRequest(id,this.props.user,()=>{
+        acceptFriendRequest(id,this.props.user)
+        .then(()=>{
             this.getData();
             socket.emit("friend request accepted",{
                 authorization: getToken(),
@@ -81,9 +89,10 @@ export default class NotificationBody extends React.Component{
     }
 
     handleActivityAccept(notificationid){
-        acceptActivityRequest(notificationid,this.props.user,()=>{
+        acceptActivityRequest(notificationid,this.props.user)
+        .then(()=>{
             this.getData();
-        })
+        });
     }
 
     handleChange(value){

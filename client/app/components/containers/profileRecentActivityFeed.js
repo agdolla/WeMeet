@@ -15,7 +15,9 @@ export default class ProfileRecentActivityFeed extends React.Component{
     }
 
     getData(user){
-        getActivityFeedData(user, (activity) => {
+        getActivityFeedData(user)
+        .then(response=>{
+            let activity = response.data;
             this.setState(activity);
         });
     }

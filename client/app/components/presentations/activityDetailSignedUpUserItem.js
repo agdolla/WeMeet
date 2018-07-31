@@ -36,18 +36,20 @@ class ActivityDetailSignedUpUserItem extends React.Component{
 
     handleAddFriend(e){
         e.preventDefault();
-        addFriend(this.props.currUser,this.props.data._id,(success)=>{
-            if(success){
-                socket.emit('notification',{
-                    authorization:getToken(),
-                    sender: this.props.currUser,
-                    target: this.props.data._id
-                });
-                this.setState({
-                    success:true
-                });
-            }
-        });
+        addFriend(this.props.currUser,this.props.data._id)
+        .then(response=>{
+            socket.emit('notification',{
+                authorization:getToken(),
+                sender: this.props.currUser,
+                target: this.props.data._id
+            });
+            this.setState({
+                success:true
+            });
+        })
+        .catch(err=>{
+            //todo: handler err
+        })
     }
 
     render(){

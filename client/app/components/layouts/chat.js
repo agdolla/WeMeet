@@ -45,29 +45,37 @@ export default class Chat extends React.Component {
                     sessionId:session
                 },
                 ()=>{
-                    getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
+                    getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
+                    .then(response=>{
+                        let message = response.data;
                         this.setState({
                             message:message
                         },()=>{
-                            getSessions(this.props.user, (sessions) => {
+                            getSessions(this.props.user)
+                            .then(response=>{
+                                let sessions = response.data;
                                 this.setState({
                                     sessions:sessions,
                                     btnText:"load earier messages"
                                 });
                             });
-                        })
+                        });
                     });
-                })
+                });
             });
         });
     }
 
     getData() {
-        getUserData(this.props.user, (userData) => {
+        getUserData(this.props.user)
+        .then(response=>{
+            let userData = response.data;
             this.setState({
                 user:userData
             },()=>{
-                getSessions(this.props.user,(sessions)=>{
+                getSessions(this.props.user)
+                .then(response=>{
+                    let sessions = response.data;
                     this.setState({
                         sessions:sessions,
                         friend:this.state.user.friends[0]
@@ -77,17 +85,19 @@ export default class Chat extends React.Component {
                                 sessionId:session
                             },
                             ()=>{
-                                getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
+                                getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
+                                .then(response=>{
+                                    let message = response.data;
                                     this.setState({
                                         message:message,
                                         btnText:message.length===0?"say hello to your friend!":"load earier messages"
-                                    })
+                                    });
                                 });
                             });
                         });
                     });
                 });
-            })
+            });
         });
     }
 
@@ -100,8 +110,9 @@ export default class Chat extends React.Component {
             }
         });
         if(result === null){
-            getSessionId(this.props.user,friend,(session)=>{
-                return callback(session._id);
+            getSessionId(this.props.user,friend)
+            .then(response=>{
+                return callback(response.data._id);
             });
         }
         else callback(result);
@@ -109,13 +120,17 @@ export default class Chat extends React.Component {
 
     handlePostMessage(message){
         socket.emit('chat',{currUser:this.props.user,friend:this.state.friend._id});
-        postMessage(this.state.sessionId, this.props.user, this.state.friend._id ,message, (newMessage)=>{
+        postMessage(this.state.sessionId, this.props.user, this.state.friend._id ,message)
+        .then(response=>{
+            let newMessage = response.data;
             this.setState({message:newMessage},()=>{
-                getSessions(this.props.user, (sessions) => {
+                getSessions(this.props.user)
+                .then(response=>{
+                    let sessions = response.data;
                     this.setState({
                         sessions:sessions,
                         btnText:"load earier messages"
-                    })
+                    });
                 });
             });
         });
@@ -129,21 +144,26 @@ export default class Chat extends React.Component {
                         sessionId:session
                     },
                     ()=>{
-                        getMessages((new Date().getTime()),this.props.user,this.state.sessionId,(message)=>{
+                        getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
+                        .then(response=>{
+                            let message = response.data;
                             this.setState({
                                 message:message,
                                 btnText:message.length===0?"say hello to your friend!":"load earier messages"
-                            })
+                            });
                         });
                     });
                 });
             }
         );
     }
+
     handleLoadMessage(e){
         e.preventDefault();
         var time = this.state.message.length===0?(new Date().getTime()):this.state.message[0].date;
-        getMessages(time,this.props.user,this.state.sessionId,(messages)=>{
+        getMessages(time,this.props.user,this.state.sessionId)
+        .then(response=>{
+            let message = response.data;
             if(messages.length===0){
                 return this.setState({
                     btnText: "nothing more to load"

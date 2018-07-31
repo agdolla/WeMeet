@@ -19,12 +19,16 @@ export default class Profile extends React.Component{
     }
 
     getData(currUser,user){
-        getUserData(currUser, (userData)=>{
+        getUserData(currUser)
+        .then(response=>{
+            let userData = response.data;
             this.setState({
                 currUser: userData
             });
-        });
-        getUserData(user, (userData)=>{
+        })
+        getUserData(user)
+        .then(response=>{
+            let userData = response.data;
             this.setState({
                 user:userData
             });

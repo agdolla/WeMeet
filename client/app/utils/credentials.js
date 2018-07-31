@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 const axios = require('axios');
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export var socket = io();
 /**
@@ -61,9 +61,7 @@ export function isUserLoggedIn() {
  * You will implement this during the workshop.
  */
  export function logout() {
-     debug("here1");
      if(user!==null){
-         debug("here");
          socket.emit('logout',user._id);
          user=null;
          localStorage.removeItem('user');

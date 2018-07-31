@@ -15,7 +15,9 @@ export default class ProfileRecentPostFeed extends React.Component{
     }
 
     getData(user){
-        getPostFeedData(user, (post) => {
+        getPostFeedData(use)
+        .then(response=>{
+            let post = response.data;
             this.setState(post);
         });
     }

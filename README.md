@@ -11,13 +11,13 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 * Writing some tests
 * Update to latest mongodb driver for nodejs
 * All code should be reviewed and revised
-* Notification is not working properly when there is new notification
 
 <br/>
 
+* Notification is not working properly when there is new notification
 * check of PostFeedItem can replace ProfileRecentPostItem, same for activity
 * activity detail comment should be descending sorted according to timestamp
 * fix naming
 * study the new react router
 * send friend request and send activity invitation are not working properly
-* promisify all the util functions
+* user is not logged out when session expired, needs refresh, which is not good.

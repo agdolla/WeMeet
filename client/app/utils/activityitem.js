@@ -2,8 +2,8 @@ var moment = require('moment');
 let axios = require('axios');
 // let debug = require('react-debug');
 
-export function createActivity(data,cb){
-    axios.post('/createActivity',{
+export function createActivity(data){
+     return axios.post('/createActivity',{
         postDate: new Date().getTime(),
         type: data.type,
         author:data.userData._id,
@@ -16,36 +16,28 @@ export function createActivity(data,cb){
         contents: {
             "text": data.detail
         }
-    })
-    .then(response=>{
-        cb(response.data);
     });
 }
 
-export function likeActivity(activityId, user, cb){
-    axios.put('/activityItem/' + activityId + '/likelist/' + user)
-    .then((response=>cb(response.data)));
+export function likeActivity(activityId, user){
+    return axios.put('/activityItem/' + activityId + '/likelist/' + user);
 }
 
-export function unLikeActivity(activityId, user, cb){
-    axios.delete('/activityItem/' + activityId +'/likelist/' + user)
-    .then(response=>cb(response.data));
+export function unLikeActivity(activityId, user){
+    return axios.delete('/activityItem/' + activityId +'/likelist/' + user);
 }
 
-export function getAllActivities(time,cb){
-    axios.get('/activities/'+time)
-    .then((response)=>cb(response.data));
+export function getAllActivities(time){
+    return axios.get('/activities/'+time);
 }
 
 export function getActivityDetail(id,cb){
-    axios.get('/activityItem/'+id)
-    .then((response)=>cb(response.data));
+    return axios.get('/activityItem/'+id);
 }
 
-export function adpostComment(activityId, author, comment, cb){
-    axios.post('/activityItem/'+activityId+'/commentThread/comment',{
+export function postActivityDetailComment(activityId, author, comment, cb){
+    return axios.post('/activityItem/'+activityId+'/commentThread/comment',{
         author:author,
         text:comment
-    })
-    .then(response=>cb(response.data));
+    });
 }

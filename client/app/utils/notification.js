@@ -1,11 +1,9 @@
 const axios = require('axios');
 
-export function deleteNotification(id, user ,cb){
-    axios.delete('/notification/'+id+'/'+user)
-    .then(response=>cb(response.data));
+export function deleteNotification(id, user){
+    return axios.delete('/notification/'+id+'/'+user);
 }
 
 export function acceptFriendRequest(id,user,cb){
-    axios.put('/notification/'+id+'/'+user)
-    .then(response=>cb(response.data));
+    return axios.put('/notification/'+id+'/'+user);
 }

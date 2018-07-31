@@ -21,11 +21,13 @@ export default class PostFeedItem extends React.Component{
     }
 
     handlePostComment(comment){
-        postComment(this.state.data._id, this.props.currentUser ,comment, (newFeedItem)=>{
+        postComment(this.state.data._id, this.props.currentUser, comment)
+        .then(response=>{
+            let newFeedItem = response.data;
             this.setState({
                 data:newFeedItem
             });
-        })
+        });
     }
 
     handleImgClick(index,e){
@@ -46,7 +48,7 @@ export default class PostFeedItem extends React.Component{
         e.preventDefault();
 
         if(e.button === 0){
-            var cb = (likeCounter) => {
+            var handler = (likeCounter) => {
                 this.state.data.likeCounter = likeCounter;
                 var newData = this.state.data;
                 this.setState(
@@ -57,10 +59,12 @@ export default class PostFeedItem extends React.Component{
             };
 
             if(!didUserLike(this.state.data.likeCounter,this.props.currentUser)){
-                likePost(this.state.data._id,this.props.currentUser,cb);
+                likePost(this.state.data._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
             else{
-                unLikePost(this.state.data._id,this.props.currentUser,cb);
+                unLikePost(this.state.data._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
         }
     }

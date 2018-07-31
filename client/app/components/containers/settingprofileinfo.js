@@ -43,7 +43,9 @@ export default class SettingProfileInfo extends React.Component{
                 nickname: this.state.userData.nickname,
                 description: this.state.userData.description,
                 birthday:moment(this.state.userData.birthday).toDate()
-            },(userData)=>{
+            })
+            .then(response=>{
+                let userData = response.data;
                 this.setState({
                     userData: userData,
                     changeInfoFailed:false,

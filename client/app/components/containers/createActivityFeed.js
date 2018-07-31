@@ -13,7 +13,7 @@ import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
-// var debug = require('react-debug');
+var debug = require('react-debug');
 var swal = require('sweetalert');
 
 class CreateActivityFeed extends React.Component {
@@ -120,28 +120,35 @@ class CreateActivityFeed extends React.Component {
                 break;
             }
             data.type = type;
-            createActivity(data,(data)=>{
+            createActivity(data)
+            .then(response=>{
+                let data = response.data;
                 socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
                 this.state.invitedlist.map((targetid)=>{
-                    sendInviteActivityRequest(this.props.user,targetid,data._id,(success)=>{
-                        if(success){
-                            socket.emit('notification',{
-                                authorization:getToken(),
-                                sender: this.props.user,
-                                target: targetid
-                            });
-                        }
-                    });
+                    sendInviteActivityRequest(this.props.user,targetid,data._id)
+                    .then(response=>{
+                        socket.emit('notification',{
+                            authorization:getToken(),
+                            sender: this.props.user,
+                            target: targetid
+                        });
+                    })
+                    .catch(err=>{
+                        //todo: handle err;
+                    })
                 });
-            });
-            swal({
-              title:"Success",
-              icon: "success",
-              button: "OK",
+                return swal({
+                  title:"Success",
+                  icon: "success",
+                  button: "OK",
+                });
             })
             .then(()=>{
                 this.props.history.push('/activity');
-            });
+            })
+            .catch(err=>{
+                // TODO: handle err
+            })
         }
         else{
             this.setState({alert:true})

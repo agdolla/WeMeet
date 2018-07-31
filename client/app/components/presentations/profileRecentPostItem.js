@@ -20,17 +20,19 @@ export default class ProfileRecentPostItem extends React.Component{
         e.preventDefault();
 
         if(e.button === 0){
-            var cb = (likeCounter) => {
+            var handler = (likeCounter) => {
                 var newData = this.state.data;
                 newData.likeCounter = likeCounter;
                 this.setState({data:newData});
             };
 
             if(!didUserLike(this.state.data.likeCounter, this.props.currentUser)){
-                likePost(this.state.data._id,this.props.currentUser,cb);
+                likePost(this.state.data._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
             else{
-                unLikePost(this.state.data._id,this.props.currentUser,cb);
+                unLikePost(this.state.data._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
         }
 

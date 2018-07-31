@@ -24,10 +24,17 @@ export default class NotificationActivity extends React.Component{
     }
 
     getData(){
-        getActivityDetail(this.props.data.activityid,(activitydata)=>{
-            this.setState({activityname:activitydata.title},()=>{
-            });
-        });
+        getActivityDetail(this.props.data.activityid)
+        .then(response=>{
+            let activityData = response.data;
+            this.setState({
+                activityname: activityData.title
+            })
+        })
+        // getActivityDetail(this.props.data.activityid,(activitydata)=>{
+        //     this.setState({activityname:activitydata.title},()=>{
+        //     });
+        // });
     }
 
     componentDidMount(){

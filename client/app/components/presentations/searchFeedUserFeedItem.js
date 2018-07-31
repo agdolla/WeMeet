@@ -33,19 +33,20 @@ export default class SearchFeedUserFeedItem extends React.Component{
 
     handleAddFriend(e){
         e.preventDefault();
-        addFriend(this.props.currentUser._id,this.state.data._id,(success)=>{
-            if(success){
-                this.setState({
-                    success:true
-                });
-
-                socket.emit('notification',{
-                    authorization:getToken(),
-                    sender: this.props.currentUser._id,
-                    target: this.state.data._id
-                });
-            }
-        });
+        addFriend(this.props.currentUser._id,this.state.data._id)
+        .then(response=>{
+            this.setState({
+                success:true
+            });
+            socket.emit('notification',{
+                authorization:getToken(),
+                sender: this.props.currentUser._id,
+                target: this.state.data._id
+            });
+        })
+        .catch(err=>{
+            //todo: handler err
+        })
     }
 
     render(){

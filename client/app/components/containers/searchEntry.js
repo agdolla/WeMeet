@@ -28,17 +28,17 @@ export default class SearchEntry extends React.Component{
         if (e.key === "Enter") {
             var query = this.state.value.trim();
             if (query !== "") {
-                searchquery(query,(searchData)=>
-                this.setState(
-                    {
+                searchquery(query)
+                .then(response=>{
+                    let searchData = response.data;
+                    this.setState({
                         searchDataResult:searchData,
                         title: "Search result for "+query+": "
-                    }
-                )
-            )
+                    });
+                });
+            }
         }
     }
-}
 
 
 render(){

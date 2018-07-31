@@ -15,7 +15,9 @@ export default class Settings extends React.Component{
     }
 
     getData(){
-        getUserData(this.props.user,(userData)=>{
+        getUserData(this.props.user)
+        .then(response=>{
+            let userData = response.data;
             this.setState({
                 userData: userData
             });

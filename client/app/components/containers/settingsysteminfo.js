@@ -8,7 +8,7 @@ import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
 import {hideElement} from '../../utils';
 var swal = require('sweetalert');
-
+let debug = require('react-debug');
 
 export default class SettingSystemInfo extends React.Component{
     constructor(props){
@@ -48,18 +48,23 @@ export default class SettingSystemInfo extends React.Component{
                 userId: this.state.userData._id,
                 oldEmail: this.state.oldEmail,
                 newEmail: this.state.newEmail
-            },(error)=>{
+            })
+            .then(response=>{
+                debug(response);
                 var msg = "";
-                if(error){
+                var color = "";
+                if(response.data){
                     msg = "Old email is wrong or new email has wrong format";
+                    color = "#d32f2f"
                 }
                 else{
                     msg = "Successfully Changed  Email";
+                    color = "#43A047"
                 }
                 this.setState({
                     oldEmail: "",
                     newEmail: "",
-                    snackBarColor: "#d32f2f",
+                    snackBarColor: color,
                     snackBarMsg: msg,
                     open: true
                 });
@@ -126,7 +131,9 @@ export default class SettingSystemInfo extends React.Component{
     handleAvatarChange(e){
         e.preventDefault();
         if(this.state.img !== null){
-            ChangeAvatar(this.state.userData._id,this.state.img,(userData)=>{
+            ChangeAvatar(this.state.userData._id,this.state.img)
+            .then(response=>{
+                let userData = response.data;
                 this.setState({userData: userData});
                 var user = {};
                 user._id = userData._id;

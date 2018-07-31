@@ -17,15 +17,17 @@ export default class ProfileRecentActivityItem extends React.Component{
         e.preventDefault();
 
         if(e.button === 0){
-            var cb = (likeCounter) => {
+            var handler = (likeCounter) => {
                 this.setState({likeCounter:likeCounter});
             };
 
             if(!didUserLike(this.state.likeCounter,this.props.currentUser)){
-                likeActivity(this.state._id,this.props.currentUser,cb);
+                likeActivity(this.state._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
             else{
-                unLikeActivity(this.state._id,this.props.currentUser,cb);
+                unLikeActivity(this.state._id,this.props.currentUser)
+                .then(response=>handler(response.data));
             }
         }
 

@@ -893,7 +893,7 @@ MongoClient.connect(url, function(err, database) {
         var userId = new ObjectID(req.params.userId);
         getUserData(userId, function(err, userData) {
             if (err)
-            return sendDatabaseError(res, err);
+                return sendDatabaseError(res, err);
             else if (userData.email === data.oldEmail && validateEmail(data.newEmail)) {
                 db.collection('users').updateOneAsync({
                     _id: userId

@@ -18,11 +18,13 @@ export default class ActivityFeed extends React.Component{
     }
 
     getData(){
-        getAllActivities((new Date()).getTime(), (activityFeedData)=>{
+        getAllActivities((new Date()).getTime())
+        .then(response=>{
+            let activityFeedData = response.data;
             this.setState({
                 contents:activityFeedData
             });
-        });
+        })
     }
 
     handleLoadMore(e){
@@ -32,7 +34,9 @@ export default class ActivityFeed extends React.Component{
         });
         var date = this.state.contents.length===0?(new Date()).getTime():
         this.state.contents[this.state.contents.length-1].postDate;
-        getAllActivities(date, (activities)=>{
+        getAllActivities(date)
+        .then(response=>{
+            let activities = response.data;
             if(activities.length===0){
                 return this.setState({
                     btnText:"nothing more to load",
@@ -44,7 +48,8 @@ export default class ActivityFeed extends React.Component{
                 contents:newActivities,
                 submitted:false
             });
-        });
+
+        })
     }
 
     componentDidMount(){

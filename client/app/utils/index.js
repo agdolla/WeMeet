@@ -4,7 +4,7 @@ import {unLikeActivity} from './activityitem'
 import {createActivity} from './activityitem'
 import {getActivityDetail} from './activityitem'
 import {getAllActivities} from './activityitem'
-import {adpostComment} from './activityitem'
+import {postActivityDetailComment} from './activityitem'
 
 //client side authentication request function
 import {signup} from './authentication'
@@ -44,8 +44,6 @@ import {sendInviteActivityRequest} from './server'
 
 //client side search request function
 import {searchquery} from './search'
-
-
 //client side settings request function
 import {changeUserInfo} from './settings'
 import {ChangeAvatar} from './settings'
@@ -72,7 +70,7 @@ export{
     createActivity,
     getAllActivities,
     getActivityDetail,
-    adpostComment,
+    postActivityDetailComment,
 
     //export authentication function
     signup,

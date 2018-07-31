@@ -1,19 +1,16 @@
 const axios = require('axios');
 
 
-export function changeUserInfo(data, cb){
-    axios.put('/settings/user/'+data.userId,data)
-    .then(response=>cb(response.data));
+export function changeUserInfo(data){
+    return axios.put('/settings/user/'+data.userId,data);
 }
 
-export function ChangeAvatar(user,img,cb){
-    axios.put('/settings/avatar/user/'+user,{
+export function ChangeAvatar(user,img){
+    return axios.put('/settings/avatar/user/'+user,{
         img:img
-    })
-    .then(response=>cb(response.data));
+    });
 }
 
-export function changeEmail(data,cb){
-    axios.put('/settings/emailChange/user/'+data.userId,data)
-    .then(response=>cb(response.data));
+export function changeEmail(data){
+    return axios.put('/settings/emailChange/user/'+data.userId,data);
 }
