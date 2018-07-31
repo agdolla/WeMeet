@@ -15,7 +15,7 @@ WeMeet is a social networking service.It recommends users nearby activities and 
 <br/>
 
 * push notification is not working properly when there is new notification
-* check of PostFeedItem can replace ProfileRecentPostItem, same for activity
+* check if PostFeedItem can replace ProfileRecentPostItem, same for activity
 * activity detail comment should be descending sorted according to timestamp
 * fix naming (check again)
 * study the new react router
