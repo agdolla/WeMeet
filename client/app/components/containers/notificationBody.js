@@ -14,7 +14,7 @@ import FontIcon from 'material-ui/FontIcon';
 import Badge from 'material-ui/Badge';
 // import IconButton from 'material-ui/IconButton';
 
-let debug = require('react-debug');
+// let debug = require('react-debug');
 
 
 Array.prototype.insert = function (index, item) {

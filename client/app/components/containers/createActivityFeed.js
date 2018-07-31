@@ -125,7 +125,7 @@ class CreateActivityFeed extends React.Component {
                 let data = response.data;
                 socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
                 this.state.invitedlist.map((targetid)=>{
-                    sendInviteActivityRequest(this.props.user,targetid,data._id)
+                    sendInviteActivityRequest(this.props.user._id,targetid,data._id)
                     .then(response=>{
                         socket.emit('notification',{
                             authorization:getToken(),

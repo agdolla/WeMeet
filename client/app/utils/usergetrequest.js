@@ -10,7 +10,7 @@ export function getPostFeedData(user){
 }
 
 export function getActivityFeedData(user){
-    axios.get('/user/' + user + '/activity');
+    return axios.get('/user/' + user + '/activity');
 }
 
 export function getUserData(user){

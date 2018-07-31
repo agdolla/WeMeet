@@ -31,11 +31,11 @@ export function getAllActivities(time){
     return axios.get('/activities/'+time);
 }
 
-export function getActivityDetail(id,cb){
+export function getActivityDetail(id){
     return axios.get('/activityItem/'+id);
 }
 
-export function postActivityDetailComment(activityId, author, comment, cb){
+export function postActivityDetailComment(activityId, author, comment){
     return axios.post('/activityItem/'+activityId+'/commentThread/comment',{
         author:author,
         text:comment

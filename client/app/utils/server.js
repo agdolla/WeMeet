@@ -18,6 +18,6 @@ export function sendJoinActivityRequest(sender,target,activityid){
     return axios.post('/activityJoinRequest/'+sender+'/'+target+'/'+activityid,{});
 }
 
-export function sendInviteActivityRequest(sender,target,activityid,cb){
+export function sendInviteActivityRequest(sender,target,activityid){
     return axios.post('/activityInviteRequest/'+sender+'/'+target+'/'+activityid,{});
 }
