@@ -758,6 +758,7 @@ MongoClient.connect(url, function(err, database) {
             postFeedItem.comments.forEach((comment) => {
                 userList.push(comment.author);
             });
+            postFeedItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
             userList = userList.concat(postFeedItem.likeCounter);
 
             resolveUserObjects(userList, function(err, userMap) {
