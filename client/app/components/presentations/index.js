@@ -27,10 +27,6 @@ import ChatRightBubble from './chatrightbubble'
 import NotificationActivity from './notificationactivity'
 import NotificationFriendRequest from './notificationfriendRequest'
 
-//import Profile presentations
-import ProfileRecentActivityItem from './profileRecentActivityItem'
-import ProfileRecentPostItem from './profileRecentPostItem'
-
 //import Search presentations
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
 
@@ -58,9 +54,6 @@ export{
 
     NotificationActivity,
     NotificationFriendRequest,
-
-    ProfileRecentActivityItem,
-    ProfileRecentPostItem,
 
     SearchFeedUserFeedItem
 }

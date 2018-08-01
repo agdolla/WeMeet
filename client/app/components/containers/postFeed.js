@@ -87,7 +87,7 @@ export default class PostFeed extends React.Component{
             );
         }
         return (
-            <div>
+            <div className="postFeedItem">
                 <PostEntry userData={this.props.user} onPost={(text,img)=>this.onPost(text,img)}/>
                 {this.state.contents.map((postFeedItem,i)=>{
                     return <PostFeedItem key={i} data={postFeedItem} currentUser={this.props.user._id}/>

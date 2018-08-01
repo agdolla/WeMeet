@@ -6,6 +6,29 @@
   margin-bottom: 30px;
 }
 
+.profile .panel .panel-heading {
+  background-color: #FDFDFD;
+  border-bottom-color: #FDFDFD;
+}
+.profile .panel .panel-body{
+  background-color: #F7F7F7;
+}
+
+.profile .panel textarea:focus{
+  border-color: rgba(97, 180, 228, 0.4);
+  outline: 0 none;
+}
+
+.profile .panel textarea{
+  resize: none;
+  margin-top: 10px;
+  border-color: #F7F7F7;
+  background-color: #F7F7F7;
+  border-radius: 5px;
+  height: 100px;
+  width: 100%;
+}
+
 .profile .panel .panel-footer{
   background-color: #FDFDFD;
   border-top-color: #FDFDFD;

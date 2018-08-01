@@ -3,7 +3,7 @@ import React from 'react';
 //request function
 import {getActivityFeedData} from '../../utils';
 
-import {ProfileRecentActivityItem} from '../presentations';
+import {ActivityFeedItem} from '../presentations';
 
 export default class ProfileRecentActivityFeed extends React.Component{
 
@@ -32,9 +32,9 @@ export default class ProfileRecentActivityFeed extends React.Component{
 
     render(){
         return(
-            <div>
+            <div style={{marginTop: '15px'}}>
                 {this.state.contents.map((activityItem)=>{
-                    return <ProfileRecentActivityItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
+                    return <ActivityFeedItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
                 })}
             </div>
         );

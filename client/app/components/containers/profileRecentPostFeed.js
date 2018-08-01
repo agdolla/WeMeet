@@ -3,7 +3,7 @@ import React from 'react';
 //request function
 import {getPostFeedData} from '../../utils';
 
-import {ProfileRecentPostItem} from '../presentations';
+import {PostFeedItem} from '../presentations';
 
 export default class ProfileRecentPostFeed extends React.Component{
 
@@ -32,7 +32,7 @@ export default class ProfileRecentPostFeed extends React.Component{
         return(
             <div>
                 {this.state.contents.map((postItem)=>{
-                    return <ProfileRecentPostItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
+                    return <PostFeedItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
                 })}
             </div>
         );
