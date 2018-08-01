@@ -734,6 +734,7 @@ MongoClient.connect(url, function(err, database) {
         activityItem.comments.forEach((comment) => {
             userList.push(comment.author);
         });
+        activityItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
         activityItem.likeCounter.map((id) => userList.push(id));
         activityItem.participants.map((id) => userList.push(id));
         resolveUserObjects(userList, function(err, userMap) {
@@ -1030,7 +1031,7 @@ MongoClient.connect(url, function(err, database) {
     });
 
     //get activity detail
-    app.get('/activityItem/:activityId',cache(60), isLoggedIn, function(req, res) {
+    app.get('/activityItem/:activityId', isLoggedIn, function(req, res) {
         var activityId = new ObjectID(req.params.activityId);
         getActivityFeedItem(activityId, function(err, activityData) {
             res.status(201);

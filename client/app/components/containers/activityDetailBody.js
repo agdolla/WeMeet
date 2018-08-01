@@ -55,9 +55,9 @@ export default class ActivityDetailBody extends React.Component{
   handlePostComment(comment){
     postActivityDetailComment(this.state.activity._id, this.props.currentUser ,comment)
     .then(response=>{
-      let newFeedItem = response.data;
+      debug(response.data);
       this.setState({
-        activity: newFeedItem
+        activity: response.data
       });
     });
   }
@@ -279,7 +279,7 @@ export default class ActivityDetailBody extends React.Component{
       </div>
     </div>
     <ActivityCommentThread count={this.state.activity.comments === undefined ? 0:this.state.activity.comments.length} user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}>
-      {this.state.activity.comments === undefined ? 0:this.state.activity.comments.map((comment,i)=>{
+      {this.state.activity.comments === undefined ? []:this.state.activity.comments.map((comment,i)=>{
         return (
           <ActivityDetailComment key={i} data={comment} />
         )
