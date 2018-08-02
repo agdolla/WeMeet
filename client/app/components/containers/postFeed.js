@@ -6,12 +6,10 @@ import {PostFeedItem} from '../presentations';
 //request function
 import {getAllPosts,postStatus} from '../../utils';
 //credentials function
-import {socket,getToken} from '../../utils';
+import {socket,getToken,isBottom} from '../../utils';
 
 // var debug = require('react-debug');
 
-
-import RaisedButton from 'material-ui/RaisedButton';
 
 export default class PostFeed extends React.Component{
 
@@ -19,7 +17,7 @@ export default class PostFeed extends React.Component{
         super(props);
         this.state = {
             contents: [],
-            loadBtnText:"load more",
+            moreToLoad: true,
             submitted:false
         }
     }
@@ -35,8 +33,8 @@ export default class PostFeed extends React.Component{
         });
     }
 
-    handleLoadMore(e){
-        e.preventDefault();
+    handleLoadMore(){
+        document.removeEventListener('scroll', this.trackScrolling);
         this.setState({
             submitted:true
         });
@@ -47,7 +45,7 @@ export default class PostFeed extends React.Component{
             let postFeedData = response.data;
             if(postFeedData.length===0){
                 return this.setState({
-                    loadBtnText:"nothing more to load",
+                    moreToLoad:false,
                     submitted:false
                 })
             }
@@ -55,6 +53,8 @@ export default class PostFeed extends React.Component{
             this.setState({
                 contents:newPostData,
                 submitted:false
+            },() =>{
+                document.addEventListener('scroll', this.trackScrolling);
             });
         });
     }
@@ -63,17 +63,20 @@ export default class PostFeed extends React.Component{
         postStatus(this.props.user._id, text, img,)
         .then(()=>{
             socket.emit('newPost',{authorization:getToken(),user:this.props.user._id});
-            this.setState({
-                loadBtnText:"load more"
-            },()=>{
-                this.getData();
-            });
+            this.getData();
         });
     }
 
     componentWillReceiveProps(){
         this.getData();
     }
+
+    trackScrolling = () => {
+        let wrappedElement = document.getElementById('postFeed');
+        if (isBottom(wrappedElement)) {
+          this.handleLoadMore();
+        }
+    };
 
     render(){
         if(this.state.contents.length === 0){
@@ -87,18 +90,27 @@ export default class PostFeed extends React.Component{
             );
         }
         return (
-            <div className="postFeedItem">
+            <div className="postFeedItem" id="postFeed">
                 <PostEntry userData={this.props.user} onPost={(text,img)=>this.onPost(text,img)}/>
                 {this.state.contents.map((postFeedItem,i)=>{
                     return <PostFeedItem key={i} data={postFeedItem} currentUser={this.props.user._id}/>
                 })}
-                <RaisedButton label={this.state.loadBtnText} fullWidth={true} onClick={(e)=>this.handleLoadMore(e)}
-                disabled={this.state.loadBtnText==="nothing more to load"||this.state.submitted} style={{marginBottom:'30px'}}/>
+                {
+                    !this.state.moreToLoad &&
+                    <div style = {{marginTop: '30px', marginBottom: '30px', textAlign: 'center'}}>
+                        Nothing more to load
+                    </div>
+                }
             </div>
         );
     }
 
     componentDidMount(){
+        document.addEventListener('scroll', this.trackScrolling);
         this.getData();
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener('scroll', this.trackScrolling);
     }
 }

@@ -1,8 +1,7 @@
 import React from 'react';
 import {Link} from "react-router-dom";
 import {ActivityFeedItem} from '../presentations';
-import {getAllActivities} from '../../utils';
-import RaisedButton from 'material-ui/RaisedButton';
+import {getAllActivities, isBottom} from '../../utils';
 // var debug = require('react-debug');
 
 
@@ -12,7 +11,7 @@ export default class ActivityFeed extends React.Component{
         super(props);
         this.state= {
             contents: [],
-            btnText:"load more",
+            moreToLoad:true,
             submitted:false
         }
     }
@@ -27,8 +26,8 @@ export default class ActivityFeed extends React.Component{
         })
     }
 
-    handleLoadMore(e){
-        e.preventDefault();
+    handleLoadMore(){
+        document.removeEventListener('scroll', this.trackScrolling);
         this.setState({
             submitted:true
         });
@@ -39,7 +38,7 @@ export default class ActivityFeed extends React.Component{
             let activities = response.data;
             if(activities.length===0){
                 return this.setState({
-                    btnText:"nothing more to load",
+                    moreToLoad:false,
                     submitted:false
                 })
             }
@@ -47,18 +46,32 @@ export default class ActivityFeed extends React.Component{
             this.setState({
                 contents:newActivities,
                 submitted:false
+            },()=>{
+                document.addEventListener('scroll', this.trackScrolling);
             });
 
         })
     }
 
     componentDidMount(){
+        document.addEventListener('scroll', this.trackScrolling);
         this.getData();
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener('scroll', this.trackScrolling);
     }
 
     componentWillReceiveProps(){
         this.getData();
     }
+
+    trackScrolling = () => {
+        let wrappedElement = document.getElementById('activityFeed');
+        if (isBottom(wrappedElement)) {
+          this.handleLoadMore();
+        }
+    };
 
     render(){
         if(this.state.contents.length === 0){
@@ -75,11 +88,16 @@ export default class ActivityFeed extends React.Component{
             );
         }
         return(
-            <div>
+            <div id="activityFeed">
                 {this.state.contents.map((activityFeedItem)=>{
                     return <ActivityFeedItem key={activityFeedItem._id} data={activityFeedItem}/>
                 })}
-                <RaisedButton label={this.state.btnText} fullWidth={true} onClick={(e)=>this.handleLoadMore(e)} disabled={this.state.btnText==="nothing more to load"||this.state.submitted} style={{marginBottom:'30px'}}/>
+                {
+                    !this.state.moreToLoad &&
+                    <div style = {{marginTop: '30px', marginBottom: '30px', textAlign: 'center'}}>
+                        Nothing more to load
+                    </div>
+                }
             </div>
         );
     }
