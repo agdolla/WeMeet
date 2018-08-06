@@ -2,12 +2,11 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
 import {PostComment, PostCommentThread} from './';
-import {likePost, unLikePost, postComment, didUserLike} from '../../utils';
+import {likePost, unLikePost, postComment, didUserLike, getPostComments} from '../../utils';
 import {RadioButton} from 'material-ui/RadioButton';
 import FontIcon from 'material-ui/FontIcon';
 
 var moment = require('moment');
-// var debug = require('react-debug');
 
 export default class PostFeedItem extends React.Component{
 
@@ -15,8 +14,10 @@ export default class PostFeedItem extends React.Component{
         super(props);
         this.state = {
             data: props.data,
+            comments:[],
             isOpen:false,
-            currentImage:0
+            currentImage:0,
+            loadMore: true
         };
     }
 
@@ -26,6 +27,8 @@ export default class PostFeedItem extends React.Component{
             let newFeedItem = response.data;
             this.setState({
                 data:newFeedItem
+            },()=>{
+                this.loadComments(true);
             });
         });
     }
@@ -69,9 +72,25 @@ export default class PostFeedItem extends React.Component{
         }
     }
 
+    loadComments(justPosted) {
+        let date = justPosted || this.state.comments.length == 0 ? (new Date()).getTime() :
+        this.state.comments[this.state.comments.length-1].postDate;
+
+        getPostComments(this.state.data._id, date)
+        .then(response=>{
+            let load = response.data.length > 0;
+            let postComments = justPosted? response.data : this.state.comments.concat(response.data);
+            this.setState({
+                loadMore: load,
+                comments: postComments
+            })
+        })
+    }
+
     componentWillReceiveProps(nextProps){
         this.setState({
-            data: nextProps.data
+            data: nextProps.data,
+            comments: []
         })
     }
 
@@ -168,10 +187,11 @@ export default class PostFeedItem extends React.Component{
                                 uncheckedIcon={<FontIcon className="material-icons" style={{fontSize:'20px'}}>favorite_border</FontIcon>}
                                 />
                                 <FontIcon className="material-icons" style={{fontSize:'20px'}}>insert_comment</FontIcon>
-                                <div><span style={{marginLeft:'2px'}}>{data.comments.length}</span></div>
+                                <div><span style={{marginLeft:'2px'}}>{this.state.data.commentsCount}</span></div>
                             </div>
-                            <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)}>
-                                {data.comments.map((comment,i)=>{
+                            <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)} 
+                            loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}>
+                                {this.state.comments.map((comment,i)=>{
                                     return (
                                     <PostComment key={i} data={comment} />
                                     )

@@ -32,7 +32,7 @@ import {likePost} from './postitem'
 import {unLikePost} from './postitem'
 import {postComment} from './postitem'
 import {postStatus} from './postitem'
-import {getAllPosts} from './postitem'
+import {getAllPosts,getPostComments} from './postitem'
 
 
 //client side httprequest function
@@ -99,7 +99,7 @@ export{
     postComment,
     postStatus,
     getAllPosts,
-
+    getPostComments,
 
     //export search function
     searchquery,

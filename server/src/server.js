@@ -123,7 +123,6 @@ MongoClient.connect(url, function(err, database) {
                 user.nickname = "";
                 user.avatar = "img/user.png";
                 user.description = "";
-                user.location = null;
                 user.friends = [new ObjectID("000000000000000000000001")];
                 user.sessions = [];
                 user.birthday = 147812931;
@@ -216,7 +215,6 @@ MongoClient.connect(url, function(err, database) {
                     user.nickname = "";
                     user.avatar = "https://graph.facebook.com/"+profile.id+"/picture?type=large";
                     user.description = "";
-                    user.location = null;
                     user.friends = [new ObjectID("000000000000000000000001")];
                     user.sessions = [];
                     user.birthday = 147812931;
@@ -335,6 +333,23 @@ MongoClient.connect(url, function(err, database) {
         });
     }
 
+    //get post comments
+    function getPostComments(postFeedId, date) {
+        return db.collection('postFeedComments').aggregateAsync([
+            {$match: {_id: postFeedId}},
+            {$unwind: '$comments'},
+            {$match: {'comments.postDate':{$lt:parseInt(date)}}},
+            {$sort: {'comments.postDate':-1}},
+            {$limit: 3}
+        ])
+        .then((comments)=>{
+            let postComments = comments.map((comment)=>{
+                return comment.comments
+            });
+            return resolvePostComments(postComments);
+        })
+    }
+
     function getPostFeedData(user) {
         return new Promise(function(resolve, reject) {
             db.collection('users').findOneAsync({
@@ -392,7 +407,7 @@ MongoClient.connect(url, function(err, database) {
 
     });
 
-    function postStatus(user, text, location, img) {
+    function postStatus(user, text, img) {
         return new Promise(function(resolve,reject){
             var time = new Date().getTime();
             //generate unique name
@@ -411,10 +426,9 @@ MongoClient.connect(url, function(err, database) {
                     "author": user,
                     "postDate": time,
                     "text": text,
-                    "img": imgPath,
-                    "location": location
+                    "img": imgPath
                 },
-                "comments": []
+                "commentsCount": 0
             };
 
             db.collection('postFeedItems').insertOneAsync(post, {
@@ -459,7 +473,7 @@ MongoClient.connect(url, function(err, database) {
     app.post('/postItem', validate({body: statusUpdateSchema}), isLoggedIn,function(req, res) {
         var body = req.body;
         if(body.userId.str!==req.user._id.str) return res.status(401).end();
-        postStatus(new ObjectID(body.userId), body.text, body.location, body.img)
+        postStatus(new ObjectID(body.userId), body.text, body.img)
         .then(function(newPost){
             res.status(201);
             res.send(newPost);
@@ -542,7 +556,6 @@ MongoClient.connect(url, function(err, database) {
                     delete user.post;
                     delete user.notification;
                     delete user.activity;
-                    delete user.location;
                     userMap[user._id] = user;
                 });
                 callback(null, userMap);
@@ -663,13 +676,16 @@ MongoClient.connect(url, function(err, database) {
         });
     });
 
+
+    //TODO: update the counter and get postcomments again=
     //post comments
     app.post('/postItem/:postItemId/commentThread/comment', validate({body: commentSchema}), isLoggedIn,function(req, res) {
         var body = req.body;
         var postItemId = req.params.postItemId;
         var userId = body.author;
         if(userId.str!==req.user._id.str) return res.status(401).end();
-        db.collection('postFeedItems').updateOneAsync({
+        
+        db.collection('postFeedComments').findOneAndUpdateAsync({
             _id: new ObjectID(postItemId)
         }, {
             $push: {
@@ -679,14 +695,38 @@ MongoClient.connect(url, function(err, database) {
                     "postDate": (new Date()).getTime()
                 }
             }
+        },{
+            upsert: true
         })
-        .then(() => {
-            getPostFeedItem(new ObjectID(postItemId))
-            .then(postItem => {
-                res.send(postItem);
+        .then(()=>{
+            return db.collection('postFeedItems').findAndModifyAsync({
+                _id: new ObjectID(postItemId)
+            },[],{
+                $inc: {commentsCount: 1}
+            },{
+                new: true
             })
         })
-        .catch(err => {sendDatabaseError(res,err)})
+        .then((updatedPostItem)=>{
+            updatedPostItem = updatedPostItem.value;
+            return resolvePostItem(updatedPostItem);
+        })
+        .then(resolvedPostItem=>{
+            res.send(resolvedPostItem);
+        })
+        .catch(err => {sendDatabaseError(res,err)});
+    });
+
+    app.get('/postItem/:postItemId/comment/:date', isLoggedIn, (req, res)=>{
+        let postFeedId = req.params.postItemId;
+        let date = req.params.date
+        getPostComments(new ObjectID(postFeedId),date)
+        .then((postComments)=>{
+            res.send(postComments);
+        })
+        .catch(err=>{
+            sendDatabaseError(res, err);
+        });
     });
 
     //change user info
@@ -702,7 +742,6 @@ MongoClient.connect(url, function(err, database) {
                 fullname:data.fullname,
                 nickname: data.nickname,
                 description: data.description,
-                location: data.location,
                 birthday: moment(data.birthday).valueOf()
             }
         })
@@ -755,10 +794,10 @@ MongoClient.connect(url, function(err, database) {
     function resolvePostItem(postFeedItem){
         return new Promise(function(resolve, reject) {
             var userList = [postFeedItem.contents.author];
-            postFeedItem.comments.forEach((comment) => {
-                userList.push(comment.author);
-            });
-            postFeedItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
+            // postFeedItem.comments.forEach((comment) => {
+                // userList.push(comment.author);
+            // });
+            // postFeedItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
             userList = userList.concat(postFeedItem.likeCounter);
 
             resolveUserObjects(userList, function(err, userMap) {
@@ -767,13 +806,33 @@ MongoClient.connect(url, function(err, database) {
                 else {
                     postFeedItem.likeCounter = postFeedItem.likeCounter.map((id) => userMap[id]);
                     postFeedItem.contents.author = userMap[postFeedItem.contents.author];
-                    postFeedItem.comments.forEach((comment) => {
-                        comment.author = userMap[comment.author];
-                    });
+                    // postFeedItem.comments.forEach((comment) => {
+                    //     comment.author = userMap[comment.author];
+                    // });
                     resolve(postFeedItem);
                 }
             });
         });
+    }
+
+    function resolvePostComments(postComments) {
+        return new Promise((resolve, reject)=>{
+            var userList = [];
+            postComments.forEach((comment)=>{
+                userList.push(comment.author);
+            });
+
+            resolveUserObjects(userList, (err, userMap)=>{
+                if(err)
+                    reject(err);
+                else{
+                    postComments.forEach((comment)=> {
+                        comment.author = userMap[comment.author];
+                    });
+                    resolve(postComments);
+                }
+            });
+        })
     }
 
     function getAllActivities(time,callback){
@@ -947,24 +1006,24 @@ MongoClient.connect(url, function(err, database) {
         .catch(err=>{throw(err)})
     });
 
-    app.put('/settings/location/user/:userId', isLoggedIn,function(req, res) {
-        if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
-        var userId = req.params.userId;
-        var body = req.body;
-        db.collection('users').updateOne({
-            _id: new ObjectID(userId)
-        }, {
-            $set: {
-                location: body
-            }
-        }, function(err) {
-            if (err)
-            return sendDatabaseError(res, err);
-            else {
-                res.send(true);
-            }
-        });
-    });
+    // app.put('/settings/location/user/:userId', isLoggedIn,function(req, res) {
+    //     if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+    //     var userId = req.params.userId;
+    //     var body = req.body;
+    //     db.collection('users').updateOne({
+    //         _id: new ObjectID(userId)
+    //     }, {
+    //         $set: {
+    //             location: body
+    //         }
+    //     }, function(err) {
+    //         if (err)
+    //         return sendDatabaseError(res, err);
+    //         else {
+    //             res.send(true);
+    //         }
+    //     });
+    // });
 
     // get activity Feed data
     app.get('/user/:userid/activity',cache(30), isLoggedIn,function(req, res) {

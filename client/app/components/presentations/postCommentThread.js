@@ -1,5 +1,8 @@
 import React from 'react';
 import {PostCommentEntry} from './';
+import FlatButton from 'material-ui/FlatButton';
+
+// let debug = require('react-debug');
 
 export default class PostCommentThread extends React.Component{
     render(){
@@ -14,6 +17,10 @@ export default class PostCommentThread extends React.Component{
                         );
                     })}
                 </ul>
+                {
+                    this.props.loadMore &&
+                    <FlatButton label="Load comments" onClick={()=>this.props.loadCommentClick()}/>
+                }
                 <PostCommentEntry onPostComment={this.props.onPostComment}/>
             </div>
         );

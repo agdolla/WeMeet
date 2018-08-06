@@ -27,7 +27,6 @@ var initialData = {
       "nickname": "make your life better",
       "avatar": "img/logo/mipmap-xxhdpi/ic_launcher.png",
       "description": "Welcome to Wemeet! If there are any questions, ask me!",
-      "location":{},
       "friends":[new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")],
       "post":new ObjectID("000000000000000000000001"),
       "activity":new ObjectID("000000000000000000000001"),
@@ -44,7 +43,6 @@ var initialData = {
       "nickname": "None",
       "avatar": "img/user.png",
       "description": "Hello everyone, I'm a test account",
-      "location":{},
       "friends":[new ObjectID("000000000000000000000001")],
       "post":new ObjectID("000000000000000000000002"),
       "activity":new ObjectID("000000000000000000000002"),
@@ -61,7 +59,6 @@ var initialData = {
       "nickname": "None",
       "avatar": "img/user.png",
       "description": "Hello everyone, I'm a test account",
-      "location":{},
       "friends":[new ObjectID("000000000000000000000001")],
       "post":new ObjectID("000000000000000000000003"),
       "activity":new ObjectID("000000000000000000000003"),
@@ -231,12 +228,18 @@ var initialData = {
       "type": "general",
       "contents": {
         "author":new ObjectID("000000000000000000000001"),
-        "location":{},
         //unix time
         "postDate": 1478129314000,
         "text": "What's up there",
         "img": ["img/tmp.jpg"]
       },
+      "commentsCount": 2
+    }
+  },
+
+  "postFeedComments": {
+    "1": {
+      "_id": new ObjectID("000000000000000000000001"),
       "comments": [
         {
           "author":new ObjectID("000000000000000000000002"),

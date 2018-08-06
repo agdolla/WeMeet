@@ -26,3 +26,7 @@ export function postStatus(user, text, img){
 export function getAllPosts(time){
     return axios.get('/posts/'+time);
 }
+
+export function getPostComments(postFeedId, date) {
+    return axios.get('/postItem/'+postFeedId+'/comment/'+date);
+}

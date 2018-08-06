@@ -29,6 +29,8 @@ export default class PostFeed extends React.Component{
             let postFeedData = response.data;
             this.setState({
                 contents:postFeedData
+            },()=>{
+                document.addEventListener('scroll', this.trackScrolling);
             });
         });
     }
@@ -60,7 +62,7 @@ export default class PostFeed extends React.Component{
     }
 
     onPost(text,img){
-        postStatus(this.props.user._id, text, img,)
+        postStatus(this.props.user._id, text, img)
         .then(()=>{
             socket.emit('newPost',{authorization:getToken(),user:this.props.user._id});
             this.getData();
@@ -74,7 +76,7 @@ export default class PostFeed extends React.Component{
     trackScrolling = () => {
         let wrappedElement = document.getElementById('postFeed');
         if (isBottom(wrappedElement)) {
-          this.handleLoadMore();
+            this.handleLoadMore();
         }
     };
 
