@@ -19,7 +19,7 @@ export default class PostCommentThread extends React.Component{
                 </ul>
                 {
                     this.props.loadMore &&
-                    <FlatButton label="Load comments" onClick={()=>this.props.loadCommentClick()}/>
+                    <FlatButton label="Load comments" fullWidth={true} onClick={()=>this.props.loadCommentClick()}/>
                 }
                 <PostCommentEntry onPostComment={this.props.onPostComment}/>
             </div>

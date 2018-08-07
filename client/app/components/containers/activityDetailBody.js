@@ -10,7 +10,7 @@ import {ActivityDetailSignedUpUserAvatar} from '../presentations'
 //request function
 import {getActivityDetail,postActivityDetailComment,
     sendJoinActivityRequest,likeActivity,
-    unLikeActivity,socket, hideElement,didUserLike} from '../../utils';
+    unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments} from '../../utils';
 
 var moment = require('moment');
 
@@ -23,9 +23,11 @@ export default class ActivityDetailBody extends React.Component{
     super(props);
     this.state = {
       activity: {},
+      comments: [],
       ishost: false,
       joined: false,
-      success:false
+      success:false,
+      loadMore: true
     };
   }
 
@@ -57,6 +59,8 @@ export default class ActivityDetailBody extends React.Component{
     .then(response=>{
       this.setState({
         activity: response.data
+      },()=>{
+        this.loadComments(true);
       });
     });
   }
@@ -70,7 +74,6 @@ export default class ActivityDetailBody extends React.Component{
           this.setState({ishost:true});
         }
         if(this.checkJoined()){
-          this.setState({ishost:true});
           this.setState({joined:true});
         }
       });
@@ -109,6 +112,21 @@ export default class ActivityDetailBody extends React.Component{
       //todo: hande err
     })
   }
+
+  loadComments(justPosted) {
+    let date = justPosted || this.state.comments.length == 0 ? (new Date()).getTime() :
+    this.state.comments[this.state.comments.length-1].postDate;
+
+    getActivityItemCommments(this.props.id, date)
+    .then(response=>{
+        let load = response.data.length > 0;
+        let activityComments = justPosted? response.data : this.state.comments.concat(response.data);
+        this.setState({
+            loadMore: load,
+            comments: activityComments
+        })
+    })
+}
 
 
   componentDidMount(){
@@ -256,7 +274,7 @@ export default class ActivityDetailBody extends React.Component{
                       {this.state.activity.likeCounter === undefined ? 0:this.state.activity.likeCounter.length}
                     </a>
                     <span className="glyphicon glyphicon-comment" style={{'marginRight':'5px','marginLeft':'20px'}}></span>
-                    {this.state.activity.comments === undefined ? 0:this.state.activity.comments.length}
+                    {this.state.activity.commentsCount}
                   </div>
                 </div>
               </div>
@@ -276,8 +294,10 @@ export default class ActivityDetailBody extends React.Component{
         </div>
       </div>
     </div>
-    <ActivityCommentThread count={this.state.activity.comments === undefined ? 0:this.state.activity.comments.length} user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}>
-      {this.state.activity.comments === undefined ? []:this.state.activity.comments.map((comment,i)=>{
+    <ActivityCommentThread count={this.state.activity.commentsCount} 
+    user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}
+    onLoadComments={()=>this.loadComments(false)} loadMore={this.state.loadMore}>
+      {this.state.comments.map((comment,i)=>{
         return (
           <ActivityDetailComment key={i} data={comment} />
         )

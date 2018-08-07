@@ -6,7 +6,7 @@ WeMeet is a social networking service. It recommends users nearby activities and
 * Reset password is not implemented
 * Users should be able to send images in chat, this part is also not implemented
 * All realtime functionalities should be reviewed and redesigned
-* (current working) Paging in user profile for the user-posted trendings and activities * paging completed for post user comments.
+* Paging in user profile
 
 * Update to material ui latest version
 * Writing some tests
@@ -14,6 +14,7 @@ WeMeet is a social networking service. It recommends users nearby activities and
 * All code should be reviewed and revised
 * add infinite scroll to chat message
 * performance and security
+* divide server-side code to modules
 
 <br/>
 

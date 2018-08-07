@@ -41,3 +41,7 @@ export function postActivityDetailComment(activityId, author, comment){
         text:comment
     });
 }
+
+export function getActivityItemCommments(activityItemId, date) {
+    return axiosHelper.get('/activityItem/'+activityItemId+'/comment/'+date);
+}

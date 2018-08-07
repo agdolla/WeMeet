@@ -1,5 +1,6 @@
 import React from 'react';
 import {ActivityDetailCommentEntry} from './';
+import FlatButton from 'material-ui/FlatButton';
 
 export default class ActivityCommentThread extends React.Component{
     constructor(props){
@@ -29,6 +30,10 @@ export default class ActivityCommentThread extends React.Component{
                                         );
                                     })}
                                 </ul>
+                                {
+                                    this.props.loadMore &&
+                                    <FlatButton label='Load Comments' fullWidth={true} onClick={()=>this.props.onLoadComments()}/>
+                                }
                             </div>
                         </div>
                     </div>

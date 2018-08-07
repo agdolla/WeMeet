@@ -140,16 +140,10 @@ var initialData = {
       "participants": [new ObjectID("000000000000000000000002")],
       "likeCounter": [new ObjectID("000000000000000000000001"),
       new ObjectID("000000000000000000000002"),new ObjectID("000000000000000000000003")],
-      "comments":[
-        {
-          "author":new ObjectID("000000000000000000000001"),
-          "postDate": 1478129314000,
-          "text": "iufihishf"
-        }
-      ],
       "contents": {
         "text": "Friday, October 7th\n6 PM - 9 PM: Check-in at Campus Center first floor, dinner at Blue Wall Cafe\n9 PM - 10 PM: Opening ceremony in Campus Center Auditorium\n 10 PM: Move to Integrative Learning Center (ILC) \n12 Midnight: Hacking begins in the ILC \n"
-      }
+      },
+      "commentsCount": 1
     },
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
@@ -164,16 +158,10 @@ var initialData = {
       "location": "University of Massachusetts Amherst",
       "participants": [],
       "likeCounter": [],
-      "comments":[
-        {
-          "author":new ObjectID("000000000000000000000001"),
-          "postDate": 1478129314000,
-          "text": "iufihishf"
-        }
-      ],
       "contents": {
         "text": "acticity detail of activity 2"
-      }
+      },
+      "commentsCount": 1
     },
     "3": {
       "_id":new ObjectID("000000000000000000000003"),
@@ -189,19 +177,44 @@ var initialData = {
       "participants": [new ObjectID("000000000000000000000002")],
       "likeCounter": [new ObjectID("000000000000000000000001"),new ObjectID("000000000000000000000002"),
       new ObjectID("000000000000000000000003")],
+      "contents": {
+        "text": "activity detail of activity 3"
+      },
+      "commentsCount": 1
+    }
+  },
+
+  "activityItemComments": {
+    "1": {
+      "_id": new ObjectID("000000000000000000000001"),
       "comments":[
         {
           "author":new ObjectID("000000000000000000000001"),
           "postDate": 1478129314000,
           "text": "iufihishf"
         }
-      ],
-      "contents": {
-        "text": "activity detail of activity 3"
-      }
+      ]
+    },
+    "2": {
+      "_id": new ObjectID("000000000000000000000002"),
+      "comments":[
+        {
+          "author":new ObjectID("000000000000000000000001"),
+          "postDate": 1478129314000,
+          "text": "iufihishf"
+        }
+      ]
+    },
+    "3": {
+      "_id": new ObjectID("000000000000000000000003"),
+      "comments":[
+        {
+          "author":new ObjectID("000000000000000000000001"),
+          "postDate": 1478129314000,
+          "text": "iufihishf"
+        }
+      ]
     }
-
-
   },
 
   // "feeds" collection. Feeds for each user.

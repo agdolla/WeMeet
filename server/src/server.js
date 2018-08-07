@@ -340,7 +340,7 @@ MongoClient.connect(url, function(err, database) {
             let postComments = comments.map((comment)=>{
                 return comment.comments
             });
-            return resolvePostComments(postComments);
+            return resolveComments(postComments);
         })
     }
 
@@ -749,49 +749,56 @@ MongoClient.connect(url, function(err, database) {
         .catch(err=>sendDatabaseError(res,err));
     });
 
-    function getActivityFeedItem(activityId, callback) {
-        db.collection('activityItems').findOneAsync({
-            _id: activityId
+    function getActivityFeedItem(activityId) {
+        return new Promise((resolve, reject)=>{
+            db.collection('activityItems').findOneAsync({
+                _id: activityId
+            })
+            .then(activityitem=>{
+                return resolveActivityItem(activityitem)
+            })
+            .then(resolvedActivityItem=>resolve(resolvedActivityItem))
+            .catch(err=>reject(err));
         })
-        .then(activityitem=>{
-            if(activityitem===null){
-                return callback(null,activityitem)
-            }
-            resolveActivityItem(activityitem,callback);
-        })
-        .catch(err=>callback(err));
     }
 
-    function resolveActivityItem(activityItem,callback){
-        var userList = [activityItem.author];
-        activityItem.comments.forEach((comment) => {
-            userList.push(comment.author);
-        });
-        activityItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
-        activityItem.likeCounter.map((id) => userList.push(id));
-        activityItem.participants.map((id) => userList.push(id));
-        resolveUserObjects(userList, function(err, userMap) {
-            if (err)
-            return callback(err);
-
-            activityItem.author = userMap[activityItem.author];
-            activityItem.participants = activityItem.participants.map((id) => userMap[id]);
-            activityItem.likeCounter = activityItem.likeCounter.map((id) => userMap[id]);
-            activityItem.comments.forEach((comment) => {
-                comment.author = userMap[comment.author];
+    function getActivityItemComments(activityItemId, date) {
+        return db.collection('activityItemComments').aggregateAsync([
+            {$match: {_id: activityItemId}},
+            {$unwind: '$comments'},
+            {$match: {'comments.postDate':{$lt:parseInt(date)}}},
+            {$sort: {'comments.postDate':-1}},
+            {$limit: 3}
+        ])
+        .then((comments)=>{
+            let postComments = comments.map((comment)=>{
+                return comment.comments
             });
+            return resolveComments(postComments);
+        })
+    }
 
-            callback(null, activityItem);
-        });
+    function resolveActivityItem(activityItem){
+        return new Promise((resolve, reject)=>{
+            var userList = [activityItem.author];
+            activityItem.likeCounter.map((id) => userList.push(id));
+            activityItem.participants.map((id) => userList.push(id));
+            resolveUserObjects(userList, function(err, userMap) {
+                if (err)
+                    reject(err);
+    
+                activityItem.author = userMap[activityItem.author];
+                activityItem.participants = activityItem.participants.map((id) => userMap[id]);
+                activityItem.likeCounter = activityItem.likeCounter.map((id) => userMap[id]);
+    
+                resolve(activityItem);
+            });
+        })
     }
 
     function resolvePostItem(postFeedItem){
         return new Promise(function(resolve, reject) {
             var userList = [postFeedItem.contents.author];
-            // postFeedItem.comments.forEach((comment) => {
-                // userList.push(comment.author);
-            // });
-            // postFeedItem.comments.sort((x,y)=>{return y.postDate-x.postDate});
             userList = userList.concat(postFeedItem.likeCounter);
 
             resolveUserObjects(userList, function(err, userMap) {
@@ -800,19 +807,16 @@ MongoClient.connect(url, function(err, database) {
                 else {
                     postFeedItem.likeCounter = postFeedItem.likeCounter.map((id) => userMap[id]);
                     postFeedItem.contents.author = userMap[postFeedItem.contents.author];
-                    // postFeedItem.comments.forEach((comment) => {
-                    //     comment.author = userMap[comment.author];
-                    // });
                     resolve(postFeedItem);
                 }
             });
         });
     }
 
-    function resolvePostComments(postComments) {
+    function resolveComments(comments) {
         return new Promise((resolve, reject)=>{
             var userList = [];
-            postComments.forEach((comment)=>{
+            comments.forEach((comment)=>{
                 userList.push(comment.author);
             });
 
@@ -820,60 +824,62 @@ MongoClient.connect(url, function(err, database) {
                 if(err)
                     reject(err);
                 else{
-                    postComments.forEach((comment)=> {
+                    comments.forEach((comment)=> {
                         comment.author = userMap[comment.author];
                     });
-                    resolve(postComments);
+                    resolve(comments);
                 }
             });
         })
     }
 
-    function getAllActivities(time,callback){
-        db.collection('activityItems').findAsync({
-            postDate:{
-                $lt:time
-            }
+    function getAllActivities(time){
+        return new Promise((resolve, reject)=>{
+            db.collection('activityItems').findAsync({
+                postDate:{
+                    $lt:time
+                }
+            })
+            .then(cursor =>{
+                return cursor.limit(5).sort({postDate:-1}).toArrayAsync();
+            })
+            .then(collection => {
+                var resolvedActivities = [];
+    
+                function processNextFeedItem(i) {
+                    // Asynchronously resolve a feed item.
+                    resolveActivityItem(collection[i])
+                    .then(activityItem=>{
+                        resolvedActivities.push(activityItem);
+                        if (resolvedActivities.length === collection.length) {
+                            // I am the final feed item; all others are resolved.
+                            // Pass the resolved feed document back to the callback.
+                            resolve(collection);
+                        } else {
+                            // Process the next feed item.
+                            processNextFeedItem(i + 1);
+                        }
+                    })
+                    .catch(err=>{
+                        reject(err)
+                    })
+                }
+    
+                if (collection.length === 0) {
+                    resolve(collection);
+                } else {
+                    processNextFeedItem(0);
+                }
+            })
+            .catch((err)=>{reject(err)});
         })
-        .then(cursor =>{
-            return cursor.limit(5).sort({postDate:-1}).toArrayAsync();
-        })
-        .then(collection => {
-            var resolvedActivities = [];
-
-            function processNextFeedItem(i) {
-                // Asynchronously resolve a feed item.
-                resolveActivityItem(collection[i], function(err, activityItem) {
-                    resolvedActivities.push(activityItem);
-                    if (resolvedActivities.length === collection.length) {
-                        // I am the final feed item; all others are resolved.
-                        // Pass the resolved feed document back to the callback.
-                        callback(null, collection);
-                    } else {
-                        // Process the next feed item.
-                        processNextFeedItem(i + 1);
-                    }
-                });
-            }
-
-            if (collection.length === 0) {
-                callback(null, collection);
-            } else {
-                processNextFeedItem(0);
-            }
-        })
-        .catch((err)=>{callback(err)});
     }
 
     app.get('/activities/:time',isLoggedIn,cache(10),function(req,res){
         var time = parseInt(req.params.time);
-        getAllActivities(time,function(err, activityData) {
-            if (err)
-            sendDatabaseError(res, err);
-            else {
-                res.send(activityData);
-            }
-        });
+        getAllActivities(time)
+        .then(activityData=>res.send(activityData))
+        .catch(err=>sendDatabaseError(res, err));
     });
 
     app.get('/posts/:time',cache(10),isLoggedIn,function(req,res){
@@ -887,54 +893,53 @@ MongoClient.connect(url, function(err, database) {
         })
     });
 
-    function getActivityFeedData(userId, callback) {
-        db.collection('users').findOneAsync({
-            _id: userId
-        })
-        .then(userData =>{
-            if (userData === null)
-            return callback(null, null);
-            else {
-                return db.collection('activities').findOneAsync({
-                    _id: userData.activity
-                })
-            }
-        })
-        .then(function(activity) {
-            if (activity === null)
-            return callback(null, null);
-
-            var resolvedContents = [];
-
-            function processNextFeedItem(i) {
-                // Asynchronously resolve a feed item.
-                getActivityFeedItem(activity.contents[i], function(err, feedItem) {
-                    if (err) {
-                        // Pass an error to the callback.
-                        callback(err);
-                    } else {
+    function getActivityFeedData(userId) {
+        return new Promise((resolve, reject)=> {
+            db.collection('users').findOneAsync({
+                _id: userId
+            })
+            .then(userData =>{
+                if (userData === null)
+                    reject(null)
+                else {
+                    return db.collection('activities').findOneAsync({
+                        _id: userData.activity
+                    })
+                }
+            })
+            .then(function(activity) {
+                if (activity === null)
+                    reject(null);
+    
+                var resolvedContents = [];
+    
+                function processNextFeedItem(i) {
+                    // Asynchronously resolve a feed item.
+                    getActivityFeedItem(activity.contents[i])
+                    .then(feedItem=>{
                         // Success!
                         resolvedContents.push(feedItem);
                         if (resolvedContents.length === activity.contents.length) {
                             // I am the final feed item; all others are resolved.
                             // Pass the resolved feed document back to the callback.
                             activity.contents = resolvedContents;
-                            callback(null, activity);
+                            resolve(activity);
                         } else {
                             // Process the next feed item.
                             processNextFeedItem(i + 1);
                         }
-                    }
-                });
-            }
-
-            if (activity.contents.length === 0) {
-                callback(null, activity);
-            } else {
-                processNextFeedItem(0);
-            }
+                    })
+                    .catch(err=>reject(err))
+                }
+    
+                if (activity.contents.length === 0) {
+                    resolve(activity);
+                } else {
+                    processNextFeedItem(0);
+                }
+            })
+            .catch(err => {reject(err)})
         })
-        .catch(err => {callback(err)})
     }
 
     function validateEmail(email) {
@@ -1022,13 +1027,9 @@ MongoClient.connect(url, function(err, database) {
     // get activity Feed data
     app.get('/user/:userid/activity',cache(30), isLoggedIn,function(req, res) {
         var userId = new ObjectID(req.params.userid);
-        getActivityFeedData(userId, function(err, activityData) {
-            if (err)
-            sendDatabaseError(res, err);
-            else {
-                res.send(activityData);
-            }
-        });
+        getActivityFeedData(userId)
+        .then(activityData=>res.send(activityData))
+        .catch(err=>sendDatabaseError(res, err));
     });
 
     function createActivity(data,callback) {
@@ -1046,7 +1047,7 @@ MongoClient.connect(url, function(err, database) {
         }
         data.participants=[];
         data.likeCounter=[];
-        data.comments=[];
+        data.commentsCount = 0;
         data.author = new ObjectID(data.author);
         delete data.cropperOpen;
         db.collection('activityItems').insertOneAsync(data)
@@ -1087,10 +1088,9 @@ MongoClient.connect(url, function(err, database) {
     //get activity detail
     app.get('/activityItem/:activityId', isLoggedIn, function(req, res) {
         var activityId = new ObjectID(req.params.activityId);
-        getActivityFeedItem(activityId, function(err, activityData) {
-            res.status(201);
-            res.send(activityData);
-        });
+        getActivityFeedItem(activityId)
+        .then(activityData=>res.send(activityData))
+        .catch(err=>sendDatabaseError(res,err))
     });
 
     //like activity
@@ -1163,9 +1163,10 @@ MongoClient.connect(url, function(err, database) {
         var activityItemId = new ObjectID(req.params.activityId);
         var userId = body.author;
         if(userId.str!==req.user._id.str) return res.status(401).end();
-        db.collection('activityItems').updateOneAsync({
+
+        db.collection('activityItemComments').findOneAndUpdateAsync({
             _id: activityItemId
-        }, {
+        },{
             $push: {
                 comments: {
                     "author": new ObjectID(userId),
@@ -1173,18 +1174,33 @@ MongoClient.connect(url, function(err, database) {
                     "text": body.text
                 }
             }
+        },{
+            upsert: true
         })
         .then(()=>{
-            getActivityFeedItem(activityItemId, function(err, activityData) {
-                if (err) {
-                    sendDatabaseError(res, err);
-                } else {
-                    res.send(activityData);
-                }
-            });
+            return db.collection('activityItems').findAndModifyAsync({
+                _id: activityItemId
+            },[],{
+                $inc: {commentsCount:1}
+            },{
+                new: true
+            })
         })
-        .catch(err=>sendDatabaseError(res,err));
+        .then((activityItem)=>{
+            activityItem = activityItem.value;
+            return resolveActivityItem(activityItem);
+        })
+        .then(resolvedActivityItem=>res.send(resolvedActivityItem))
+        .catch(err=>sendDatabaseError(res, err));
     });
+
+    app.get('/activityItem/:activityItemId/comment/:date', isLoggedIn, (req, res)=>{
+        let activityItemId = req.params.activityItemId;
+        let date = req.params.date;
+        getActivityItemComments(new ObjectID(activityItemId), date)
+        .then(comments=>res.send(comments))
+        .catch(err=>sendDatabaseError(res, err));
+    })
 
     function getNotificationItem(notificationId, callback) {
         db.collection('notificationItems').findOneAsync({
