@@ -16,13 +16,15 @@ var MongoClient = MongoDB.MongoClient;
 var ObjectID = MongoDB.ObjectID;
 var url = 'mongodb://localhost:27017/'+dbName;
 var bcrypt = Promise.promisifyAll(require('bcryptjs'));
-var jwt = require('jsonwebtoken');
 var mcache = require('memory-cache');
-var cookieSession = require('cookie-session')
 var passport = require('passport');
 var cookieParser = require('cookie-parser')
 var localStrategy = require('passport-local').Strategy;
 var facebookStrategy = require('passport-facebook').Strategy;
+let session = require('express-session');
+let MongoStore = require('connect-mongo')(session);
+let sessionStore = new MongoStore({url: 'mongodb://localhost/wemeetSession'});
+let helmet = require('helmet');
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -32,9 +34,11 @@ a332ca4da03fc80b9228f56cad935b6b9fd33ce6437a4b1f96648546a122a718720452b7cf
 38acc120c64b4a1622399bd6984460e4f4387db1a164c6dd4c80993930c57444905f6b46e7
 a7f1dba60f898302c4865cfee74b82517852e5bd5890a547d59071319b5dfc0faa92ce4f01
 f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571be9aef`;
+app.use(helmet());
 app.use(bodyParser.json({limit: '2mb'}));
 app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 app.use(compression());
+app.disable('x-powered-by');
 
 var cache = (duration) => {
     return (req, res, next) => {
@@ -67,15 +71,24 @@ MongoClient.connect(url, function(err, database) {
     if(err){
         console.log("mongodb err: "+err)
     }
+
     app.use(bodyParser.json());
     app.use(bodyParser.text());
     app.use(cookieParser());
     app.use(express.static('../client/build'));
-    app.use(cookieSession({
-        name: 'session',
-        keys: [secretKey],
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    app.set('trust proxy', 1);
+    app.use(session({
+        name: 'wemeetSessionId',
+        secret: secretKey,
+        store: sessionStore,
+        resave: false,
+        saveUninitialized: false,
+        cookie : {
+            secure: false, //try true in production
+            maxAge : 24 * 60 * 60 * 1000 // 1 day
+        }
     }));
+
     app.use(passport.initialize());
     app.use(passport.session());
 
@@ -171,22 +184,13 @@ MongoClient.connect(url, function(err, database) {
                 bcrypt.compareAsync(password,user.password)
                 .then(success=>{
                     if(success){
-                        jwt.sign({
-                            id:user._id
-                        },secretKey,{expiresIn:'1 day'},function(err,token){
-                            if(err){
-                                console.log(err);
-                                return done(err,false);
-                            }
-                            var newUserObj = {}
-                            newUserObj._id = user._id;
-                            newUserObj.avatar = user.avatar;
-                            newUserObj.fullname = user.fullname;
-                            newUserObj.friends = user.friends;
-                            return done(null,newUserObj,{
-                                user:newUserObj,
-                                token:token
-                            })
+                        var newUserObj = {}
+                        newUserObj._id = user._id;
+                        newUserObj.avatar = user.avatar;
+                        newUserObj.fullname = user.fullname;
+                        newUserObj.friends = user.friends;
+                        return done(null,newUserObj,{
+                            user:newUserObj
                         });
                     }
                     else{
@@ -238,34 +242,24 @@ MongoClient.connect(url, function(err, database) {
                                     post:post.insertedId
                                 }
                             });
-                            jwt.sign({
-                                id:userAsync.insertedId
-                            },secretKey,{expiresIn:'1 day'},function(token){
-                                var newUserObj = {}
-                                newUserObj._id = userAsync.insertedId;
-                                newUserObj.avatar = encodeURIComponent(user.avatar);
-                                newUserObj.fullname = user.fullname;
-                                newUserObj.friends = user.friends;
-                                return done(null,newUserObj,{
-                                    user:newUserObj,
-                                    token:token
-                                });
+                            var newUserObj = {}
+                            newUserObj._id = userAsync.insertedId;
+                            newUserObj.avatar = encodeURIComponent(user.avatar);
+                            newUserObj.fullname = user.fullname;
+                            newUserObj.friends = user.friends;
+                            return done(null,newUserObj,{
+                                user:newUserObj
                             });
                         });
                     }
                     else{
-                        jwt.sign({
-                            id:user._id
-                        },secretKey,{expiresIn:'1 day'},function(token){
-                            var newUserObj = {}
-                            newUserObj._id = user._id;
-                            newUserObj.fullname = user.fullname;
-                            newUserObj.avatar = encodeURIComponent(user.avatar);
-                            newUserObj.friends = user.friends;
-                            return done(null,newUserObj,{
-                                user:newUserObj,
-                                token:token
-                            });
+                        var newUserObj = {}
+                        newUserObj._id = user._id;
+                        newUserObj.fullname = user.fullname;
+                        newUserObj.avatar = encodeURIComponent(user.avatar);
+                        newUserObj.friends = user.friends;
+                        return done(null,newUserObj,{
+                            user:newUserObj
                         });
                     }
                 })
@@ -1864,6 +1858,28 @@ MongoClient.connect(url, function(err, database) {
     //                     app);
     var server = http.createServer(app);
     var io = require('socket.io')(server);
+    var passportSocketIo = require("passport.socketio");
+    io.set('authorization', passportSocketIo.authorize({
+        key: 'wemeetSessionId',
+        cookieParser: cookieParser,
+        secret: secretKey,
+        store: sessionStore,
+        success: onAuthorizeSuccess,
+        fail: onAuthorizeFail
+    }))
+
+    function onAuthorizeSuccess(data, accept) {
+        console.log('successful connection to socket.io');
+        accept(null, true);
+    }
+
+    function onAuthorizeFail(data, message, error, accept) {
+        if(error)
+            throw new Error(message);
+        console.log('failed connection to socket.io:', message);
+        accept(null, false);
+    }
+
     io.on('connection', function(socket){
 
         //disconnect means user logs out
@@ -1934,62 +1950,38 @@ MongoClient.connect(url, function(err, database) {
             });
         });
 
-        socket.on('newPost',function(data){
-            if(data.authorization!==undefined&&data.authorization!==null){
-                var tokenObj = jwt.verify(data.authorization, secretKey);
-                var id = tokenObj['id'];
-                if(id===data.user){
-                    socket.broadcast.emit('newPost');
-                }
-            }
+        socket.on('newPost',()=>{
+            socket.broadcast.emit('newPost');
         });
 
-        socket.on('newActivity',function(data){
-            if(data.authorization!==undefined&&data.authorization!==null){
-                var tokenObj = jwt.verify(data.authorization, secretKey);
-                var id = tokenObj['id'];
-                if(id===data.user){
-                    socket.broadcast.emit('newActivity');
-                }
-            }
+        socket.on('newActivity',()=>{
+            socket.broadcast.emit('newActivity');
         });
 
         socket.on('notification',function(data){
-            if(data.authorization!==undefined&&data.authorization!==null){
-                var tokenObj = jwt.verify(data.authorization, secretKey);
-                var id = tokenObj['id'];
-                if(id===data.sender){
-                    db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
-                        if(err)
-                        io.emit('notification',err);
-                        else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
-                            io.sockets.connected[socketData.socketId].emit('notification');
-                        }
-                    });
+            db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
+                if(err)
+                io.emit('notification',err);
+                else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
+                    io.sockets.connected[socketData.socketId].emit('notification');
                 }
-            }
+            });
         });
 
         socket.on('friend request accepted',function(data){
-            if(data.authorization!==undefined&&data.authorization!==null){
-                var tokenObj = jwt.verify(data.authorization, secretKey);
-                var id = tokenObj['id'];
-                if(id===data.sender){
-                    db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
+            db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
+                if(err)
+                    io.emit('friend request accepted',err);
+                else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
+                    db.collection('users').findOne({_id:new ObjectID(data.sender)},function(err,userData){
                         if(err)
                         io.emit('friend request accepted',err);
-                        else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
-                            db.collection('users').findOne({_id:new ObjectID(data.sender)},function(err,userData){
-                                if(err)
-                                io.emit('friend request accepted',err);
-                                else{
-                                    io.sockets.connected[socketData.socketId].emit('friend request accepted',{sender:userData.fullname});
-                                }
-                            });
+                        else{
+                            io.sockets.connected[socketData.socketId].emit('friend request accepted',{sender:userData.fullname});
                         }
                     });
                 }
-            }
+            });
         });
 
     });

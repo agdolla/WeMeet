@@ -1,22 +1,22 @@
-let axios = require('axios');
+let axiosHelper = require('./axiosHelper');
 
 export function getNotificationData(user){
-    return axios.get('/user/'+user+'/notification');
+    return axiosHelper.get('/user/'+user+'/notification');
 }
 
 export function getPostFeedData(user){
-    return axios.get('/user/'+user+'/feed');
+    return axiosHelper.get('/user/'+user+'/feed');
 
 }
 
 export function getActivityFeedData(user){
-    return axios.get('/user/' + user + '/activity');
+    return axiosHelper.get('/user/' + user + '/activity');
 }
 
 export function getUserData(user){
-    return axios.get('/user/'+user);
+    return axiosHelper.get('/user/'+user);
 }
 
 export function getSessions(user){
-    return axios.get('/user/'+user+'/sessions');
+    return axiosHelper.get('/user/'+user+'/sessions');
 }

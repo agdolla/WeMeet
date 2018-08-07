@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Route, Switch, withRouter} from 'react-router-dom';
+import { Router, Route, Switch, withRouter} from 'react-router-dom';
 
 
 import {Post} from './components/layouts';
@@ -17,6 +17,7 @@ import { Landing } from './components/layouts';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './utils/credentials';
 
+import history from './utils/history';
 
 // var debug = require('react-debug');
 // var swal = require('sweetalert');
@@ -46,7 +47,7 @@ class ActivityPage extends React.Component{
             if(isUserLoggedIn){
                 const rawData = new URLSearchParams(this.props.location.search).get('data');
                 var data = JSON.parse(rawData);
-                updateCredentials(data.user, data.token);
+                updateCredentials(data.user);
                 window.onload = ()=>{
                     socket.emit('user',data.user._id);
                 }
@@ -244,7 +245,7 @@ withRouter(LandingPage);
 
 //render main
 ReactDOM.render((
-    <HashRouter>
+    <Router history={history}>
       <Route path="/" component={App} />
-    </HashRouter>
+    </Router>
 ),document.getElementById('container'));

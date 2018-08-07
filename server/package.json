@@ -17,11 +17,9 @@
         "chai-like": "^1.1.1",
         "compression": "^1.6.2",
         "cookie-parser": "^1.4.3",
-        "cookie-session": "^2.0.0-alpha.2",
         "express": "^4.13.4",
         "express-jsonschema": "^1.1.0",
         "jimp": "^0.2.27",
-        "jsonwebtoken": "^8.3.0",
         "memory-cache": "^0.2.0",
         "mocha": "^5.2.0",
         "mochawesome": "^3.0.3",
@@ -38,7 +36,11 @@
         "node": ">=6.0.0"
     },
     "devDependencies": {
+        "connect-mongo": "^2.0.1",
         "eslint": "^5.2.0",
-        "eslint-plugin-node": "^7.0.1"
+        "eslint-plugin-node": "^7.0.1",
+        "express-session": "^1.15.6",
+        "helmet": "^3.13.0",
+        "passport.socketio": "^3.7.0"
     }
 }

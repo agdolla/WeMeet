@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-const axios = require('axios');
+const axiosHelper = require('./axiosHelper');
 // var debug = require('react-debug');
 
 export var socket = io();
@@ -8,16 +8,6 @@ export var socket = io();
  */
  var user = null;
  // var debug = require('react-debug');
-
-/**
- * Get the token of the currently authenticated user.
- */
-export function getToken() {
-  if (isUserLoggedIn()) {
-    return localStorage.getItem('token');
-  }
-  return null;
-}
 
 /**
  * Get the user ID of the currently authenticated user.
@@ -42,8 +32,7 @@ export function getUserFullName() {
 /**
  * Update the token and user document of the currently authenticated user.
  */
-export function updateCredentials(newUser, newToken) {
-  localStorage.setItem('token', newToken);
+export function updateCredentials(newUser) {
   localStorage.setItem('user', JSON.stringify(newUser));
 }
 
@@ -65,9 +54,8 @@ export function isUserLoggedIn() {
          socket.emit('logout',user._id);
          user=null;
          localStorage.removeItem('user');
-         localStorage.removeItem('token');
      }
-     axios.get('/logout');
+     axiosHelper.get('/logout');
  }
 
  export function getUserData(){

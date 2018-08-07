@@ -3,7 +3,7 @@ import {withRouter} from 'react-router-dom';
 import {createActivity, sendInviteActivityRequest} from '../../utils';
 import {CreateActivityFriendItem} from './';
 import {hideElement} from '../../utils';
-import {socket,getToken} from '../../utils';
+import {socket} from '../../utils';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
@@ -123,12 +123,11 @@ class CreateActivityFeed extends React.Component {
             createActivity(data)
             .then(response=>{
                 let data = response.data;
-                socket.emit('newActivity',{authorization:getToken(),user:this.props.user});
+                socket.emit('newActivity',{user:this.props.user});
                 this.state.invitedlist.map((targetid)=>{
                     sendInviteActivityRequest(this.props.user._id,targetid,data._id)
                     .then(response=>{
                         socket.emit('notification',{
-                            authorization:getToken(),
                             sender: this.props.user,
                             target: targetid
                         });

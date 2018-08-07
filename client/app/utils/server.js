@@ -1,23 +1,23 @@
-let axios = require('axios');
+let axiosHelper = require('./axiosHelper');
 
 // var debug = require('react-debug');
 
 export function getSessionId(userid,targetid){
-    return axios.get('/getsession/'+userid+'/'+targetid);
+    return axiosHelper.get('/getsession/'+userid+'/'+targetid);
 }
 
 export function acceptActivityRequest(notificationid,fromuser){
-    return axios.put('/acceptactivity/'+notificationid+'/'+fromuser);
+    return axiosHelper.put('/acceptactivity/'+notificationid+'/'+fromuser);
 }
 
 export function addFriend(sender,target){
-    return axios.post('/friendRequest/'+sender+"/"+target,{});
+    return axiosHelper.post('/friendRequest/'+sender+"/"+target,{});
 }
 
 export function sendJoinActivityRequest(sender,target,activityid){
-    return axios.post('/activityJoinRequest/'+sender+'/'+target+'/'+activityid,{});
+    return axiosHelper.post('/activityJoinRequest/'+sender+'/'+target+'/'+activityid,{});
 }
 
 export function sendInviteActivityRequest(sender,target,activityid){
-    return axios.post('/activityInviteRequest/'+sender+'/'+target+'/'+activityid,{});
+    return axiosHelper.post('/activityInviteRequest/'+sender+'/'+target+'/'+activityid,{});
 }

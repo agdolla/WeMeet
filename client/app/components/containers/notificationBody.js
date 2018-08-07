@@ -6,7 +6,7 @@ import {NotificationActivity} from '../presentations'
 //request function
 import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../../utils';
 //credentials function
-import {socket,getToken} from '../../utils';
+import {socket} from '../../utils';
 
 
 import {Tabs, Tab} from 'material-ui/Tabs';
@@ -81,7 +81,6 @@ export default class NotificationBody extends React.Component{
         .then(()=>{
             this.getData();
             socket.emit("friend request accepted",{
-                authorization: getToken(),
                 sender: this.props.user,
                 target: user
             });

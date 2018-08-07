@@ -1,9 +1,9 @@
 var moment = require('moment');
-let axios = require('axios');
+const axiosHelper = require('./axiosHelper.js');
 // let debug = require('react-debug');
 
 export function createActivity(data){
-     return axios.post('/createActivity',{
+     return axiosHelper.post('/createActivity',{
         postDate: new Date().getTime(),
         type: data.type,
         author:data.userData._id,
@@ -20,23 +20,23 @@ export function createActivity(data){
 }
 
 export function likeActivity(activityId, user){
-    return axios.put('/activityItem/' + activityId + '/likelist/' + user);
+    return axiosHelper.put('/activityItem/' + activityId + '/likelist/' + user);
 }
 
 export function unLikeActivity(activityId, user){
-    return axios.delete('/activityItem/' + activityId +'/likelist/' + user);
+    return axiosHelper.delete('/activityItem/' + activityId +'/likelist/' + user);
 }
 
 export function getAllActivities(time){
-    return axios.get('/activities/'+time);
+    return axiosHelper.get('/activities/'+time)
 }
 
 export function getActivityDetail(id){
-    return axios.get('/activityItem/'+id);
+    return axiosHelper.get('/activityItem/'+id);
 }
 
 export function postActivityDetailComment(activityId, author, comment){
-    return axios.post('/activityItem/'+activityId+'/commentThread/comment',{
+    return axiosHelper.post('/activityItem/'+activityId+'/commentThread/comment',{
         author:author,
         text:comment
     });

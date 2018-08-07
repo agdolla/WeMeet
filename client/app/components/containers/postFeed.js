@@ -6,7 +6,7 @@ import {PostFeedItem} from '../presentations';
 //request function
 import {getAllPosts,postStatus} from '../../utils';
 //credentials function
-import {socket,getToken,isBottom} from '../../utils';
+import {socket,isBottom} from '../../utils';
 
 // var debug = require('react-debug');
 
@@ -64,7 +64,7 @@ export default class PostFeed extends React.Component{
     onPost(text,img){
         postStatus(this.props.user._id, text, img)
         .then(()=>{
-            socket.emit('newPost',{authorization:getToken(),user:this.props.user._id});
+            socket.emit('newPost',{user:this.props.user._id});
             this.getData();
         });
     }

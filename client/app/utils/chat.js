@@ -1,11 +1,11 @@
-let axios = require('axios');
+let axiosHelper = require('./axiosHelper');
 
 export function getMessages(time,userid,id){
-    return axios.get('/user/'+userid+'/chatsession/'+id+"/"+time);
+    return axiosHelper.get('/user/'+userid+'/chatsession/'+id+"/"+time);
 }
 
 export function postMessage(sessionId,sender,target, text){
-    return axios.post('/chatsession/'+sessionId,{
+    return axiosHelper.post('/chatsession/'+sessionId,{
         sender:sender,
         target:target,
         text:text

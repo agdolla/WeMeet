@@ -5,7 +5,7 @@ import {hideElement} from '../../utils';
 //request function
 import {addFriend} from '../../utils';
 //credentials function
-import {socket,getToken} from '../../utils';
+import {socket} from '../../utils';
 
 export default class SearchFeedUserFeedItem extends React.Component{
     constructor(props){
@@ -39,7 +39,6 @@ export default class SearchFeedUserFeedItem extends React.Component{
                 success:true
             });
             socket.emit('notification',{
-                authorization:getToken(),
                 sender: this.props.currentUser._id,
                 target: this.state.data._id
             });

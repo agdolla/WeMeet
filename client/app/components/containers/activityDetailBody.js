@@ -10,7 +10,7 @@ import {ActivityDetailSignedUpUserAvatar} from '../presentations'
 //request function
 import {getActivityDetail,postActivityDetailComment,
     sendJoinActivityRequest,likeActivity,
-    unLikeActivity,socket,getToken, hideElement,didUserLike} from '../../utils';
+    unLikeActivity,socket, hideElement,didUserLike} from '../../utils';
 
 var moment = require('moment');
 
@@ -99,7 +99,6 @@ export default class ActivityDetailBody extends React.Component{
     sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id)
     .then(response=>{
       socket.emit('notification',{
-        authorization:getToken(),
         sender: this.props.currentUser,
         target: this.state.activity.author._id
       });

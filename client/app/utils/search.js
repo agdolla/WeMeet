@@ -1,6 +1,6 @@
-let axios = require('axios');
+let axiosHelper = require('./axiosHelper');
 // const debug = require('react-debug');
 
 export function searchquery(querytext){
-    return axios.get('/search/'+querytext);
+    return axiosHelper.get('/search/'+querytext);
 }

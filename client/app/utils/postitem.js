@@ -1,22 +1,22 @@
-let axios = require('axios');
+let axiosHelper = require('./axiosHelper');
 
 export function likePost(feedItemId, user){
-    return axios.put('/postItem/'+feedItemId+'/likelist/'+user);
+    return axiosHelper.put('/postItem/'+feedItemId+'/likelist/'+user);
 }
 
 export function unLikePost(feedItemId, user){
-    return axios.delete('/postItem/'+feedItemId+'/likelist/'+user);
+    return axiosHelper.delete('/postItem/'+feedItemId+'/likelist/'+user);
 }
 
 export function postComment(feedItemId, author, comment){
-    return axios.post('/postItem/'+feedItemId+'/commentThread/comment',{
+    return axiosHelper.post('/postItem/'+feedItemId+'/commentThread/comment',{
         author:author,
         text:comment
     });
 }
 
 export function postStatus(user, text, img){
-    return axios.post('/postItem',{
+    return axiosHelper.post('/postItem',{
         userId:user,
         text:text,
         img: img
@@ -24,9 +24,9 @@ export function postStatus(user, text, img){
 }
 
 export function getAllPosts(time){
-    return axios.get('/posts/'+time);
+    return axiosHelper.get('/posts/'+time);
 }
 
 export function getPostComments(postFeedId, date) {
-    return axios.get('/postItem/'+postFeedId+'/comment/'+date);
+    return axiosHelper.get('/postItem/'+postFeedId+'/comment/'+date);
 }

@@ -16,7 +16,6 @@ import {postMessage} from './chat'
 
 //client side credentials function
 import {socket} from './credentials'
-import {getToken} from './credentials'
 import {getUserId} from './credentials'
 import {getUserFullName} from './credentials'
 import {updateCredentials} from './credentials'
@@ -78,7 +77,6 @@ export{
 
     //export credentials function
     socket,
-    getToken,
     getUserId,
     getUserFullName,
     updateCredentials,

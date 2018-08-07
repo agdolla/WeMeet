@@ -1,10 +1,10 @@
 import {updateCredentials} from './';
 import {socket} from './';
-let axios = require('axios');
+const axiosHelper = require('./axiosHelper');
 // let debug = require('react-debug');
 
 export function signup(email, username, password, cb) {
-    axios.post('/signup',{
+    axiosHelper.post('/signup',{
         fullname: username,
         email: email,
         password: password
@@ -14,7 +14,7 @@ export function signup(email, username, password, cb) {
 }
 
 export function login(email, password, cb) {
-    axios.post('/login',{
+    axiosHelper.post('/login',{
         email: email,
         password: password
     })
@@ -22,7 +22,7 @@ export function login(email, password, cb) {
         // Success callback: Login succeeded.
         var authData = response.data;
         // Update credentials and indicate success via the callback!
-        updateCredentials(authData.user, authData.token);
+        updateCredentials(authData.user);
         //let server know this user is online
         socket.emit('user',authData.user._id);
         cb(true);

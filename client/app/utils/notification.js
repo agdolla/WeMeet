@@ -1,9 +1,9 @@
-const axios = require('axios');
+const axiosHelper = require('./axiosHelper');
 
 export function deleteNotification(id, user){
-    return axios.delete('/notification/'+id+'/'+user);
+    return axiosHelper.delete('/notification/'+id+'/'+user);
 }
 
 export function acceptFriendRequest(id,user){
-    return axios.put('/notification/'+id+'/'+user);
+    return axiosHelper.put('/notification/'+id+'/'+user);
 }

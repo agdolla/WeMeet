@@ -6,7 +6,7 @@ import {addFriend} from '../../utils';
 //util function
 import {hideElement} from '../../utils';
 //credentials function
-import {socket,getToken} from '../../utils';
+import {socket} from '../../utils';
 // var debug = require('react-debug');
 
 
@@ -39,7 +39,6 @@ class ActivityDetailSignedUpUserItem extends React.Component{
         addFriend(this.props.currUser,this.props.data._id)
         .then(response=>{
             socket.emit('notification',{
-                authorization:getToken(),
                 sender: this.props.currUser,
                 target: this.props.data._id
             });
