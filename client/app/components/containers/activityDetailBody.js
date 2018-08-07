@@ -55,7 +55,6 @@ export default class ActivityDetailBody extends React.Component{
   handlePostComment(comment){
     postActivityDetailComment(this.state.activity._id, this.props.currentUser ,comment)
     .then(response=>{
-      debug(response.data);
       this.setState({
         activity: response.data
       });

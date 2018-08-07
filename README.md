@@ -18,8 +18,4 @@ WeMeet is a social networking service. It recommends users nearby activities and
 <br/>
 
 * push notification is not working properly when there is new notification
-* fix naming (check again, should be fixed now)
-* study the new react router
 * send friend request and send activity invitation are not working properly
-* (current working, ergent)redirect to the homepage if the user's session is expired, needs to put all axios functions into a new file, and needs to use history object
-* (current working, ergent) use socket.io authorization instead of jwt, remove jwt after 
