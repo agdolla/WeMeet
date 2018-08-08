@@ -5,6 +5,7 @@ import history from './history';
 const axios = require('axios');
 const Promise = require('bluebird');
 const debug = require('react-debug');
+const swal = require('sweetalert');
 
 class AxiosHelper {
     constructor() {
@@ -17,8 +18,13 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                logout();
-                history.push('/');
+                if(err.response.status === '401'){
+                    logout();
+                    history.push('/');
+                }
+                else{
+                    swal("Oops!", "An error occurred on the server side" , "error");
+                }
                 reject(err);
             })
         })
@@ -30,8 +36,13 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                logout();
-                history.push('/');
+                if(err.response.status === '401'){
+                    logout();
+                    history.push('/');
+                }
+                else{
+                    swal("Oops!", "An error occurred on the server side" , "error");
+                }
                 reject(err);
             })
         })
@@ -43,8 +54,13 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                logout();
-                history.push('/');
+                if(err.response.status === '401'){
+                    logout();
+                    history.push('/');
+                }
+                else{
+                    swal("Oops!", "An error occurred on the server side" , "error");
+                }
                 reject(err);
             })
         })
@@ -56,8 +72,13 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                logout();
-                history.push('/');
+                if(err.response.status === '401'){
+                    logout();
+                    history.push('/');
+                }
+                else{
+                    swal("Oops!", "An error occurred on the server side" , "error");
+                }
                 reject(err);
             })
         })
