@@ -14,7 +14,7 @@ WeMeet is a social networking service. It recommends users nearby activities and
 * All code should be reviewed and revised
 * add infinite scroll to chat message
 * performance and security
-* divide server-side code to modules
+* (working) divide server-side code to modules
 
 <br/>
 

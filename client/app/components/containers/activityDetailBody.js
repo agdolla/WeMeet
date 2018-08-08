@@ -16,7 +16,7 @@ var moment = require('moment');
 
 import RaisedButton from 'material-ui/RaisedButton';
 
-// var debug = require('react-debug');
+var debug = require('react-debug');
 
 export default class ActivityDetailBody extends React.Component{
   constructor(props){
@@ -70,12 +70,10 @@ export default class ActivityDetailBody extends React.Component{
     .then(response=>{
       let activitydata = response.data;
       this.setState({activity:activitydata},()=>{
-        if(this.isHost()){
-          this.setState({ishost:true});
-        }
-        if(this.checkJoined()){
-          this.setState({joined:true});
-        }
+        this.setState({
+          ishost: this.isHost(),
+          joined: this.checkJoined()
+        });
       });
     })
   }
@@ -89,11 +87,7 @@ export default class ActivityDetailBody extends React.Component{
     if(this.state.activity.participants===undefined){
       return false;
     }
-    return this.state.activity.participants.filter((user)=>{
-      if(user._id===this.props.currentUser)
-        return true;
-      else return false;
-    }).length>0;
+    return this.state.activity.participants.filter((user)=>{return user._id==this.props.currentUser}).length>0;
   }
 
   handleRequestJoin(e){
@@ -135,10 +129,10 @@ export default class ActivityDetailBody extends React.Component{
 
   render(){
     var buttonText;
-    if(this.state.ishost&&this.state.joined!=true){
+    if(this.state.ishost&&!this.state.joined){
       buttonText = "You are the host"
     }
-    else if(this.state.ishost&&this.state.joined==true){
+    else if(!this.state.ishost&&this.state.joined){
       buttonText = "You have joined"
     }
     else{
@@ -264,7 +258,7 @@ export default class ActivityDetailBody extends React.Component{
                      paddingBottom: '8px',
                      marginBottom: '7px'
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
-                    <RaisedButton primary={true} label={buttonText} disabled={this.state.ishost} onClick={(e)=>this.handleRequestJoin(e)}/>
+                    <RaisedButton primary={true} label={buttonText} disabled={this.state.ishost || this.state.joined} onClick={(e)=>this.handleRequestJoin(e)}/>
                   </div>
                 </div>
 
