@@ -22,6 +22,10 @@ let MongoStore = require('connect-mongo')(session);
 let sessionStore = new MongoStore({url: 'mongodb://localhost/wemeetSession'});
 let helmet = require('helmet');
 let ServerHelper = require('./utils/serverHelper');
+let ActivityHelper = require('./utils/activityHelper');
+let PostHelper = require('./utils/postHelper');
+let ChatHelper = require('./utils/chatHelper');
+let NotificationHelper = require('./utils/notificationHelper');
 const Jimp = require("jimp");
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
@@ -58,7 +62,13 @@ var cache = (duration) => {
 
 MongoClient.connect(url, function(err, database) {
     let db = database.db(dbName);
+
+    //initialize helper class
     let serverHelper = new ServerHelper(db);
+    let activityHelper = new ActivityHelper(db);
+    let postHelper = new PostHelper(db);
+    let chatHelper = new ChatHelper(db);
+    let notificationHelper = new NotificationHelper(db);
 
     if(err){
         console.log("mongodb err: "+err)
@@ -262,7 +272,7 @@ MongoClient.connect(url, function(err, database) {
 
     app.get('/user/:userId/feed',cache(10),serverHelper.isLoggedIn,(req, res) => {
         var userId = req.params.userId;
-        serverHelper.getPostFeedData(new ObjectID(userId))
+        postHelper.getPostFeedData(new ObjectID(userId))
         .then(feedData => {
             if (feedData === null) {
                 res.status(400);
@@ -279,7 +289,7 @@ MongoClient.connect(url, function(err, database) {
     app.post('/postItem', validate({body: statusUpdateSchema}), serverHelper.isLoggedIn,(req, res) => {
         var body = req.body;
         if(body.userId.str!==req.user._id.str) return res.status(401).end();
-        serverHelper.postStatus(new ObjectID(body.userId), body.text, body.img)
+        postHelper.postStatus(new ObjectID(body.userId), body.text, body.img)
         .then(function(newPost){
             res.status(201);
             res.send(newPost);
@@ -302,7 +312,7 @@ MongoClient.connect(url, function(err, database) {
             }
         })
         .then(function(){
-            return serverHelper.getPostFeedItem(new ObjectID(postItemId))
+            return postHelper.getPostFeedItem(new ObjectID(postItemId))
         })
         .then(postItem => {
             res.send(postItem.likeCounter);
@@ -324,7 +334,7 @@ MongoClient.connect(url, function(err, database) {
             }
         })
         .then(function(){
-            return serverHelper.getPostFeedItem(new ObjectID(postItemId))
+            return postHelper.getPostFeedItem(new ObjectID(postItemId))
         })
         .then(postItem => {
             res.send(postItem.likeCounter);
@@ -337,7 +347,7 @@ MongoClient.connect(url, function(err, database) {
     app.get('/user/:userId/sessions',serverHelper.isLoggedIn, (req, res) =>{
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
-        serverHelper.getSessions(userId)
+        chatHelper.getSessions(userId)
         .then(sessions=>{
             res.send(sessions);
         })
@@ -400,7 +410,7 @@ MongoClient.connect(url, function(err, database) {
         })
         .then((updatedPostItem)=>{
             updatedPostItem = updatedPostItem.value;
-            return serverHelper.resolvePostItem(updatedPostItem);
+            return postHelper.resolvePostItem(updatedPostItem);
         })
         .then(resolvedPostItem=>{
             res.send(resolvedPostItem);
@@ -411,7 +421,7 @@ MongoClient.connect(url, function(err, database) {
     app.get('/postItem/:postItemId/comment/:date', serverHelper.isLoggedIn, (req, res)=>{
         let postFeedId = req.params.postItemId;
         let date = req.params.date
-        serverHelper.getPostComments(new ObjectID(postFeedId),date)
+        postHelper.getPostComments(new ObjectID(postFeedId),date)
         .then((postComments)=>{
             res.send(postComments);
         })
@@ -448,14 +458,16 @@ MongoClient.connect(url, function(err, database) {
 
     app.get('/activities/:time',serverHelper.isLoggedIn,cache(10),(req, res) =>{
         var time = parseInt(req.params.time);
-        serverHelper.getAllActivities(time)
+        activityHelper.getAllActivities(time)
         .then(activityData=>res.send(activityData))
-        .catch(err=>serverHelper.sendDatabaseError(res, err));
+        .catch(err=>{
+            serverHelper.sendDatabaseError(res, err)
+        });
     });
 
     app.get('/posts/:time',cache(10),serverHelper.isLoggedIn,(req, res) =>{
         var time = parseInt(req.params.time);
-        serverHelper.getAllPosts(time)
+        postHelper.getAllPosts(time)
         .then((postData)=>{
             res.send(postData);
         })
@@ -545,7 +557,7 @@ MongoClient.connect(url, function(err, database) {
     // get activity Feed data
     app.get('/user/:userid/activity',cache(30), serverHelper.isLoggedIn,(req, res) => {
         var userId = new ObjectID(req.params.userid);
-        serverHelper.getActivityFeedData(userId)
+        activityHelper.getActivityFeedData(userId)
         .then(activityData=>res.send(activityData))
         .catch(err=>serverHelper.sendDatabaseError(res, err));
     });
@@ -554,7 +566,7 @@ MongoClient.connect(url, function(err, database) {
     app.post('/createActivity', validate({body: activitySchema}), serverHelper.isLoggedIn,(req, res) => {
         var body = req.body;
         if(body.author.str!==req.user._id.str) return res.status(401).end();
-        serverHelper.createActivity(body,function(err,activityData){
+        activityHelper.createActivity(body,function(err,activityData){
             if(err)
             return serverHelper.sendDatabaseError(res,err);
             else{
@@ -566,7 +578,7 @@ MongoClient.connect(url, function(err, database) {
     //get activity detail
     app.get('/activityItem/:activityId', serverHelper.isLoggedIn, (req, res) => {
         var activityId = new ObjectID(req.params.activityId);
-        serverHelper.getActivityFeedItem(activityId)
+        activityHelper.getActivityFeedItem(activityId)
         .then(activityData=>res.send(activityData))
         .catch(err=>serverHelper.sendDatabaseError(res,err))
     });
@@ -666,7 +678,7 @@ MongoClient.connect(url, function(err, database) {
         })
         .then((activityItem)=>{
             activityItem = activityItem.value;
-            return serverHelper.resolveActivityItem(activityItem);
+            return activityHelper.resolveActivityItem(activityItem);
         })
         .then(resolvedActivityItem=>res.send(resolvedActivityItem))
         .catch(err=>serverHelper.sendDatabaseError(res, err));
@@ -675,7 +687,7 @@ MongoClient.connect(url, function(err, database) {
     app.get('/activityItem/:activityItemId/comment/:date', serverHelper.isLoggedIn, (req, res)=>{
         let activityItemId = req.params.activityItemId;
         let date = req.params.date;
-        serverHelper.getActivityItemComments(new ObjectID(activityItemId), date)
+        activityHelper.getActivityItemComments(new ObjectID(activityItemId), date)
         .then(comments=>res.send(comments))
         .catch(err=>serverHelper.sendDatabaseError(res, err));
     });
@@ -691,7 +703,7 @@ MongoClient.connect(url, function(err, database) {
             if (userData === null)
             return res.status(400).end();
             else {
-                serverHelper.getNotificationData(userData.notification, function(err, notificationData) {
+                notificationHelper.getNotificationData(userData.notification, function(err, notificationData) {
                     if (err)
                     return serverHelper.sendDatabaseError(res, err);
                     res.send(notificationData);
@@ -706,7 +718,7 @@ MongoClient.connect(url, function(err, database) {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
         var notificationId = new ObjectID(req.params.notificationId);
-        serverHelper.getNotificationItem(notificationId, function(err, notification) {
+        notificationHelper.getNotificationItem(notificationId, function(err, notification) {
             if (err)
             return serverHelper.sendDatabaseError(res, err);
             else {
@@ -723,7 +735,7 @@ MongoClient.connect(url, function(err, database) {
                     })
                 })
                 .then(()=>{
-                    serverHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
+                    notificationHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
                         if (err)
                         serverHelper.sendDatabaseError(res, err);
                         else {
@@ -735,12 +747,12 @@ MongoClient.connect(url, function(err, database) {
         });
     });
 
-    //serverHelper.deleteNotification
+    //notificationHelper.deleteNotification
     app.delete('/notification/:notificationId/:userId', serverHelper.isLoggedIn,(req, res) => {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
         var notificationId = new ObjectID(req.params.notificationId);
-        serverHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
+        notificationHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
             if (err)
             serverHelper.sendDatabaseError(res, err);
             else {
@@ -754,7 +766,7 @@ MongoClient.connect(url, function(err, database) {
         if(req.params.fromuser.str!==req.user._id.str) return res.status(401).end();
         var user = new ObjectID(req.params.fromuser);
         var notificationId = new ObjectID(req.params.notificationId);
-        serverHelper.getNotificationItem(notificationId,function(err,notification){
+        notificationHelper.getNotificationItem(notificationId,function(err,notification){
             if(err)
             return serverHelper.sendDatabaseError(res, err);
             else{
@@ -776,7 +788,7 @@ MongoClient.connect(url, function(err, database) {
                     if(err){
                         return serverHelper.sendDatabaseError(res,err);
                     }
-                    serverHelper.deleteNotification(notificationId,user,function(err,notificationData){
+                    notificationHelper.deleteNotification(notificationId,user,function(err,notificationData){
 
                         if(err)
                         serverHelper.sendDatabaseError(res,err);
@@ -790,7 +802,7 @@ MongoClient.connect(url, function(err, database) {
         });
     });
 
-    //serverHelper.getMessage
+    //chatHelper.getMessage
     app.get('/user/:userId/chatsession/:id/:time', serverHelper.isLoggedIn,(req, res) => {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var id = req.params.id;
@@ -812,7 +824,7 @@ MongoClient.connect(url, function(err, database) {
                         }
                     })
                     .then(()=>{
-                        serverHelper.getMessage(time+1, message.contents, function(err, messages) {
+                        chatHelper.getMessage(time+1, message.contents, function(err, messages) {
                             if (err)
                             serverHelper.sendDatabaseError(res, err);
                             else {
@@ -823,7 +835,7 @@ MongoClient.connect(url, function(err, database) {
                     })
                     .catch(err=>serverHelper.sendDatabaseError(res,err));
                 }
-                else serverHelper.getMessage(time+1,message.contents, function(err, messages) {
+                else chatHelper.getMessage(time+1,message.contents, function(err, messages) {
                     if (err)
                     serverHelper.sendDatabaseError(res, err);
                     else {
@@ -851,7 +863,7 @@ MongoClient.connect(url, function(err, database) {
             "date": time,
             "text": text
         }
-        serverHelper.getSessionContentsID(new ObjectID(id), function(err, contentsid) {
+        chatHelper.getSessionContentsID(new ObjectID(id), function(err, contentsid) {
             if (err)
             serverHelper.sendDatabaseError(res, err);
             else {
@@ -863,7 +875,7 @@ MongoClient.connect(url, function(err, database) {
                     }
                 })
                 .then(()=>{
-                    serverHelper.getMessage(time+1,contentsid, function(err, messages) {
+                    chatHelper.getMessage(time+1,contentsid, function(err, messages) {
                         if (err)
                         serverHelper.sendDatabaseError(res, err);
                         else {
@@ -893,10 +905,10 @@ MongoClient.connect(url, function(err, database) {
         var userid = req.params.userid;
         if(userid.str!==req.user._id.str) return res.status(401).end();
         var targetid = req.params.targetid;
-        serverHelper.getSession(new ObjectID(userid), new ObjectID(targetid))
+        chatHelper.getSession(new ObjectID(userid), new ObjectID(targetid))
         .then(session=>{
             if(session===null){
-                serverHelper.createSession(new ObjectID(userid), new ObjectID(targetid),function(err,newSession){
+                chatHelper.createSession(new ObjectID(userid), new ObjectID(targetid),function(err,newSession){
                     if(err)
                     serverHelper.sendDatabaseError(res,err);
                     else{
@@ -987,7 +999,7 @@ MongoClient.connect(url, function(err, database) {
                 return res.send(data);
             }
             p.forEach((c) => {
-                serverHelper.resolvePostItem(c)
+                postHelper.resolvePostItem(c)
                 .then(postItem => {
                     resolvedPosts.push(postItem);
                     if (resolvedPosts.length === p.length) {

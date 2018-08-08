@@ -24,7 +24,6 @@
         "mocha": "^5.2.0",
         "mochawesome": "^3.0.3",
         "moment": "^2.22.2",
-        "mongo-express": "^0.49.0",
         "mongodb": "^2.1.14",
         "passport": "^0.4.0",
         "passport-facebook": "^2.1.1",
