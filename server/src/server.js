@@ -22,6 +22,7 @@ let MongoStore = require('connect-mongo')(session);
 let sessionStore = new MongoStore({url: 'mongodb://localhost/wemeetSession'});
 let helmet = require('helmet');
 let ServerHelper = require('./utils/serverHelper');
+const Jimp = require("jimp");
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
