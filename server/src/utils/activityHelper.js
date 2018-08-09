@@ -101,7 +101,7 @@ module.exports = class ActivityHelper {
         })
     }
 
-    getActivityFeedData(userId) {
+    getActivityFeedData(userId, count) {
         return new Promise((resolve, reject)=> {
             this.database.collection('users').findOneAsync({
                 _id: userId
@@ -122,12 +122,16 @@ module.exports = class ActivityHelper {
                 var resolvedContents = [];
     
                 var processNextFeedItem = (i) => {
+                    if(i>=activity.contents.length){
+                        activity.contents = resolvedContents;
+                        resolve(activity);
+                    }
                     // Asynchronously resolve a feed item.
                     this.getActivityFeedItem(activity.contents[i])
                     .then(feedItem=>{
                         // Success!
                         resolvedContents.push(feedItem);
-                        if (resolvedContents.length === activity.contents.length) {
+                        if (resolvedContents.length === 3) {
                             // I am the final feed item; all others are resolved.
                             // Pass the resolved feed document back to the callback.
                             activity.contents = resolvedContents;
@@ -141,9 +145,9 @@ module.exports = class ActivityHelper {
                 }
     
                 if (activity.contents.length === 0) {
-                    resolve(activity);
+                    resolve([]);
                 } else {
-                    processNextFeedItem(0);
+                    processNextFeedItem(count);
                 }
             })
             .catch(err => {reject(err)})

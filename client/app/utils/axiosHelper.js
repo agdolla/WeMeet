@@ -18,7 +18,7 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                if(err.response.status === '401'){
+                if(err.response.status === 401){
                     logout();
                     history.push('/');
                 }
@@ -36,7 +36,7 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                if(err.response.status === '401'){
+                if(err.response.status === 401){
                     logout();
                     history.push('/');
                 }
@@ -54,7 +54,7 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                if(err.response.status === '401'){
+                if(err.response.status === 401){
                     logout();
                     history.push('/');
                 }
@@ -72,7 +72,7 @@ class AxiosHelper {
             .then(response=>resolve(response))
             .catch(err=>{
                 debug(err);
-                if(err.response.status === '401'){
+                if(err.response.status === 401){
                     logout();
                     history.push('/');
                 }

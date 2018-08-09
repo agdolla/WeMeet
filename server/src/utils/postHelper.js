@@ -101,7 +101,7 @@ module.exports = class PostHelper {
         })
     }
 
-    getPostFeedData(user) {
+    getPostFeedData(user, count) {
         return new Promise((resolve, reject) =>  {
             this.database.collection('users').findOneAsync({
                 _id: user
@@ -119,10 +119,14 @@ module.exports = class PostHelper {
                     return resolve(null);
                 }
                 var processNextFeedItem = (i) => {
+                    if(i>=feedData.contents.length){
+                        feedData.contents = resolvedContents;
+                        resolve(feedData);
+                    }
                     this.getPostFeedItem(feedData.contents[i])
                     .then(feedItem => {
                         resolvedContents.push(feedItem);
-                        if (resolvedContents.length === feedData.contents.length) {
+                        if (resolvedContents.length === 3) {
                             feedData.contents = resolvedContents;
                             return resolve(feedData);
                         } else {
@@ -133,10 +137,10 @@ module.exports = class PostHelper {
 
                 var resolvedContents = [];
                 if (feedData.contents.length === 0) {
-                    return resolve(feedData);
+                    return resolve([]);
                 }
                 else{
-                    processNextFeedItem(0);
+                    processNextFeedItem(count);
                 }
             })
             .catch(err => {reject(err)})

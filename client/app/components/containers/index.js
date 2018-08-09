@@ -18,7 +18,6 @@ import CreateActivityFriendItem from './createActivityFriendItem';
 
 import PostFeed from './postFeed';
 
-import ProfileMainFeed from './profileMainFeed';
 import ProfilePersonalInfo from './profilePersonalInfo';
 import ProfileRecentActivityFeed from './profileRecentActivityFeed';
 import ProfileRecentPostFeed from './profileRecentPostFeed';
@@ -48,7 +47,6 @@ export{
 
     PostFeed,
 
-    ProfileMainFeed,
     ProfilePersonalInfo,
     ProfileRecentActivityFeed,
     ProfileRecentPostFeed,

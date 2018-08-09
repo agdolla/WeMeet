@@ -270,9 +270,10 @@ MongoClient.connect(url, function(err, database) {
         )
     )
 
-    app.get('/user/:userId/feed',cache(10),serverHelper.isLoggedIn,(req, res) => {
-        var userId = req.params.userId;
-        postHelper.getPostFeedData(new ObjectID(userId))
+    app.get('/user/:userId/feed/:count',cache(10),serverHelper.isLoggedIn,(req, res) => {
+        let userId = req.params.userId;
+        let count = parseInt(req.params.count);
+        postHelper.getPostFeedData(new ObjectID(userId),count)
         .then(feedData => {
             if (feedData === null) {
                 res.status(400);
@@ -555,11 +556,15 @@ MongoClient.connect(url, function(err, database) {
     // });
 
     // get activity Feed data
-    app.get('/user/:userid/activity',cache(30), serverHelper.isLoggedIn,(req, res) => {
-        var userId = new ObjectID(req.params.userid);
-        activityHelper.getActivityFeedData(userId)
+    app.get('/user/:userid/activity/:count',cache(30), serverHelper.isLoggedIn,(req, res) => {
+        let userId = new ObjectID(req.params.userid);
+        let count = parseInt(req.params.count);
+        activityHelper.getActivityFeedData(userId, count)
         .then(activityData=>res.send(activityData))
-        .catch(err=>serverHelper.sendDatabaseError(res, err));
+        .catch(err=>{
+            console.log(err);
+            serverHelper.sendDatabaseError(res, err)
+        });
     });
 
     //post activity

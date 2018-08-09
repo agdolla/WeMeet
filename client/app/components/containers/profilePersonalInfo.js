@@ -1,55 +1,69 @@
 import React from 'react';
-var moment = require('moment');
 import {List, ListItem} from 'material-ui/List';
-import FontIcon from 'material-ui/FontIcon'
+import FontIcon from 'material-ui/FontIcon';
+import Avatar from 'material-ui/Avatar';
+import Subheader from 'material-ui/Subheader';
+import {Link} from 'react-router-dom';
+import IconButton from 'material-ui/IconButton';
+import {addFriend} from '../../utils';
+
+var moment = require('moment');
 
 export default class ProfilePersonalInfo extends React.Component{
 
     constructor(props){
         super(props);
-        this.state = props.user;
     }
 
-    componentWillReceiveProps(newProps){
-        this.setState(newProps.user);
-    }
-
-    countProgress(){
-        var count = 0.0;
-        if (this.state.fullname != null){
-            count += 1;
-        }
-        if (this.state.nickname != null){
-            count += 1;
-        }
-        if (this.state.description != null){
-            count += 1;
-        }
-        if (this.state.birthday != null){
-            count += 1;
-        }
-        return count / 5 * 100 | 0;
+    isCommon(id) {
+        return this.props.commonFriends.indexOf(id) !== -1 || id === this.props.currentUser;
     }
 
     render(){
-        var progress = this.countProgress();
-
         return(
             <div>
-                <div className="panel panel-default">
-                    <div className="panel-body">
-                        <div className="media">
-                            You have completed {progress}% of profile.
-                            <br />
-                            <progress value={progress} max="100"></progress>
-                        </div>
-                    </div>
-                </div>
                 <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
-
-                    <ListItem primaryText={moment(this.state.birthday).calendar()} leftIcon={<FontIcon className="material-icons">cake</FontIcon>} />
-                    <ListItem primaryText={this.state.email} leftIcon={<FontIcon className="material-icons">mail</FontIcon>} />
-
+                    <Subheader style={{fontSize: '20px'}}>Profile</Subheader>
+                    <ListItem primaryText={this.props.user.fullname} 
+                        leftAvatar={<Avatar src={this.props.user.avatar} 
+                        backgroundColor="none"/>} disabled={true}/>
+                    <ListItem primaryText={this.props.user.description} 
+                        leftIcon={<FontIcon className="material-icons">info</FontIcon>} 
+                        disabled={true}/>
+                    <ListItem primaryText={moment(this.props.user.birthday).calendar()} 
+                        leftIcon={<FontIcon className="material-icons">cake</FontIcon>} 
+                        disabled={true}/>
+                    <ListItem primaryText={this.props.user.email} 
+                        leftIcon={<FontIcon className="material-icons">mail</FontIcon>} 
+                        disabled={true}/>
+                    <ListItem primaryText="Connections"
+                        leftIcon={<FontIcon className="material-icons">contacts</FontIcon>}
+                        initiallyOpen={false}
+                        primaryTogglesNestedList={true}
+                        nestedItems={(this.props.user.friends===undefined? []:this.props.user.friends).map((friend,i)=>{
+                            var rightButton;
+                            if(this.isCommon(friend._id)) {
+                                rightButton =  <IconButton disabled={true}>
+                                                <FontIcon className="material-icons">check</FontIcon> 
+                                            </IconButton>
+                            }
+                            else {
+                                rightButton =  <IconButton onClick={()=>addFriend(this.props.currentUser, friend._id)}>
+                                                <FontIcon className="material-icons">add</FontIcon> 
+                                            </IconButton>
+                            }
+                            return <ListItem primaryText={friend.fullname}
+                                secondaryText={friend.description}
+                                key={i}
+                                leftAvatar={
+                                    <Link to={'/profile/'+friend._id}>
+                                        <Avatar src={friend.avatar} backgroundColor="none" />
+                                    </Link>
+                                }
+                                rightIconButton={rightButton}
+                                disabled={true}
+                            /> 
+                        })}/>
                 </List>
             </div>
         );

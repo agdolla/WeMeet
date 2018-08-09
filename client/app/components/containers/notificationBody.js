@@ -119,7 +119,7 @@ export default class NotificationBody extends React.Component{
         return(
             <Tabs
                 style={{boxShadow:  "0 10px 28px 0 rgba(137,157,197,.12)", marginTop:'20px'}}
-                inkBarStyle={{backgroundColor:"#607D8B",height:'3px'}}
+                inkBarStyle={{backgroundColor:"white",height:'3px'}}
                 contentContainerStyle={{backgroundColor:'#FDFDFD',padding:'10px'}}
                 value={this.state.value}
                 onChange={(value)=>this.handleChange(value)}
