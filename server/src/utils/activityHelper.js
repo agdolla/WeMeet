@@ -145,7 +145,8 @@ module.exports = class ActivityHelper {
                 }
     
                 if (activity.contents.length === 0) {
-                    resolve([]);
+                    activity.contents = []
+                    resolve(activity);
                 } else {
                     processNextFeedItem(count);
                 }

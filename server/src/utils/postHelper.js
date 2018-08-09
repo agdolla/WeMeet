@@ -137,7 +137,8 @@ module.exports = class PostHelper {
 
                 var resolvedContents = [];
                 if (feedData.contents.length === 0) {
-                    return resolve([]);
+                    feedData.contents = [];
+                    return resolve(feedData);
                 }
                 else{
                     processNextFeedItem(count);

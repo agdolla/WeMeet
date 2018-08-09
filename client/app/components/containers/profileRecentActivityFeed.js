@@ -6,7 +6,7 @@ import {getActivityFeedData} from '../../utils';
 import {ActivityFeedItem} from '../presentations';
 import FlatButton from 'material-ui/FlatButton';
 
-// let debug = require('react-debug');
+let debug = require('react-debug');
 
 export default class ProfileRecentActivityFeed extends React.Component{
 
@@ -21,6 +21,7 @@ export default class ProfileRecentActivityFeed extends React.Component{
     getData(user){
         getActivityFeedData(user, this.state.contents.length)
         .then(response=>{
+            debug(response.data);
             let activities = this.state.contents.concat(response.data.contents);
             this.setState({
                 contents:activities,
@@ -44,8 +45,10 @@ export default class ProfileRecentActivityFeed extends React.Component{
                     return <ActivityFeedItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
                 })}
                 {
-                    this.state.loadMore &&
-                    <FlatButton onClick={()=>{this.getData(this.props.user)}} label="Load More" fullWidth={true} backgroundColor={"#fdfdfd"}/>
+                    <FlatButton onClick={()=>{this.getData(this.props.user)}} 
+                    label={this.state.loadMore? "Load More" : "Nothing more to load"}
+                    fullWidth={true} backgroundColor={"#fdfdfd"}
+                    disabled={!this.state.loadMore}/>
                 }
             </div>
         );

@@ -39,8 +39,10 @@ export default class ProfileRecentPostFeed extends React.Component{
                     return <PostFeedItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
                 })}
                 {
-                    this.state.loadMore &&
-                    <FlatButton onClick={()=>{this.getData(this.props.user)}} label="Load More" fullWidth={true} backgroundColor={"#fdfdfd"}/>
+                    <FlatButton onClick={()=>{this.getData(this.props.user)}} 
+                    label={this.state.loadMore? "Load More" : "Nothing more to load"} 
+                    fullWidth={true} backgroundColor={"#fdfdfd"}
+                    disabled={!this.state.loadMore}/>
                 }
             </div>
         );
