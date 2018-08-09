@@ -6,6 +6,7 @@ import Subheader from 'material-ui/Subheader';
 import {Link} from 'react-router-dom';
 import IconButton from 'material-ui/IconButton';
 import {addFriend} from '../../utils';
+import Snackbar from 'material-ui/Snackbar';
 
 var moment = require('moment');
 
@@ -13,15 +14,41 @@ export default class ProfilePersonalInfo extends React.Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            open: false
+        }
     }
 
     isCommon(id) {
         return this.props.commonFriends.indexOf(id) !== -1 || id === this.props.currentUser;
     }
 
+    handleAddFriend(targetId) {
+        addFriend(this.props.currentUser, targetId);
+        this.setState({
+            open: true
+        });
+    }
+
+    handleRequestClose = () => {
+        this.setState({
+            open: false,
+        });
+    };
+
     render(){
         return(
             <div>
+                <Snackbar
+                    bodyStyle = {{
+                        backgroundColor:"#2E7D32",
+                        textAlign:'center'
+                    }}
+                    open={this.state.open}
+                    message="Friend request sent!"
+                    autoHideDuration={3000}
+                    onRequestClose={this.handleRequestClose}
+                />
                 <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
                     <Subheader style={{fontSize: '20px'}}>Profile</Subheader>
                     <ListItem primaryText={this.props.user.fullname} 
@@ -48,7 +75,7 @@ export default class ProfilePersonalInfo extends React.Component{
                                             </IconButton>
                             }
                             else {
-                                rightButton =  <IconButton onClick={()=>addFriend(this.props.currentUser, friend._id)}>
+                                rightButton =  <IconButton onClick={()=>this.handleAddFriend(friend._id)}>
                                                 <FontIcon className="material-icons">add</FontIcon> 
                                             </IconButton>
                             }

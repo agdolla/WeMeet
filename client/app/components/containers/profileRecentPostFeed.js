@@ -13,10 +13,11 @@ export default class ProfileRecentPostFeed extends React.Component{
         };
     }
 
-    getData(user){
-        getPostFeedData(user, this.state.contents.length)
+    getData(user, refreshed){
+        let count = refreshed? 0: this.state.contents.length
+        getPostFeedData(user, count)
         .then(response=>{
-            let activities = this.state.contents.concat(response.data.contents);
+            let activities = refreshed?response.data.contents:this.state.contents.concat(response.data.contents);
             this.setState({
                 contents:activities,
                 loadMore: response.data.contents.length > 0
@@ -29,7 +30,7 @@ export default class ProfileRecentPostFeed extends React.Component{
     // }
 
     componentWillReceiveProps(newProps){
-        this.getData(newProps.user);
+        this.getData(newProps.user,true);
     }
 
     render(){
@@ -39,7 +40,7 @@ export default class ProfileRecentPostFeed extends React.Component{
                     return <PostFeedItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
                 })}
                 {
-                    <FlatButton onClick={()=>{this.getData(this.props.user)}} 
+                    <FlatButton onClick={()=>{this.getData(this.props.user,false)}} 
                     label={this.state.loadMore? "Load More" : "Nothing more to load"} 
                     fullWidth={true} backgroundColor={"#fdfdfd"}
                     disabled={!this.state.loadMore}/>

@@ -1075,7 +1075,7 @@ MongoClient.connect(url, function(err, database) {
             type:"FR"
         },function(err,result){
             if(err)
-            serverHelper.sendDatabaseError(res,err);
+                serverHelper.sendDatabaseError(res,err);
             else{
                 db.collection('users').findOneAsync({_id:new ObjectID(target)})
                 .then(userData=>{
@@ -1085,7 +1085,7 @@ MongoClient.connect(url, function(err, database) {
                         }
                     },function(err){
                         if(err)
-                        serverHelper.sendDatabaseError(res,err);
+                            serverHelper.sendDatabaseError(res,err);
                         else {
                             res.send();
                         }
