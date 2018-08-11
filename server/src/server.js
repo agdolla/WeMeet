@@ -60,8 +60,8 @@ var cache = (duration) => {
     }
 }
 
-MongoClient.connect(url, function(err, database) {
-    let db = database.db(dbName);
+MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
+    let db = client.db(dbName);
 
     //initialize helper class
     let serverHelper = new ServerHelper(db);
@@ -842,25 +842,22 @@ MongoClient.connect(url, function(err, database) {
                         }
                     })
                     .then(()=>{
-                        chatHelper.getMessage(time, message.contents, function(err, messages) {
-                            if (err)
-                                serverHelper.sendDatabaseError(res, err);
-                            else {
-                                res.status(201);
-                                res.send(messages);
-                            }
-                        });
+                        return chatHelper.getMessage(time, message.contents);
+                    })
+                    .then((messages)=>{
+                        res.status(201);
+                        res.send(messages);
                     })
                     .catch(err=>serverHelper.sendDatabaseError(res,err));
                 }
-                else chatHelper.getMessage(time,message.contents, function(err, messages) {
-                    if (err)
-                        serverHelper.sendDatabaseError(res, err);
-                    else {
+                else {
+                    chatHelper.getMessage(time, message.contents)
+                    .then((messages)=>{
                         res.status(201);
                         res.send(messages);
-                    }
-                });
+                    })
+                    .catch(err=>serverHelper.sendDatabaseError(res,err));
+                }
             }
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err))

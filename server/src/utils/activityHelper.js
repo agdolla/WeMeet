@@ -51,7 +51,11 @@ module.exports = class ActivityHelper {
             {$sort: {'comments.postDate':-1}},
             {$limit: 3}
         ])
+        .then((cursor)=>{
+            return cursor.toArray()
+        })
         .then((comments)=>{
+            console.log(comments);
             let postComments = comments.map((comment)=>{
                 return comment.comments
             });

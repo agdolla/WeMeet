@@ -93,6 +93,7 @@ module.exports = class PostHelper {
             {$sort: {'comments.postDate':-1}},
             {$limit: 3}
         ])
+        .then(cursor => {return cursor.toArray()})
         .then((comments)=>{
             let postComments = comments.map((comment)=>{
                 return comment.comments

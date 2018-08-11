@@ -56,38 +56,39 @@ module.exports = class ChatHelper {
         });
     }
 
-    getMessage(time, sessionId, cb) {
-        this.database.collection('message').aggregate([
-            {$match: { _id: sessionId}},
-            {$unwind: "$messages"},
-            {$match:{"messages.date":{$lt:parseInt(time)}}},
-            {$sort:{"messages.date":-1}},
-            {$limit:10}
-        ],(err,messages)=>{
-            if (err) {
-                return cb(err);
-            } else {
+    getMessage(time, sessionId) {
+        return new Promise((resolve, reject)=>{
+            this.database.collection('message').aggregateAsync([
+                {$match: { _id: sessionId}},
+                {$unwind: "$messages"},
+                {$match:{"messages.date":{$lt:parseInt(time)}}},
+                {$sort:{"messages.date":-1}},
+                {$limit:10}
+            ])
+            .then(cursor=>{return cursor.toArray();})
+            .then(messages=>{
                 if(messages.length===0){
-                    cb(null,messages);
+                    resolve(messages);
                 }
                 else{
                     var resultMsgs = messages.map((message)=>{
                         return message.messages;
-                    })
+                    });
                     resultMsgs = resultMsgs.reverse();
                     var userList = [resultMsgs[0].sender, resultMsgs[0].target];
-                    this.serverHelper.resolveUserObjects(userList, function(err, userMap) {
+                    this.serverHelper.resolveUserObjects(userList, (err, userMap)=>{
                         if (err)
-                            return cb(err);
+                            reject(err);
                         resultMsgs.forEach((message) => {
                             message.target = userMap[message.target];
                             message.sender = userMap[message.sender];
                         });
-                        cb(null, resultMsgs);
+                        resolve(resultMsgs);
                     })
                 }
-            }
-        });
+            })
+            .catch(err=>reject(err));
+        })
     }
 
     getSession(userid, targetid) {
