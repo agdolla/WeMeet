@@ -1,25 +1,24 @@
-var express = require('express');
-var compression = require('compression');
-var app = express();
-var http = require('http');
-// var https = require('https');
-var bodyParser = require('body-parser');
-var Promise = require("bluebird");
-// var fs = Promise.promisifyAll(require('fs'));
+let express = require('express');
+let compression = require('compression');
+let app = express();
+let http = require('http');
+// let https = require('https');
+let bodyParser = require('body-parser');
+let Promise = require("bluebird");
+// let fs = Promise.promisifyAll(require('fs'));
 let dbName = 'wemeet';
-var MongoDB = Promise.promisifyAll(require('mongodb'));
-var MongoClient = MongoDB.MongoClient;
-var ObjectID = MongoDB.ObjectID;
-var url = 'mongodb://localhost:27017/'+dbName;
-var bcrypt = Promise.promisifyAll(require('bcryptjs'));
-var mcache = require('memory-cache');
-var passport = require('passport');
-var cookieParser = require('cookie-parser');
-var localStrategy = require('passport-local').Strategy;
-var facebookStrategy = require('passport-facebook').Strategy;
+let MongoDB = Promise.promisifyAll(require('mongodb'));
+let MongoClient = MongoDB.MongoClient;
+let ObjectID = MongoDB.ObjectID;
+let url = 'mongodb://localhost:27017/'+dbName;
+let bcrypt = Promise.promisifyAll(require('bcryptjs'));
+let mcache = require('memory-cache');
+let passport = require('passport');
+let cookieParser = require('cookie-parser');
+let localStrategy = require('passport-local').Strategy;
+let facebookStrategy = require('passport-facebook').Strategy;
 let session = require('express-session');
 let MongoStore = require('connect-mongo')(session);
-let sessionStore = new MongoStore({url: 'mongodb://localhost/wemeetSession'});
 let helmet = require('helmet');
 let ServerHelper = require('./utils/serverHelper');
 let ActivityHelper = require('./utils/activityHelper');
@@ -29,7 +28,7 @@ let NotificationHelper = require('./utils/notificationHelper');
 const Jimp = require("jimp");
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
-var secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
+let secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
 fda064351da14375118884b463b47a4c0699f67aed0094f339998f102d99bdfe479dbefae0
 6933592c86abd20c5447a5f9af1b275c909de4108ae2256bcb0285daad0aa890171849fb3c
 a332ca4da03fc80b9228f56cad935b6b9fd33ce6437a4b1f96648546a122a718720452b7cf
@@ -42,7 +41,7 @@ app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
 app.use(compression());
 app.disable('x-powered-by');
 
-var cache = (duration) => {
+let cache = (duration) => {
     return (req, res, next) => {
         var key = '__express__' + req.originalUrl || req.url
         var cachedBody = mcache.get(key);
@@ -60,9 +59,12 @@ var cache = (duration) => {
     }
 }
 
-MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
+MongoClient.connect(url, { 
+    useNewUrlParser: true,
+    replicaSet: 'rs0'
+}, function(err, client) {
     let db = client.db(dbName);
-
+    let sessionStore = new MongoStore({db: db});
     //initialize helper class
     let serverHelper = new ServerHelper(db);
     let activityHelper = new ActivityHelper(db);
@@ -890,27 +892,23 @@ MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
                     }
                 })
                 .then(()=>{
-                    chatHelper.getMessage(time+1,contentsid, function(err, messages) {
-                        if (err)
-                        serverHelper.sendDatabaseError(res, err);
-                        else {
-                            //seting lastmessage;
-                            lastmessage.isread = false;
-                            db.collection("messageSession").updateOneAsync({
-                                _id: new ObjectID(id)
-                            }, {
-                                $set: {
-                                    "lastmessage": lastmessage
-                                }
-                            })
-                            .then(()=>{
-                                res.send(messages);
-                            })
-                            .catch(err=>serverHelper.sendDatabaseError(res,err))
-                        }
-                    });
+                    return chatHelper.getMessage(time,contentsid)
                 })
-                .catch(err=>serverHelper.sendDatabaseError(res,err))
+                .then((messages) => {
+                    //seting lastmessage;
+                    lastmessage.isread = false;
+                    db.collection("messageSession").updateOneAsync({
+                        _id: new ObjectID(id)
+                    }, {
+                        $set: {
+                            "lastmessage": lastmessage
+                        }
+                    })
+                    .then(()=>{
+                        res.send(messages);
+                    })
+                })
+                .catch(err=>serverHelper.sendDatabaseError(res,err));
             }
         });
     });
@@ -1209,8 +1207,7 @@ MongoClient.connect(url, { useNewUrlParser: true }, function(err, client) {
         accept(null, false);
     }
 
-    io.on('connection', function(socket){
-
+    io.on('connection', (socket)=>{
         //disconnect means user logs out
         socket.on('disconnect', function () {
             db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){

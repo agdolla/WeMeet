@@ -402,7 +402,10 @@ function resetDatabase(db, cb) {
 }
 
 function reset(cb){
-  mongoClient.connect(url, function(err, database) {
+  mongoClient.connect('mongodb://localhost:27017/wemeet, localhost:27018/wemeet2',{
+    useNewUrlParser: true,
+    replicaSet: 'rs0'
+  }, function(err, database) {
     if (err) {
       throw new Error("Could not connect to database: " + err);
     } else {
