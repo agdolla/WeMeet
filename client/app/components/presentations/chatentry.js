@@ -18,8 +18,8 @@ export default class ChatEntry extends React.Component{
         e.preventDefault();
         if(e.key === "Enter" || e.button===0){
             if(this.state.text.trim() !== ""){
-                this.setState({text:""});
                 this.props.onPost(this.state.text);
+                this.setState({text:""});
             }
         }
     }

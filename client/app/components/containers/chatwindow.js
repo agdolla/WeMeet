@@ -37,6 +37,8 @@ export default class ChatWindow extends React.Component {
             this.setState({
                 targetUser:this.props.target,
                 message:this.props.message
+            },()=>{
+                this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             })
         }
     }
