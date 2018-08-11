@@ -56,7 +56,7 @@ module.exports = class ChatHelper {
         });
     }
 
-    getMessage(time,sessionId, cb) {
+    getMessage(time, sessionId, cb) {
         this.database.collection('message').aggregate([
             {$match: { _id: sessionId}},
             {$unwind: "$messages"},
@@ -78,7 +78,7 @@ module.exports = class ChatHelper {
                     var userList = [resultMsgs[0].sender, resultMsgs[0].target];
                     this.serverHelper.resolveUserObjects(userList, function(err, userMap) {
                         if (err)
-                        return cb(err);
+                            return cb(err);
                         resultMsgs.forEach((message) => {
                             message.target = userMap[message.target];
                             message.sender = userMap[message.sender];

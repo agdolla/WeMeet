@@ -24,7 +24,7 @@ import {logout} from './credentials'
 
 //client side notification request function
 import {deleteNotification} from './notification'
-import {acceptFriendRequest} from './notification'
+import {acceptFriendRequest, hasNewNotification} from './notification'
 
 //client side postitem request function
 import {likePost} from './postitem'
@@ -91,6 +91,7 @@ export{
     //export notification function
     deleteNotification,
     acceptFriendRequest,
+    hasNewNotification,
 
     //export postitem function
     likePost,

@@ -2,13 +2,12 @@ import React from 'react';
 import {Navbar} from '../containers';
 import {ChatNavBody} from '../containers';
 import {ChatWindow} from '../containers';
-//request function
 import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
-//credentials function
 import {socket} from '../../utils';
-
 import Drawer from 'material-ui/Drawer';
+
 // var debug = require('react-debug');
+let Promise = require('bluebird');
 
 export default class Chat extends React.Component {
 
@@ -31,131 +30,95 @@ export default class Chat extends React.Component {
             var tmp = Object.assign({},this.state.user);
             tmp.friends.forEach((i)=>{if(i._id===data.user)i.online=data.online})
             this.setState({ user:tmp })
-        })
-    }
-
-    componentWillUpdate(){
-        socket.removeAllListeners("chat");
-    }
-
-    componentDidUpdate(){
+        });
         socket.on('chat',()=>{
-            this.getSession(this.state.friend._id,(session)=>{
+            Promise.join(getSessions(this.props.user), this.getMessagesForUser(this.state.friend._id))
+            .spread((sessions, data)=>{
                 this.setState({
-                    sessionId:session
-                },
-                ()=>{
-                    getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
-                    .then(response=>{
-                        let message = response.data;
-                        this.setState({
-                            message:message
-                        },()=>{
-                            getSessions(this.props.user)
-                            .then(response=>{
-                                let sessions = response.data;
-                                this.setState({
-                                    sessions:sessions,
-                                    btnText:"load earier messages"
-                                });
-                            });
-                        });
-                    });
-                });
+                    sessions: sessions.data,
+                    message: data.messages.data,
+                    btnText:"load earier messages",
+                    sessionId: data.sessionData
+                })
             });
         });
     }
 
-    getData() {
-        getUserData(this.props.user)
-        .then(response=>{
-            let userData = response.data;
-            this.setState({
-                user:userData
-            },()=>{
-                getSessions(this.props.user)
+    componentWillUnmount() {
+        socket.removeAllListeners("chat");
+        socket.removeAllListeners('online');
+    }
+
+    async getData() {
+        let initialData = await Promise.join(getUserData(this.props.user), getSessions(this.props.user));
+        let userData = initialData[0].data;
+        let sessionsData = initialData[1].data;
+        let sessionData = await this.getSession(userData.friends[0]._id);
+        let messages = await getMessages((new Date().getTime()),this.props.user,sessionData)
+
+        this.setState({
+            user: userData,
+            sessions: sessionsData,
+            friend: userData.friends[0],
+            sessionId: sessionData,
+            message: messages.data,
+            btnText: messages.data.length===0?"say hello to your friend!":"load earier messages"
+        });
+    }
+
+    getSession(friend){
+        return new Promise((resolve, reject)=>{
+            var sessions = this.state.sessions;
+            var result = null;
+            sessions.forEach(session=>{
+                if(session.users.indexOf(friend)!==-1){
+                    return result = session._id;
+                }
+            });
+            if(result === null){
+                getSessionId(this.props.user,friend)
                 .then(response=>{
-                    let sessions = response.data;
-                    this.setState({
-                        sessions:sessions,
-                        friend:this.state.user.friends[0]
-                    },()=>{
-                        this.getSession(this.state.friend._id,(session)=>{
-                            this.setState({
-                                sessionId:session
-                            },
-                            ()=>{
-                                getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
-                                .then(response=>{
-                                    let message = response.data;
-                                    this.setState({
-                                        message:message,
-                                        btnText:message.length===0?"say hello to your friend!":"load earier messages"
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    getSession(friend,callback){
-        var sessions = this.state.sessions;
-        var result = null;
-        sessions.forEach(session=>{
-            if(session.users.indexOf(friend)!==-1){
-                return result = session._id;
+                    resolve(response.data._id);
+                })
             }
+            else resolve(result);
         });
-        if(result === null){
-            getSessionId(this.props.user,friend)
-            .then(response=>{
-                return callback(response.data._id);
-            });
-        }
-        else callback(result);
     }
 
     handlePostMessage(message){
-        socket.emit('chat',{currUser:this.props.user,friend:this.state.friend._id});
         postMessage(this.state.sessionId, this.props.user, this.state.friend._id ,message)
-        .then(response=>{
+        .then(async response=>{
             let newMessage = response.data;
-            this.setState({message:newMessage},()=>{
-                getSessions(this.props.user)
-                .then(response=>{
-                    let sessions = response.data;
-                    this.setState({
-                        sessions:sessions,
-                        btnText:"load earier messages"
-                    });
-                });
+            let sessions = await getSessions(this.props.user);
+            this.setState({
+                message: newMessage,
+                sessions: sessions.data,
+                btnText:"load earier messages"
+            },()=>{
+                socket.emit('chat',{currUser:this.props.user,friend:this.state.friend._id});
             });
         });
     }
 
     handleSwitchFriends(friendData){
-        this.setState({friend:friendData},
-            ()=>{
-                this.getSession(this.state.friend._id,(session)=>{
-                    this.setState({
-                        sessionId:session
-                    },
-                    ()=>{
-                        getMessages((new Date().getTime()),this.props.user,this.state.sessionId)
-                        .then(response=>{
-                            let message = response.data;
-                            this.setState({
-                                message:message,
-                                btnText:message.length===0?"say hello to your friend!":"load earier messages"
-                            });
-                        });
-                    });
-                });
-            }
-        );
+        this.getMessagesForUser(friendData._id)
+        .then(data=>{
+            this.setState({
+                friend: friendData,
+                sessionId: data.sessionData,
+                message: data.messages.data,
+                btnText:data.messages.data.length===0?"say hello to your friend!":"load earier messages"
+            });
+        })
+    }
+
+    async getMessagesForUser(userId) {
+        let sessionData = await this.getSession(userId);
+        let messages = await getMessages((new Date().getTime()),this.props.user,sessionData);
+        return {
+            sessionData: sessionData,
+            messages: messages
+        }
     }
 
     handleLoadMessage(e){
@@ -163,7 +126,7 @@ export default class Chat extends React.Component {
         var time = this.state.message.length===0?(new Date().getTime()):this.state.message[0].date;
         getMessages(time,this.props.user,this.state.sessionId)
         .then(response=>{
-            let message = response.data;
+            let messages = response.data;
             if(messages.length===0){
                 return this.setState({
                     btnText: "nothing more to load"

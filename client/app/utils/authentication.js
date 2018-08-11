@@ -25,6 +25,7 @@ export function login(email, password, cb) {
         updateCredentials(authData.user);
         //let server know this user is online
         socket.emit('user',authData.user._id);
+        location.reload();
         cb(true);
     })
     .catch(err=>cb(false));

@@ -1,21 +1,12 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
-// import ReactDOM from 'react-dom';
-
-//request function
-import {getUserData} from '../../utils';
-
-
 import {ChatEntry} from '../presentations';
 import {ChatRightBubble} from '../presentations';
 import {ChatLeftBubble} from '../presentations';
-
-
-
-// var debug = require('react-debug');
 import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
 
+// var debug = require('react-debug');
 
 export default class ChatWindow extends React.Component {
 
@@ -23,49 +14,33 @@ export default class ChatWindow extends React.Component {
         super(props);
         this.state = {
             targetUser: props.target,
-            message: props.message,
-            load:false
+            message: props.message
         }
     }
 
-    // componentDidMount() {
-    //     this.getData();
-    // }
-
-    componentDidUpdate() {
-        if(!this.state.load)
+    componentDidMount() {
+        this.setState({
+            targetUser:this.props.target,
+            message:this.props.message
+        });
         this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
     }
 
-    handleLoad(e){
-        e.preventDefault();
-        this.setState({
-            load:true
-        },()=>{
-            this.props.onLoad(e);
-        });
-
+    async handlePostMessage(text){
+        await this.props.onPost(text);
+        this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
     }
 
-    handlePostMessage(text){
-        this.props.onPost(text);
-    }
-
-    // getData() {
-    //   if(!this.props.target==""){
-    //     getUserData(this.props.target, (userData) => {
-    //         this.setState({targetUser:userData})
-    //     });}
-    // }
-
-    componentWillReceiveProps(nextProps){
-        if(!this.props.target==""){
+    componentDidUpdate(prevProps, prevState) {
+        if((this.props.target._id!==prevProps.target._id
+        || JSON.stringify(this.props.message)!==JSON.stringify(prevProps.message))){
             this.setState({
-                targetUser:nextProps.target,
-                message:nextProps.message
+                targetUser:this.props.target,
+                message:this.props.message
             })
         }
     }
+
     render() {
         return (
             <div className="col-md-7 col-md-offset-0 col-sm-10 col-sm-offset-1 col-xs-12 chat-right">
@@ -104,7 +79,7 @@ export default class ChatWindow extends React.Component {
 
                     <div className="panel-body" ref="chatwindow">
                         <div style={{textAlign:"center"}}>
-                            <a href="" onClick={(e)=>this.handleLoad(e)}>{this.props.btnText}</a>
+                            <a href="" onClick={(e)=>this.props.onLoad(e)}>{this.props.btnText}</a>
                         </div>
 
                         {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{

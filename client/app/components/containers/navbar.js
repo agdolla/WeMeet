@@ -1,14 +1,9 @@
 import React from 'react';
 import {Link, withRouter} from 'react-router-dom';
-
-//import credentials function
 import {socket} from '../../utils';
 import {logout} from '../../utils';
-//import util function
-import {hideElement} from '../../utils';
-
-var swal = require('sweetalert');
-
+import {hideElement, hasNewNotification} from '../../utils';
+import Badge from 'material-ui/Badge';
 import Avatar from 'material-ui/Avatar';
 import {List, ListItem} from 'material-ui/List';
 import IconMenu from 'material-ui/IconMenu';
@@ -22,7 +17,9 @@ import Divider from 'material-ui/Divider';
 import Drawer from 'material-ui/Drawer';
 import FontIcon from 'material-ui/FontIcon';
 import Snackbar from 'material-ui/Snackbar';
-// var debug = require('react-debug');
+
+var swal = require('sweetalert');
+var debug = require('react-debug');
 
 class Navbar extends React.Component{
 
@@ -33,6 +30,7 @@ class Navbar extends React.Component{
       post:false,
       chat:false,
       notification:false,
+      notificationCount: 0,
       open:false,
       snackBar:false
     }
@@ -78,7 +76,7 @@ class Navbar extends React.Component{
       activity:false,
       post:false,
       chat:false,
-      notifiction:false
+      notification:false
     });
     socket.on('newActivity',this.onNewActivity);
     socket.on('newPost',this.onNewPost);
@@ -95,14 +93,30 @@ class Navbar extends React.Component{
     socket.removeListener("friend request accepted",this.onFriendRequestAccepted);
   }
 
-  componentWillReceiveProps(){
-    this.setState({
-      activity:false,
-      post:false,
-      chat:false,
-      notifiction:false
-    });
+  // componentWillReceiveProps(){
+  //   this.setState({
+  //     activity:false,
+  //     post:false,
+  //     chat:false,
+  //     notifiction:false
+  //   });
+  // }
+
+  componentDidUpdate(prevProps, prevState) {
+    if(Object.keys(this.props.user).length>0){
+      hasNewNotification(this.props.user._id)
+      .then(response=>{
+        let count = response.data.count;
+        if(prevState.notificationCount !== count){
+          this.setState({
+            notification:count>0,
+            notificationCount: count
+          });
+        }
+      })
+    }
   }
+  
 
   notifyMe(route,message) {
     if (!Notification) {
@@ -145,7 +159,7 @@ class Navbar extends React.Component{
     return(
       <div>
         <Snackbar
-          open={this.state.snackBar}
+          open={this.state.snackBar && this.props.chat!=='active'}
           message={"You have new messages"}
           action="check"
           autoHideDuration={4000}
@@ -235,7 +249,14 @@ class Navbar extends React.Component{
                     <Link to="/search"><i className="fa fa-search" aria-hidden="true"/></Link>
                   </li>
                   <li className={this.props.notification}>
-                    <Link to={"/notification"}><i className="fa fa-bell-o" aria-hidden="true"></i> <i className={"fa fa-circle "+hideElement(!this.state.notification)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                    <Link to={"/notification"}>
+                      {!this.state.notification?<i className="fa fa-bell-o" aria-hidden="true"></i>:
+                      <Badge
+                        badgeContent={this.state.notificationCount}
+                        primary={true}
+                        badgeStyle={{backgroundColor:'#f44336'}}
+                        style={{padding:'10px 12px 10px 10px'}}/>}
+                    </Link>
                   </li>
               </ul>
             </div>

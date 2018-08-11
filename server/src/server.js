@@ -356,16 +356,28 @@ MongoClient.connect(url, function(err, database) {
     });
 
     app.get('/chatNotification/:userid',serverHelper.isLoggedIn,(req, res) =>{
-        if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+        if(req.params.userid.str!==req.user._id.str) return res.status(401).end();
         var userid = req.params.userid;
         serverHelper.getUserData(new ObjectID(userid),function(err,userdata){
             if(err)
-            serverHelper.sendDatabaseError(res,err);
+                serverHelper.sendDatabaseError(res,err);
             else {
 
                 res.send(userdata.sessions);
             }
         })
+    })
+
+    app.get('/newNotification/:userId', serverHelper.isLoggedIn, (req, res)=>{
+        if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+        var userId = req.params.userId;
+        notificationHelper.hasNewNotification(new ObjectID(userId))
+        .then(result=>{
+            res.send({
+                count:result
+            });
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res, err));
     })
 
     //get user data
@@ -812,7 +824,7 @@ MongoClient.connect(url, function(err, database) {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var id = req.params.id;
         var userid = req.params.userId;
-        var time = req.params.time;
+        var time = parseInt(req.params.time);
         db.collection('messageSession').findOneAsync({
             _id: new ObjectID(id)
         })
@@ -822,16 +834,17 @@ MongoClient.connect(url, function(err, database) {
                 res.send();
             }
             else {
-                if(message.lastmessage===undefined?false: (message.lastmessage.target===undefined?"": message.lastmessage.target.str===userid.str)){
+                if(message.lastmessage===undefined? false: (message.lastmessage.target===undefined?"": 
+                message.lastmessage.target.str===userid.str)){
                     db.collection('messageSession').updateOneAsync({_id:new ObjectID(id)},{
                         $set:{
                             "lastmessage.isread":true
                         }
                     })
                     .then(()=>{
-                        chatHelper.getMessage(time+1, message.contents, function(err, messages) {
+                        chatHelper.getMessage(time, message.contents, function(err, messages) {
                             if (err)
-                            serverHelper.sendDatabaseError(res, err);
+                                serverHelper.sendDatabaseError(res, err);
                             else {
                                 res.status(201);
                                 res.send(messages);
@@ -840,9 +853,9 @@ MongoClient.connect(url, function(err, database) {
                     })
                     .catch(err=>serverHelper.sendDatabaseError(res,err));
                 }
-                else chatHelper.getMessage(time+1,message.contents, function(err, messages) {
+                else chatHelper.getMessage(time,message.contents, function(err, messages) {
                     if (err)
-                    serverHelper.sendDatabaseError(res, err);
+                        serverHelper.sendDatabaseError(res, err);
                     else {
                         res.status(201);
                         res.send(messages);
@@ -1262,7 +1275,7 @@ MongoClient.connect(url, function(err, database) {
         socket.on('chat',function(data){
             db.collection('userSocketIds').findOne({userId:new ObjectID(data.friend)},function(err,socketData){
                 if(err)
-                io.emit('chat',err);
+                    io.emit('chat',err);
                 else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
                     io.sockets.connected[socketData.socketId].emit('chat');
                 }

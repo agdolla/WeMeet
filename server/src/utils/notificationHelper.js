@@ -1,5 +1,6 @@
 'use strict';
 let ServerHelper = require('./serverHelper');
+let Promise = require('bluebird');
 
 module.exports = class NotificationHelper {
     constructor(db) {
@@ -105,5 +106,17 @@ module.exports = class NotificationHelper {
             });
         })
         .catch(err=>callback(err));
+    }
+
+    hasNewNotification(userId){
+        return new Promise((resolve, reject)=>{
+            this.database.collection('notifications').findOneAsync({
+                _id: userId
+            })
+            .then(notifications=>{
+                resolve(notifications.contents.length);
+            })
+            .catch(err=>reject(err));
+        });
     }
 }
