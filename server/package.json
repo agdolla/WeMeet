@@ -8,6 +8,10 @@
         "start": "node ./src/server.js",
         "mocha": "./node_modules/.bin/mocha --reporter mochawesome"
     },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/shengbolou/WeMeet"
+    },
     "dependencies": {
         "bcryptjs": "^2.3.0",
         "bluebird": "^3.4.7",

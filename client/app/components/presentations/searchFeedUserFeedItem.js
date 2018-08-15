@@ -15,12 +15,13 @@ export default class SearchFeedUserFeedItem extends React.Component{
             sucess:false
         }
     }
-
-
-    componentWillReceiveProps(nextProps){
-        this.setState({
-            data: nextProps.data
-        });
+    
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)){
+            this.setState({
+                data: this.props.data
+            });
+        }
     }
 
     checkFriendsOfUser(){

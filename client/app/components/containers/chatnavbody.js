@@ -9,10 +9,13 @@ export default class ChatNavBody extends React.Component {
         super(props);
         this.state = props;
     }
-
-    componentWillReceiveProps(newProps){
-        this.setState(newProps);
+    
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+            this.setState(this.props);
+        }
     }
+    
 
     getLastmessage(friendId){
         var filterResult = this.state.sessions.filter((session) => {
@@ -28,7 +31,6 @@ export default class ChatNavBody extends React.Component {
         else{
             return filterResult[0].lastmessage;
         }
-
     }
 
     render() {

@@ -39,9 +39,13 @@ export default class Profile extends React.Component{
         this.getData(this.props.currUser, this.props.user);
     }
 
-    componentWillReceiveProps(newProps){
-        this.getData(newProps.currUser, newProps.user);
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.currentUser!==this.props.currentUser || 
+            prevProps.user!==this.props.user){
+                this.getData(this.props.currUser, this.props.user);
+            }
     }
+    
 
     handleChange = (event, value) => {
         this.setState({ value:value });

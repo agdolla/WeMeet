@@ -37,11 +37,13 @@ export default class SettingProfileInfo extends React.Component{
     //
     // }
 
-    componentWillReceiveProps(nextProps) {
-        this.setState({
-            userData: nextProps.userData
-        })
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.props.userData) !== JSON.stringify(prevProps.userData))
+            this.setState({
+                userData: this.props.userData
+            })
     }
+    
 
     handleChangeUserInfo(e){
         e.preventDefault();

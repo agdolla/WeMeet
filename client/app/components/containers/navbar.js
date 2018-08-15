@@ -105,15 +105,6 @@ class Navbar extends React.Component{
     socket.removeListener("friend request accepted",this.onFriendRequestAccepted);
   }
 
-  // componentWillReceiveProps(){
-  //   this.setState({
-  //     activity:false,
-  //     post:false,
-  //     chat:false,
-  //     notifiction:false
-  //   });
-  // }
-
   componentDidUpdate(prevProps, prevState) {
     if(Object.keys(this.props.user).length>0){
       hasNewNotification(this.props.user._id)
@@ -122,7 +113,10 @@ class Navbar extends React.Component{
         if(prevState.notificationCount !== count){
           this.setState({
             notification:count>0,
-            notificationCount: count
+            notificationCount: count,
+            activity:false,
+            post:false,
+            chat:false
           });
         }
       })

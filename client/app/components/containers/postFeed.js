@@ -65,9 +65,12 @@ export default class PostFeed extends React.Component{
         });
     }
 
-    componentWillReceiveProps(){
-        this.getData();
+
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.state.contents) !== JSON.stringify(prevState.contents))
+            this.getData();
     }
+    
 
     trackScrolling = () => {
         let wrappedElement = document.getElementById('postFeed');

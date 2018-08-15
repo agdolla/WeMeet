@@ -88,13 +88,15 @@ export default class PostFeedItem extends React.Component{
         })
     }
 
-    componentWillReceiveProps(nextProps){
-        this.setState({
-            data: nextProps.data,
-            comments: []
-        })
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
+            this.setState({
+                data: this.props.data,
+                comments: []
+            })
+        }
     }
-
+    
     render(){
         var data = this.state.data;
         var contents;

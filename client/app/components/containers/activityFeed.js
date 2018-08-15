@@ -61,10 +61,12 @@ export default class ActivityFeed extends React.Component{
     componentWillUnmount(){
         document.removeEventListener('scroll', this.trackScrolling);
     }
-
-    componentWillReceiveProps(){
-        this.getData();
+    
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.state.contents) !== JSON.stringify(prevState.contents))
+            this.getData;
     }
+    
 
     trackScrolling = () => {
         let wrappedElement = document.getElementById('activityFeed');
