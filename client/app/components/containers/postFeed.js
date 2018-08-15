@@ -1,11 +1,7 @@
 import React from 'react';
-
-
 import {PostEntry} from '../presentations';
 import {PostFeedItem} from '../presentations';
-//request function
 import {getAllPosts,postStatus} from '../../utils';
-//credentials function
 import {socket,isBottom} from '../../utils';
 
 // var debug = require('react-debug');

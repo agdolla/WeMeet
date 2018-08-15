@@ -43,9 +43,10 @@
 .main-feed .panel .panel-footer .col-md-12 a:nth-child(2):hover{
   color:rgb(50, 37, 153);
 }
-.main-feed .panel .panel-footer .col-md-12 span{
-  margin-right: 5px;
-}
+/* .main-feed .panel .panel-footer .col-md-12 span{
+  margin-right: -3px;
+} */
+
 .main-feed .panel textarea{
   resize: none;
   margin-top: 10px;

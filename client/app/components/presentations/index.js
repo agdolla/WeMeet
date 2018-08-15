@@ -19,9 +19,7 @@ import PostFeedItem from './postFeedItem'
 
 //import Chat presentations
 import ChatEntry from './chatentry'
-import ChatLeftBubble from './chatleftbubble'
 import ChatNavChatItem from './chatnavchatitem'
-import ChatRightBubble from './chatrightbubble'
 
 // import Notification presentations
 import NotificationActivity from './notificationactivity'
@@ -48,9 +46,7 @@ export{
     PostFeedItem,
 
     ChatEntry,
-    ChatLeftBubble,
     ChatNavChatItem,
-    ChatRightBubble,
 
     NotificationActivity,
     NotificationFriendRequest,

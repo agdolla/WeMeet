@@ -10,6 +10,8 @@
     "watch": "./node_modules/.bin/webpack --watch"
   },
   "devDependencies": {
+    "@material-ui/core": "^1.4.3",
+    "@material-ui/icons": "^2.0.1",
     "axios": "^0.18.0",
     "babel": "^6.3.26",
     "babel-core": "^6.4.0",

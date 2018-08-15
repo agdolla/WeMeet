@@ -1,6 +1,6 @@
 import React from 'react';
 import {List, ListItem} from 'material-ui/List';
-import FontIcon from 'material-ui/FontIcon';
+import Icon from '@material-ui/core/Icon';
 import Avatar from 'material-ui/Avatar';
 import Subheader from 'material-ui/Subheader';
 import {Link} from 'react-router-dom';
@@ -55,28 +55,28 @@ export default class ProfilePersonalInfo extends React.Component{
                         leftAvatar={<Avatar src={this.props.user.avatar} 
                         backgroundColor="none"/>} disabled={true}/>
                     <ListItem primaryText={this.props.user.description} 
-                        leftIcon={<FontIcon className="material-icons">info</FontIcon>} 
+                        leftIcon={<Icon style={{width:'30px', textAlign:'center'}} className="fas fa-info-circle"/>} 
                         disabled={true}/>
                     <ListItem primaryText={moment(this.props.user.birthday).calendar()} 
-                        leftIcon={<FontIcon className="material-icons">cake</FontIcon>} 
+                        leftIcon={<Icon style={{width:'30px', textAlign:'center'}} className="fas fa-birthday-cake"/>} 
                         disabled={true}/>
                     <ListItem primaryText={this.props.user.email} 
-                        leftIcon={<FontIcon className="material-icons">mail</FontIcon>} 
+                        leftIcon={<Icon style={{width:'30px', textAlign:'center'}} className="fas fa-envelope"/>} 
                         disabled={true}/>
                     <ListItem primaryText="Connections"
-                        leftIcon={<FontIcon className="material-icons">contacts</FontIcon>}
+                        leftIcon={<Icon style={{width:'30px', textAlign:'center'}} className="fas fa-users"/>}
                         initiallyOpen={false}
                         primaryTogglesNestedList={true}
                         nestedItems={(this.props.user.friends===undefined? []:this.props.user.friends).map((friend,i)=>{
                             var rightButton;
                             if(this.isCommon(friend._id)) {
                                 rightButton =  <IconButton disabled={true}>
-                                                <FontIcon className="material-icons">check</FontIcon> 
+                                                <Icon className="fas fa-check"/> 
                                             </IconButton>
                             }
                             else {
                                 rightButton =  <IconButton onClick={()=>this.handleAddFriend(friend._id)}>
-                                                <FontIcon className="material-icons">add</FontIcon> 
+                                                <Icon className="fas fa-plus"/> 
                                             </IconButton>
                             }
                             return <ListItem primaryText={friend.fullname}

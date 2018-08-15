@@ -3,8 +3,9 @@ import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
 import {PostComment, PostCommentThread} from './';
 import {likePost, unLikePost, postComment, didUserLike, getPostComments} from '../../utils';
-import {RadioButton} from 'material-ui/RadioButton';
-import FontIcon from 'material-ui/FontIcon';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Icon from '@material-ui/core/Icon';
 
 var moment = require('moment');
 
@@ -176,18 +177,19 @@ export default class PostFeedItem extends React.Component{
                     <div className="row">
                         <div className="col-md-12">
                             <div style={{display: 'flex', flexDirection: 'row'}}>
-                                <RadioButton
-                                style={{width:'50px'}}
-                                iconStyle={{marginRight:'2px'}}
-                                onClick={(e)=>this.handleLikeClick(e)}
-                                checked={didUserLike(this.state.data.likeCounter,this.props.currentUser)}
+                                <FormControlLabel
+                                style={{marginTop:'-3px', marginLeft: '-10px'}}
+                                control={
+                                    <Checkbox onClick={(e)=>this.handleLikeClick(e)}
+                                    style={{width: '30px', height: '30px'}}
+                                    checked={didUserLike(this.state.data.likeCounter,this.props.currentUser)}
+                                    icon={<Icon style={{fontSize:'20px'}} className="far fa-heart"/>} 
+                                    checkedIcon={<Icon className="fas fa-heart" style={{color:'red',fontSize:'20px'}}/>}/>
+                                }
                                 label={data.likeCounter.length}
-                                labelStyle = {{fontWeight: 'normal'}}
-                                checkedIcon={<FontIcon className="material-icons" style={{color:'red',fontSize:'20px'}}>favorite</FontIcon>}
-                                uncheckedIcon={<FontIcon className="material-icons" style={{fontSize:'20px'}}>favorite_border</FontIcon>}
                                 />
-                                <FontIcon className="material-icons" style={{fontSize:'20px'}}>insert_comment</FontIcon>
-                                <div><span style={{marginLeft:'2px'}}>{this.state.data.commentsCount}</span></div>
+                                <Icon className="fas fa-comments" style={{marginTop:'1px', fontSize:'20px', width:'25px'}}/>
+                                <div style={{marginTop:'2px'}}><span style={{marginLeft:'5px'}}>{this.state.data.commentsCount}</span></div>
                             </div>
                             <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)} 
                             loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}>

@@ -1,5 +1,8 @@
 import React from 'react';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
+
+// let debug = require('react-debug');
 
 export default class LandingBackground extends React.Component{
 
@@ -10,7 +13,8 @@ export default class LandingBackground extends React.Component{
 
     render(){
         var btn_style={
-          margin:'10px'
+            margin:'10px',
+            outline: '0px'
         }
         return(
             <div className="bg">
@@ -18,11 +22,22 @@ export default class LandingBackground extends React.Component{
                 <h1 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="70px"/></span> WeMeet</h1>
                 <h2 style={{color:'white'}}>Join nearby activities and make friends!</h2>
                 <br/>
-                <RaisedButton onClick={(e)=>{this.handleClick(e)}} label="Sign up" backgroundColor='#607D8B' labelColor="#ffffff" style={btn_style}/>
-                <RaisedButton onClick={(e)=>this.handleClick(e)} label="Log in" primary={true} labelColor='#ffffff' style={btn_style}/>
-                <RaisedButton href="/auth/facebook" label="FACEBOOK"
-                icon={<i className="fa fa-facebook" aria-hidden="true" style={{marginRight:'5px',color:'#ffffff'}}></i>}
-                labelColor='#ffffff' style={btn_style} backgroundColor="#3b5998"/>
+                <Button variant="contained" color="primary" style={btn_style} onClick={(e)=>{this.handleClick(e)}}>
+                    Sign up
+                </Button>
+                <Button variant="contained" color="secondary" style={btn_style} onClick={(e)=>this.handleClick(e)}>
+                    Log in
+                </Button>
+                <Button variant="contained" color="default" style={{
+                    fontSize:'14px',
+                    margin:'10px',
+                    outline: '0px',
+                    color: 'white',
+                    backgroundColor: '#3b5998'
+                }} href="/auth/facebook">
+                    <Icon className="fab fa-facebook-f"/>
+                    Facebook
+                </Button>
               </div>
             </div>
         )

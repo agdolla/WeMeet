@@ -114,6 +114,9 @@ module.exports = class NotificationHelper {
                 _id: userId
             })
             .then(notifications=>{
+                if(notifications === null){
+                    return resolve(0)
+                }
                 resolve(notifications.contents.length);
             })
             .catch(err=>reject(err));

@@ -3,20 +3,29 @@ import {Link, withRouter} from 'react-router-dom';
 import {socket} from '../../utils';
 import {logout} from '../../utils';
 import {hideElement, hasNewNotification} from '../../utils';
-import Badge from 'material-ui/Badge';
-import Avatar from 'material-ui/Avatar';
-import {List, ListItem} from 'material-ui/List';
-import IconMenu from 'material-ui/IconMenu';
-import MenuItem from 'material-ui/MenuItem';
-import IconButton from 'material-ui/IconButton';
-import HardwareKeyboardArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down';
-import Person from 'material-ui/svg-icons/social/person';
-import Settings from 'material-ui/svg-icons/action/settings';
-import Create from 'material-ui/svg-icons/content/create';
-import Divider from 'material-ui/Divider';
-import Drawer from 'material-ui/Drawer';
-import FontIcon from 'material-ui/FontIcon';
-import Snackbar from 'material-ui/Snackbar';
+import Badge from '@material-ui/core/Badge';
+import Avatar from "@material-ui/core/Avatar";
+import IconButton from '@material-ui/core/IconButton';
+import Person from '@material-ui/icons/Person';
+import Settings from '@material-ui/icons/SettingsApplications';
+import Create from '@material-ui/icons/Create';
+import PowerOff from '@material-ui/icons/PowerOff'
+import Divider from '@material-ui/core/Divider';
+import Snackbar from '@material-ui/core/Snackbar';
+import Icon from '@material-ui/core/Icon';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Drawer from '@material-ui/core/Drawer';
+import Button from '@material-ui/core/Button';
+import CloseIcon from '@material-ui/icons/Close';
+
 
 var swal = require('sweetalert');
 var debug = require('react-debug');
@@ -32,7 +41,8 @@ class Navbar extends React.Component{
       notification:false,
       notificationCount: 0,
       open:false,
-      snackBar:false
+      snackBar:false,
+      anchorEl: null
     }
   }
 
@@ -142,29 +152,80 @@ class Navbar extends React.Component{
     }
   }
 
+  handleClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  };
+
   render(){
     var iconMenu =
-    <IconMenu
-      iconButtonElement={<IconButton><HardwareKeyboardArrowDown/></IconButton>}
-      anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
-      targetOrigin={{horizontal: 'right', vertical: 'bottom'}}>
-
-      <Link style={{textDecoration:'none'}} to={"/profile/"+this.props.user._id}><MenuItem primaryText="Profile" rightIcon={<Person/>}/></Link>
-      <Link style={{textDecoration:'none'}} to="/settings"><MenuItem primaryText="Settings" rightIcon={<Settings/>}/></Link>
-      <Link style={{textDecoration:'none'}} to="/createActivity"><MenuItem primaryText="Create Activity" rightIcon={<Create/>}/></Link>
+    <Menu
+      id="simple-menu"
+      anchorEl={this.state.anchorEl}
+      open={Boolean(this.state.anchorEl)}
+      onClose={this.handleClose}
+    >
+      <Link style={{textDecoration:'none', outline:'0px'}} to={"/profile/"+this.props.user._id}>
+        <MenuItem>
+          <ListItemIcon>
+            <Person />
+          </ListItemIcon>
+          <ListItemText inset primary={<h5>Profile</h5>} />
+        </MenuItem>
+      </Link>
+      <Link style={{textDecoration:'none', outline:'0px'}} to="/settings">
+        <MenuItem>
+            <ListItemIcon>
+              <Settings />
+            </ListItemIcon>
+            <ListItemText inset primary={<h5>Settings</h5>} />
+        </MenuItem>
+      </Link>
+      <Link style={{textDecoration:'none', outline:'0px'}} to="/createActivity">
+        <MenuItem>
+          <ListItemIcon>
+            <Create />
+          </ListItemIcon>
+          <ListItemText inset primary={<h5>Create Activity</h5>} />
+        </MenuItem>
+      </Link>
       <Divider/>
-      <MenuItem primaryText="Log out" onClick={(e)=>this.handleLogOut(e)}/>
-    </IconMenu>
+      <MenuItem onClick={(e)=>this.handleLogOut(e)}>
+          <ListItemIcon>
+            <PowerOff/>
+          </ListItemIcon>
+          <ListItemText inset primary={<h5>Logout</h5>} />
+      </MenuItem>
+    </Menu>
 
     return(
       <div>
         <Snackbar
-          open={this.state.snackBar && this.props.chat!=='active'}
+          open={this.state.snackBar && !this.state.chat}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
           message={"You have new messages"}
           action="check"
           autoHideDuration={4000}
-          onActionClick={()=>{this.props.history.push('/chat')}}
-          onRequestClose={()=>{this.setState({snackBar:false})}}
+          onClose={()=>{this.setState({snackBar:false})}}
+          action={[
+            <Button key="undo" color="secondary" size="small" onClick={()=>{this.props.history.push('/chat')}}>
+              Check
+            </Button>,
+            <IconButton
+              key="close"
+              aria-label="Close"
+              color="inherit"
+              onClick={()=>{this.setState({snackBar:false})}}
+            >
+              <CloseIcon />
+            </IconButton>,
+          ]}
         />
 
         <nav className="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -181,39 +242,67 @@ class Navbar extends React.Component{
               </Link>
             </div>
             <Drawer
-              docked={false}
-              width={300}
               open={this.state.open}
-              onRequestChange={(open) => this.setState({open:open})}
-            >
-            <List>
-              <ListItem
-                style={{marginBottom:'5px'}}
-                rightIconButton={iconMenu}
-                disabled={true}
-                leftAvatar={
-                  <Avatar style={{backgroundColor:'none'}} src={this.props.user.avatar} />
-                }>
-                {this.props.user.fullname}
+              onClose={() => this.setState({open:false})}
+              style={{width:'300px'}}>
+            <List style={{width:'300px'}}>
+            <ListItem style={{paddingBottom:'0px'}}>
+              <ListItemAvatar>
+                <Avatar src={this.props.user.avatar} />
+              </ListItemAvatar>
+              <ListItemText
+                primary={<h4>{this.props.user.fullname}</h4>}/>
+                <ListItemSecondaryAction>
+                  <IconButton aria-haspopup="true"
+                    onClick={this.handleClick}
+                    aria-owns={this.state.anchorEl ? 'simple-menu' : null}>
+                    <ExpandMore />
+                  </IconButton>
+                </ListItemSecondaryAction>
               </ListItem>
               <Link style={{textDecoration:'none'}} to='/activity'>
-                <ListItem primaryText="Activities" leftIcon={<FontIcon className="material-icons">featured_play_list</FontIcon>}/>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon className="fas fa-list-alt"></Icon>
+                  </ListItemIcon>
+                  <ListItemText inset primary="Activities" />
+                </ListItem>
               </Link>
 
               <Link style={{textDecoration:'none'}} to='/post'>
-                <ListItem primaryText="Trend" leftIcon={<FontIcon className="material-icons">assessment</FontIcon>}/>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon className="fas fa-book"/>
+                  </ListItemIcon>
+                  <ListItemText inset primary="Trend" />
+                </ListItem>
               </Link>
 
               <Link style={{textDecoration:'none'}} to='/chat'>
-                <ListItem primaryText="Chat" leftIcon={<FontIcon className="material-icons">chat_bubble</FontIcon>}/>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon className="fas fa-comment-alt"/>
+                  </ListItemIcon>
+                  <ListItemText inset primary="Chat" />
+                </ListItem>
               </Link>
 
               <Link style={{textDecoration:'none'}} to='/search'>
-                <ListItem primaryText="Search" leftIcon={<FontIcon className="material-icons">search</FontIcon>}/>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon className="fas fa-search"/>
+                  </ListItemIcon>
+                  <ListItemText inset primary="Search" />
+                </ListItem>
               </Link>
 
               <Link style={{textDecoration:'none'}} to='/notification'>
-                <ListItem primaryText="Notification" leftIcon={<FontIcon className="material-icons">notifications</FontIcon>}/>
+                <ListItem>
+                  <ListItemIcon>
+                    <Icon className="fas fa-bell"/>
+                  </ListItemIcon>
+                  <ListItemText inset primary="Notification" />
+                </ListItem>
               </Link>
             </List>
             </Drawer>
@@ -234,28 +323,34 @@ class Navbar extends React.Component{
 
               <ul className="nav navbar-nav navbar-right">
                 <div className="pull-left">
-                  <ListItem
-                    style={{paddingBottom:'0px'}}
-                    rightIconButton={iconMenu}
-                    disabled={true}
-                    leftAvatar={
-                      <Avatar style={{backgroundColor:'none'}} src={this.props.user.avatar} />
-                    }
-                  >
-                    {this.props.user.fullname}
+                  <ListItem style={{paddingBottom:'0px'}}>
+                    <ListItemAvatar>
+                      <Avatar src={this.props.user.avatar} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<h5>{this.props.user.fullname}</h5>}/>
+                      <ListItemSecondaryAction>
+                        <IconButton aria-haspopup="true"
+                          onClick={this.handleClick}
+                          aria-owns={this.state.anchorEl ? 'simple-menu' : null}>
+                          <ExpandMore />
+                        </IconButton>
+                      </ListItemSecondaryAction>
                   </ListItem>
+                  {iconMenu}
                 </div>
                   <li className={this.props.search}>
                     <Link to="/search"><i className="fa fa-search" aria-hidden="true"/></Link>
                   </li>
                   <li className={this.props.notification}>
                     <Link to={"/notification"}>
-                      {!this.state.notification?<i className="fa fa-bell-o" aria-hidden="true"></i>:
-                      <Badge
+                      {!this.state.notification?<i className="far fa-bell" aria-hidden="true"></i>:
+                        <Badge
                         badgeContent={this.state.notificationCount}
-                        primary={true}
-                        badgeStyle={{backgroundColor:'#f44336'}}
-                        style={{padding:'10px 12px 10px 10px'}}/>}
+                        color='secondary'>
+                          <i className="far fa-bell" aria-hidden="true"/>
+                        </Badge>
+                        }
                     </Link>
                   </li>
               </ul>

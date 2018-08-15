@@ -2,7 +2,7 @@ import React from 'react';
 import {NotificationFriendRequest} from '../presentations';
 import {NotificationActivity} from '../presentations'
 import {Tabs, Tab} from 'material-ui/Tabs';
-import FontIcon from 'material-ui/FontIcon';
+import Icon from '@material-ui/core/Icon';
 import Badge from 'material-ui/Badge';
 // import IconButton from 'material-ui/IconButton';
 
@@ -25,7 +25,7 @@ export default class NotificationBody extends React.Component{
             badgeContent={this.props.FR.length}
             primary={true}
             >
-            <FontIcon className="material-icons" style={{color:'white'}}>person_add</FontIcon>
+            <Icon className="fas fa-user-plus" style={{color:'white', width:'30px'}}/>
         </Badge>;
 
         var anbadge =
@@ -33,7 +33,7 @@ export default class NotificationBody extends React.Component{
             badgeContent={this.props.AN.length}
             primary={true}
             >
-            <FontIcon className="material-icons" style={{color:'white'}}>notifications_active</FontIcon>
+            <Icon className="fas fa-bell" style={{color:'white'}}/>
         </Badge>;
         return(
             <Tabs

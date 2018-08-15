@@ -16,7 +16,7 @@ var moment = require('moment');
 
 import RaisedButton from 'material-ui/RaisedButton';
 
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 export default class ActivityDetailBody extends React.Component{
   constructor(props){

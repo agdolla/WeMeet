@@ -46,7 +46,7 @@ export default class ChatEntry extends React.Component{
                                 <a><i className="fa fa-camera" aria-hidden="true"></i></a>
                             </label>
                             <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" multiple></input>
-                            <a id="openchatemoji"><span><i className="fa fa-lg fa-smile-o" aria-hidden="true"></i></span></a>
+                            <a id="openchatemoji"><span><i className="far fa-smile" aria-hidden="true"></i></span></a>
                         </div>
                     </div>
                     <div className="col-md-2 col-sm-2 col-xs-2 send">

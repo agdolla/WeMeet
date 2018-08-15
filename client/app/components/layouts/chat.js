@@ -4,7 +4,7 @@ import {ChatNavBody} from '../containers';
 import {ChatWindow} from '../containers';
 import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
 import {socket} from '../../utils';
-import Drawer from 'material-ui/Drawer';
+import Drawer from '@material-ui/core/Drawer';
 
 // var debug = require('react-debug');
 let Promise = require('bluebird');
@@ -161,14 +161,15 @@ export default class Chat extends React.Component {
         }
         return (
             <div style={{marginTop:'70px'}}>
-                <Drawer open={this.state.open} width={300} docked={false} onRequestChange={(open) => this.setState({open:open})}>
+                <Drawer open={this.state.open} 
+                style={{width:'500px'}}
+                onClose={() => this.setState({open:false})}>
                     <ChatNavBody sessions={this.state.sessions}
                     userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>
                 </Drawer>
                 <Navbar chat="active" user={this.state.user}/>
                 <div className="container mainElement">
                     <div className="row">
-
                         <div className="col-md-5 col-sm-5 col-xs-5 col-md-offset-1 col-sm-offset-1 col-xs-offset-1 chat-left">
                             <ChatNavBody sessions={this.state.sessions}
                             userData={this.state.user} activeFriend={this.state.friend._id} switchUser={(id)=>this.handleSwitchFriends(id)}/>

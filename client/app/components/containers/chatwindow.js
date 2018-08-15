@@ -1,11 +1,17 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
 import {ChatEntry} from '../presentations';
-import {ChatRightBubble} from '../presentations';
-import {ChatLeftBubble} from '../presentations';
-import IconButton from 'material-ui/IconButton';
-import FontIcon from 'material-ui/FontIcon';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import List from '@material-ui/core/List';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 
+let moment = require('moment');
 // var debug = require('react-debug');
 
 export default class ChatWindow extends React.Component {
@@ -38,7 +44,8 @@ export default class ChatWindow extends React.Component {
                 targetUser:this.props.target,
                 message:this.props.message
             },()=>{
-                this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
+                if(JSON.stringify(prevState.targetUser) !== JSON.stringify(this.state.targetUser))
+                    this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             })
         }
     }
@@ -48,9 +55,11 @@ export default class ChatWindow extends React.Component {
             <div className="col-md-7 col-md-offset-0 col-sm-10 col-sm-offset-1 col-xs-12 chat-right">
                 <div className="panel panel-dafault chatwindow">
                     <div className="panel-heading">
-                        <IconButton className="pull-right friend-btn" tooltip="Friends" tooltipPosition="bottom-center" onClick={()=>this.props.onExpand()}>
-                            <FontIcon className="material-icons">group</FontIcon>
-                        </IconButton>
+                        <Tooltip title="Friends">
+                            <IconButton className="pull-right friend-btn" onClick={()=>this.props.onExpand()}>
+                                <Icon style={{width:'50px'}} className="fas fa-user-friends"/>
+                            </IconButton>
+                        </Tooltip>
                         <div className="media">
                             <div className="media-left">
                                 <Link to={"/rofile/"+this.state.targetUser._id}>
@@ -71,8 +80,6 @@ export default class ChatWindow extends React.Component {
                                             {this.state.targetUser.description}
                                         </font>
                                     </div>
-                                    <div className="col-md-2">
-                                    </div>
                                 </div>
 
                             </div>
@@ -80,26 +87,41 @@ export default class ChatWindow extends React.Component {
                     </div>
 
                     <div className="panel-body" ref="chatwindow">
-                        <div style={{textAlign:"center"}}>
-                            <a href="" onClick={(e)=>this.props.onLoad(e)}>{this.props.btnText}</a>
-                        </div>
+                        <Button onClick={(e)=>this.props.onLoad(e)} fullWidth
+                        disabled={this.state.message===undefined || this.state.message.length===0}>
+                            {this.props.btnText}
+                        </Button>
 
-                        {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
-                            if(msg.sender._id===this.props.curUser){
-                                return (
-                                <ChatRightBubble key={i} data={msg} />
-                                )
-                            }
-                            else{
-                                return (
-                                <ChatLeftBubble key={i} data={msg} />
-                                )
-                            }
-                        })}
+                        <List>
+                            {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
+                                        //default time format
+                                var time = moment(msg.date).calendar();
+                                //if less than 24 hours, use relative time
+                                if((new Date().getTime()) - 12 <= 86400000)
+                                    time = moment(msg.date).fromNow();
 
+                                return <ListItem key={i}
+                                style={{
+                                    alignItems: "flex-start",
+                                    marginBottom:'10px'
+                                }}>
+                                    <ListItemAvatar>
+                                        <Avatar src={msg.sender.avatar}/>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                    primary={
+                                        <span>
+                                            <strong>{msg.sender.fullname}</strong>
+                                            <span style={{fontSize:'12px', marginLeft:'15px'}}>{time}</span>
+                                        </span>
+                                    }
+                                    secondary={msg.text}
+                                    />
+                                </ListItem>
+                            })}
+                        </List>
                     </div>
                     <ChatEntry onPost={(message)=>this.handlePostMessage(message)}/>
-
                 </div>
             </div>
 

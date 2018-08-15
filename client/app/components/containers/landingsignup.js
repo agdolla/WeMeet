@@ -1,17 +1,13 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
-
-//util function
 import {hideElement} from '../../utils';
-
-//request function
 import {signup,login} from '../../utils';
-
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
 
 var zxcvbn = require('zxcvbn');
-
 
 class LandingSignup extends React.Component{
     constructor(props){
@@ -169,38 +165,49 @@ class LandingSignup extends React.Component{
                     <div className="panel-body">
                         <div className="row">
                             <div className="col-md-7 col-md-offset-2">
-                                <TextField
-                                hintText="Username"
-                                floatingLabelText="Username"
-                                style={{width:'100%'}}
-                                onChange={(e)=>this.handleChange("signUpName",e)}
-                                onKeyUp={(e)=>this.handleSignUp(e)}
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="signUpUsername">
+                                    Username
+                                    </InputLabel>
+                                    <Input
+                                    id="signUpUsername"
+                                    value={this.state.signUpName}
+                                    onChange={(e)=>this.handleChange("signUpName",e)}
+                                    onKeyUp={(e)=>this.handleSignUp(e)}
+                                    />
+                                </FormControl>
                             </div>
                             <div className="col-md-7 col-md-offset-2">
-                                <TextField
-                                hintText="Email"
-                                floatingLabelText="Email"
-                                style={{width:'100%'}}
-                                onChange={(e)=>this.handleChange("signUpEmail",e)}
-                                onKeyUp={(e)=>this.handleSignUp(e)}
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="signUpEmail">
+                                    Email
+                                    </InputLabel>
+                                    <Input
+                                    id="signUpEmail"
+                                    value={this.state.signUpEmail}
+                                    onChange={(e)=>this.handleChange("signUpEmail",e)}
+                                    onKeyUp={(e)=>this.handleSignUp(e)}
+                                    />
+                                </FormControl>
                             </div>
                             <div className="col-md-7 col-md-offset-2">
-                                <TextField
-                                hintText="Password"
-                                floatingLabelText="Password"
-                                type="password"
-                                style={{width:'100%'}}
-                                onChange={(e)=>this.handleChange("signUpPass",e)}
-                                onKeyUp={(e)=>this.handleSignUp(e)}
-                                floatingLabelStyle={{color:'#607D8B'}}
-                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="signUpPass">
+                                    Password
+                                    </InputLabel>
+                                    <Input
+                                    id="signUpPass"
+                                    value={this.state.signUpPass}
+                                    onChange={(e)=>this.handleChange("signUpPass",e)}
+                                    onKeyUp={(e)=>this.handleSignUp(e)}
+                                    />
+                                </FormControl>
                                 <div className="progress" style={{height:'6px', marginTop:'-15px',borderRadius:'0'}}>
                                     <div className={"progress-bar "+this.state.passwordClass}
                                     role="progressbar"
@@ -211,23 +218,30 @@ class LandingSignup extends React.Component{
                             </div>
                         </div>
                         <div className="col-md-7 col-md-offset-2">
-                            <TextField
-                            hintText="Confirm password"
-                            floatingLabelText="Confirm password"
-                            type="password"
-                            style={{width:'100%'}}
-                            onChange={(e)=>this.handleChange("signUpPass2",e)}
-                            onKeyUp={(e)=>this.handleSignUp(e)}
-                            floatingLabelStyle={{color:'#607D8B'}}
-                            underlineFocusStyle={{borderColor:'#90A4AE'}}
-                            />
+                            <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                <InputLabel
+                                style={{color:'#607D8B'}}
+                                htmlFor="signUpPass2">
+                                Confirm password
+                                </InputLabel>
+                                <Input
+                                id="signUpPass2"
+                                value={this.state.signUpPass2}
+                                onChange={(e)=>this.handleChange("signUpPass2",e)}
+                                onKeyUp={(e)=>this.handleSignUp(e)}
+                                />
+                            </FormControl>
                         </div>
                     </div>
                 </div>
                 <div className="panel-footer">
                     <div className="row">
                         <div className="col-md-12">
-                            <RaisedButton className="pull-right" primary={true} disabled={this.state.submitted} label="Join Us!" onClick={(e)=>this.handleSignUp(e)}/>
+                            <Button className='pull-right' style={{backgroundColor: '#403e3e', color:'white'}} 
+                            variant='contained'
+                            onClick={(e)=>this.handleSignUp(e)}>
+                                Join us!
+                            </Button>
                             </div>
                         </div>
                     </div>
