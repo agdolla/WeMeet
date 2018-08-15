@@ -1,8 +1,16 @@
 import React from 'react'
-import TextField from 'material-ui/TextField';
-import DatePicker from 'material-ui/DatePicker';
-import Snackbar from 'material-ui/Snackbar';
 import {changeUserInfo} from '../../utils';
+//mui
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import { DatePicker } from 'material-ui-pickers';
+import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
+import MomentUtils from 'material-ui-pickers/utils/moment-utils';
+import WarningIcon from '@material-ui/icons/Warning';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 var moment = require('moment');
 // const debug = require('react-debug');
@@ -20,7 +28,8 @@ export default class SettingProfileInfo extends React.Component{
             changeInfoFailed:false,
             open: false,
             snackBarMsg: "",
-            snackBarColor: ""
+            snackBarColor: "",
+            modified: false
         }
     }
 
@@ -36,7 +45,7 @@ export default class SettingProfileInfo extends React.Component{
 
     handleChangeUserInfo(e){
         e.preventDefault();
-        if(this.state.userData.fullname!=="" && this.state.userData.description!==""){
+        if(this.state.userData.fullname!=="" && this.state.userData.description!=="" && this.state.modified){
             changeUserInfo({
                 userId: this.state.userData._id,
                 fullname:this.state.userData.fullname,
@@ -51,16 +60,18 @@ export default class SettingProfileInfo extends React.Component{
                     changeInfoFailed:false,
                     snackBarMsg: "Successfully Changed Info!",
                     snackBarColor: "#2E7D32",
-                    open:true
+                    open:true,
+                    modified: false
                 });
             });
         }
-        else{
+        else if(this.state.modified){
             this.setState({
                 changeInfoFailed:true,
                 snackBarColor: "#d32f2f",
                 snackBarMsg: "Your Name and About You can not be empty!",
-                open: true
+                open: true,
+                modified: false
             });
         }
     }
@@ -70,15 +81,17 @@ export default class SettingProfileInfo extends React.Component{
         var updatedProfileInfo = Object.assign({},this.state.userData);
         updatedProfileInfo[e.target.id] = e.target.value;
         this.setState({
-            userData: updatedProfileInfo
+            userData: updatedProfileInfo,
+            modified: true
         });
     }
 
-    handleBirthday = (e, date) => {
+    handleBirthday = (date) => {
         var updatedProfileInfo = Object.assign({},this.state.userData);
         updatedProfileInfo['birthday'] = date;
         this.setState({
-            userData: updatedProfileInfo
+            userData: updatedProfileInfo,
+            modified: true
         });
     };
 
@@ -88,6 +101,7 @@ export default class SettingProfileInfo extends React.Component{
 
     render(){
         return(
+            <MuiPickersUtilsProvider utils={MomentUtils}>
             <div className="setting-profile-info">
                 <div className="col-md-7 col-md-offset-1 infos">
                     <h4><span><i className="fa fa-cog" aria-hidden="true"></i></span> Settings</h4>
@@ -98,60 +112,81 @@ export default class SettingProfileInfo extends React.Component{
                                     <h4>Personal Info</h4>
                                     <div>
                                         <Snackbar
-                                            bodyStyle = {{
-                                                backgroundColor:this.state.snackBarColor,
-                                                textAlign:'center'
+                                        autoHideDuration={4000}
+                                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                                        open={this.state.open}
+                                        onClose={this.handleSnackBarClose}>
+                                            <SnackbarContent
+                                            style={{
+                                                backgroundColor: this.state.snackBarColor
                                             }}
-                                            open = {this.state.open}
-                                            autoHideDuration = {3000}
-                                            message = {this.state.snackBarMsg}
-                                            onRequestClose={this.handleSnackBarClose}
-                                        />
+                                            message={
+                                                <span style={{                        
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}>
+                                                    {this.state.changeInfoFailed?
+                                                        <WarningIcon style={{fontSize: '20px', marginRight:'10px'}}/>:
+                                                        <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
+                                                    }
+                                                    {this.state.snackBarMsg}
+                                                </span>
+                                            }
+                                            />
+                                        </Snackbar>
                                     </div>
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <TextField
+                                            <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                                <InputLabel
+                                                style={{color:'#607D8B'}}
+                                                htmlFor="fullname">
+                                                Your Name
+                                                </InputLabel>
+                                                <Input
                                                 id="fullname"
-                                                hintText="Your name"
-                                                floatingLabelText="Your name"
-                                                style={{width:'100%'}}
                                                 value={this.state.userData.fullname}
                                                 onChange={(e)=>this.handleChange(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                            />
+                                                />
+                                            </FormControl>
                                         </div>
                                     </div>
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <TextField
+                                            <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                                <InputLabel
+                                                style={{color:'#607D8B'}}
+                                                htmlFor="nickname">
+                                                NickName
+                                                </InputLabel>
+                                                <Input
                                                 id="nickname"
-                                                hintText="NickName"
-                                                floatingLabelText="NickName"
-                                                style={{width:'100%'}}
                                                 value={this.state.userData.nickname}
                                                 onChange={(e)=>this.handleChange(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                                />
+                                            </FormControl>
+
+                                            <DatePicker
+                                                fullWidth
+                                                format="MMM Do YY"
+                                                style={{marginBottom: '20px'}}
+                                                value={this.state.userData.birthday}
+                                                onChange={this.handleBirthday}
+                                                label="Birthday"
                                             />
-                                            <div className="md-form">
-                                                <h5>Birthday</h5>
-                                                <DatePicker hintText="Choose your birthday" value={moment(this.state.userData.birthday).toDate()}
-                                                onChange={(e,date)=>{this.handleBirthday(e,date)}} textFieldStyle={{width:"100%"}}/>
-                                            </div>
-                                            <TextField
+
+                                            <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                                                <InputLabel
+                                                style={{color:'#607D8B'}}
+                                                htmlFor="description">
+                                                About you
+                                                </InputLabel>
+                                                <Input multiline rows='4'
                                                 id="description"
-                                                rows={4}
-                                                multiLine={true}
-                                                rowsMax={4}
-                                                hintText="About you"
-                                                floatingLabelText="About you"
-                                                style={{width:'100%'}}
                                                 value={this.state.userData.description}
                                                 onChange={(e)=>this.handleChange(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                            />
+                                                />
+                                            </FormControl>
                                         </div>
                                     </div>
                                 </div>
@@ -170,6 +205,7 @@ export default class SettingProfileInfo extends React.Component{
                     </div>
                 </div>
             </div>
+            </MuiPickersUtilsProvider>
         )
     }
 }

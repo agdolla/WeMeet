@@ -1,12 +1,22 @@
 import React from 'react'
 import {changeEmail, ChangeAvatar} from '../../utils';
-import TextField from 'material-ui/TextField';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import Snackbar from 'material-ui/Snackbar';
-import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
 import {hideElement} from '../../utils';
+import Cropper from 'react-cropper';
+//mui
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+import WarningIcon from '@material-ui/icons/Warning';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+
 var swal = require('sweetalert');
 let debug = require('react-debug');
 
@@ -21,7 +31,8 @@ export default class SettingSystemInfo extends React.Component{
             cropperOpen:false,
             snackBarColor:"",
             snackBarMsg:"",
-            open: false
+            open: false,
+            changeEmailFailed: false
         }
     }
 
@@ -76,7 +87,8 @@ export default class SettingSystemInfo extends React.Component{
                 newEmail: "",
                 snackBarColor: "#d32f2f",
                 snackBarMsg: "Please fill in blanks",
-                open: true
+                open: true,
+                changeEmailFailed: true
             });
         }
     }
@@ -110,14 +122,14 @@ export default class SettingSystemInfo extends React.Component{
         e.target.value = null;
     }
 
-    handleRequestHide(){
+    handleRequestHide = ()=>{
         this.setState({
             cropperOpen: false,
             img: null
         });
     }
 
-    handleCrop(){
+    handleCrop = ()=>{
         this.setState({
             cropperOpen: false,
             img: this.refs.cropper.getCroppedCanvas().toDataURL()
@@ -154,46 +166,53 @@ export default class SettingSystemInfo extends React.Component{
         }
     }
     render(){
-        const actions = [
-          <FlatButton
-            label="Cancel"
-            primary={true}
-            onClick={()=>this.handleRequestHide()}
-          />,
-          <FlatButton
-            label="Submit"
-            primary={true}
-            keyboardFocused={true}
-            onClick={()=>this.handleCrop()}
-          />
-        ];
         return(
             <div className="setting-system-info">
                 {this.state.cropperOpen &&
                     <Dialog
-                      title="Adjust your avatar image "
-                      actions={actions}
-                      modal={false}
-                      open={this.state.cropperOpen}
-                      onRequestClose={()=>this.handleRequestHide()}
-                    >
-                    <Cropper
-                      ref='cropper'
-                      src={this.state.img}
-                      style={{height: 400, width: '100%'}}
-                      aspectRatio={1/1}/>
+                    open={this.state.cropperOpen}
+                    onClose={this.handleRequestHide}>
+                        <DialogTitle>Adjust your avatar image</DialogTitle>
+                        <DialogContent>
+                            <Cropper
+                            ref='cropper'
+                            src={this.state.img}
+                            style={{height: 400, width: '100%'}}
+                            aspectRatio={1/1}/>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleRequestHide} color="primary">
+                            Cancel
+                            </Button>
+                            <Button onClick={this.handleCrop} color="primary">
+                            Submit
+                            </Button>
+                        </DialogActions>
                     </Dialog>
                 }
                 <Snackbar
-                    bodyStyle = {{
-                        backgroundColor:this.state.snackBarColor,
-                        textAlign:'center'
+                autoHideDuration={4000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                open={this.state.open}
+                onClose={this.handleSnackBarClose}>
+                    <SnackbarContent
+                    style={{
+                        backgroundColor: this.state.snackBarColor
                     }}
-                    open = {this.state.open}
-                    autoHideDuration = {3000}
-                    message = {this.state.snackBarMsg}
-                    onRequestClose={this.handleSnackBarClose}
-                />
+                    message={
+                        <span style={{                        
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}>
+                            {this.state.changeEmailFailed?
+                                <WarningIcon style={{fontSize: '20px', marginRight:'10px'}}/>:
+                                <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
+                            }
+                            {this.state.snackBarMsg}
+                        </span>
+                    }
+                    />
+                </Snackbar>
                 <div className="col-md-3 system-settings">
                     <div className="list-group">
                         <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#reset-password" aria-expanded="true" aria-controls="reset-password">
@@ -201,32 +220,36 @@ export default class SettingSystemInfo extends React.Component{
                         </a>
                         <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div className="panel-body">
-                                <TextField
-                                    hintText="Old password"
-                                    floatingLabelText="Old password"
-                                    style={{width:'100%'}}
-                                    type='password'
-                                    floatingLabelStyle={{color:'#607D8B'}}
-                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
-
-                                <TextField
-                                    hintText="New password"
-                                    floatingLabelText="New password"
-                                    style={{width:'100%'}}
-                                    type='password'
-                                    floatingLabelStyle={{color:'#607D8B'}}
-                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
-
-                                <TextField
-                                    hintText="Repeat password"
-                                    floatingLabelText="Repeat password"
-                                    style={{width:'100%'}}
-                                    type='password'
-                                    floatingLabelStyle={{color:'#607D8B'}}
-                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="oldpass">
+                                    Old password
+                                    </InputLabel>
+                                    <Input
+                                    id="oldpass"
+                                    />
+                                </FormControl>
+                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="newpass">
+                                    New Password
+                                    </InputLabel>
+                                    <Input
+                                    id="newpass"
+                                    />
+                                </FormControl>
+                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="confirmpass">
+                                    Confirm Password
+                                    </InputLabel>
+                                    <Input
+                                    id="confirmpass"
+                                    />
+                                </FormControl>
                                 <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
                             </div>
                         </div>
@@ -235,25 +258,31 @@ export default class SettingSystemInfo extends React.Component{
                         </a>
                         <div id="reset-email" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
                             <div className="panel-body">
-                                <TextField
-                                    hintText="Old Email"
-                                    floatingLabelText="Old Email"
-                                    style={{width:'100%'}}
+                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="oldemail">
+                                    Old Email
+                                    </InputLabel>
+                                    <Input
+                                    id="oldemail"
                                     value={this.state.oldEmail}
                                     onChange={(e)=>this.handleOldEmail(e)}
-                                    floatingLabelStyle={{color:'#607D8B'}}
-                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                    />
+                                </FormControl>
 
-                                <TextField
-                                    hintText="New Email"
-                                    floatingLabelText="New Email"
-                                    style={{width:'100%'}}
+                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="newemail">
+                                    New Email
+                                    </InputLabel>
+                                    <Input
+                                    id="newemail"
                                     value={this.state.newEmail}
                                     onChange={(e)=>this.handleNewEmail(e)}
-                                    floatingLabelStyle={{color:'#607D8B'}}
-                                    underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                />
+                                    />
+                                </FormControl>
                                 <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleEmailChange(e)}>Submit</button>
                             </div>
                         </div>

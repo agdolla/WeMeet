@@ -38,24 +38,24 @@ export default class ActivityFeedItem extends React.Component{
                 </Link>
                 <CardContent>
                     <div className="row" style={{marginBottom: '20px'}}>
-                        <div className="col-md-10">
+                        <div className="col-md-12">
+                            <div className='row' style={{marginTop: '10px'}}>
+                                <div className='col-md-12'>
+                                    <Chip
+                                        avatar={
+                                        <Avatar>
+                                            <Icon style={{fontSize:'20px'}}className='fas fa-location-arrow'></Icon>
+                                        </Avatar>
+                                        }
+                                        label={this.state.location}
+                                    />
+                                    <Chip className='pull-right' style={{marginRight:'10px',
+                                    backgroundColor:"#607D8B",color:'white'}} 
+                                    label={this.state.type}/>
+                                </div>
+                            </div>
                             <h3>{this.state.title}</h3>
                             <h4>{startTime+"--"+endTime}</h4>
-                            <Chip
-                                avatar={
-                                <Avatar>
-                                    <Icon style={{fontSize:'20px'}}className='fas fa-location-arrow'></Icon>
-                                </Avatar>
-                                }
-                                label={this.state.location}
-                            />
-                        </div>
-                        <div className="col-md-2">
-                            <div className='pull-right'>
-                                <Chip style={{marginTop:'30px',marginRight:'10px',
-                                backgroundColor:"#607D8B",color:'white'}} 
-                                label={this.state.type}/>
-                            </div>
                         </div>
                     </div>
                     <div style={{marginBottom: '10px'}}>

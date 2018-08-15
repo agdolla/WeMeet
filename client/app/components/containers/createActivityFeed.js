@@ -4,16 +4,24 @@ import {createActivity, sendInviteActivityRequest} from '../../utils';
 import {CreateActivityFriendItem} from './';
 import {hideElement} from '../../utils';
 import {socket} from '../../utils';
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
-import DatePicker from 'material-ui/DatePicker';
-import TimePicker from 'material-ui/TimePicker';
-import TextField from 'material-ui/TextField';
-import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
-var debug = require('react-debug');
+//mui
+import MenuItem from '@material-ui/core/MenuItem';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+import { DateTimePicker } from 'material-ui-pickers';
+import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
+import MomentUtils from 'material-ui-pickers/utils/moment-utils';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
+
+// var debug = require('react-debug');
 var swal = require('sweetalert');
 
 class CreateActivityFeed extends React.Component {
@@ -77,14 +85,14 @@ class CreateActivityFeed extends React.Component {
         })
     }
 
-    handleRequestHide(){
+    handleRequestHide = ()=>{
         this.setState({
             cropperOpen: false,
             img:null
         })
     }
 
-    handleCrop(){
+    handleCrop = ()=>{
         this.setState({
             cropperOpen: false,
             img: this.refs.cropper.getCroppedCanvas().toDataURL()
@@ -176,13 +184,13 @@ class CreateActivityFeed extends React.Component {
         })
     }
 
-    handleStartDate(e,date){
+    handleStartTime = (date)=>{
         this.setState({
             startTime: date
         })
     }
 
-    handleEndDate(e,date){
+    handleEndTime = (date)=>{
         this.setState({
             endTime: date
         })
@@ -201,12 +209,12 @@ class CreateActivityFeed extends React.Component {
         })
     }
 
-    handleEvent(e,index,value){
-        e.preventDefault();
+    handleEvent = (e)=>{
         this.setState({
-            type: value
+            type: e.target.value
         })
     }
+
     handleDescription(e){
         e.preventDefault();
         this.setState({
@@ -214,52 +222,30 @@ class CreateActivityFeed extends React.Component {
         })
     }
 
-    handleStartTime(e,date){
-        var currentDate = this.state.startTime;
-        currentDate.setHours(date.getHours(),date.getUTCMinutes());
-        this.setState({
-            startTime: currentDate
-        })
-    }
-
-    handleEndTime(e,date){
-        var currentDate = this.state.endTime;
-        currentDate.setHours(date.getHours(),date.getUTCMinutes());
-        this.setState({
-            endTime: currentDate
-        })
-    }
-
-
     render() {
-        const actions = [
-          <FlatButton
-            label="Cancel"
-            primary={true}
-            onClick={()=>this.handleRequestHide()}
-          />,
-          <FlatButton
-            label="Submit"
-            primary={true}
-            keyboardFocused={true}
-            onClick={()=>this.handleCrop()}
-          />
-        ];
         return (
+            <MuiPickersUtilsProvider utils={MomentUtils}>
             <div className="container">
                 {this.state.cropperOpen &&
                     <Dialog
-                      title="Adjust your header image"
-                      actions={actions}
-                      modal={false}
-                      open={this.state.cropperOpen}
-                      onRequestClose={()=>this.handleRequestHide()}
-                    >
-                    <Cropper
-                      ref='cropper'
-                      src={this.state.img}
-                      style={{height: 400, width: '100%'}}
-                      aspectRatio={18/9}/>
+                    open={this.state.cropperOpen}
+                    onClose={this.handleRequestHide}>
+                        <DialogTitle>Crop your image</DialogTitle>
+                        <DialogContent>
+                            <Cropper
+                            ref='cropper'
+                            src={this.state.img}
+                            style={{height: 400, width: '100%'}}
+                            aspectRatio={18/9}/>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleRequestHide} color="primary">
+                            Cancel
+                            </Button>
+                            <Button onClick={this.handleCrop} color="primary">
+                            Submit
+                            </Button>
+                        </DialogActions>
                     </Dialog>
                 }
 
@@ -292,83 +278,98 @@ class CreateActivityFeed extends React.Component {
                                         </div>
                                         <div className="row">
                                             <div className="col-md-12">
-                                                <TextField
-                                                hintText="Title"
-                                                floatingLabelText="Title"
-                                                style={{width:'100%'}}
-                                                onChange={(e)=>this.handleTitle(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
+                                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                                    <InputLabel
+                                                    style={{color:'#607D8B'}}
+                                                    htmlFor="activityTitle">
+                                                    Title
+                                                    </InputLabel>
+                                                    <Input
+                                                    id="activityTitle"
+                                                    value={this.state.title}
+                                                    onChange={(e)=>this.handleTitle(e)}
+                                                    />
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <DateTimePicker fullWidth
+                                                    style={{marginBottom: '20px'}}
+                                                    value={this.state.startTime}
+                                                    onChange={this.handleStartTime}
+                                                    label="Start Time"
+                                                />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <DateTimePicker
+                                                    fullWidth
+                                                    style={{marginBottom: '20px'}}
+                                                    value={this.state.endTime}
+                                                    onChange={this.handleEndTime}
+                                                    label="End Time"
                                                 />
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-md-6">
-                                                <DatePicker hintText="Start Date" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleStartDate(e,date)}/>
+                                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                                    <InputLabel
+                                                    style={{color:'#607D8B'}}
+                                                    htmlFor="activityLocation">
+                                                    Location
+                                                    </InputLabel>
+                                                    <Input
+                                                    id="activityLocation"
+                                                    value={this.state.location}
+                                                    onChange={(e)=>this.handleLocation(e)}
+                                                    />
+                                                </FormControl>
                                             </div>
                                             <div className="col-md-6">
-                                                <div className="md-form">
-                                                    <DatePicker hintText="End Date" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleEndDate(e,date)}/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="col-md-6">
-                                                <TimePicker hintText="Start Time" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleStartTime(e,date)}/>
-                                            </div>
-                                            <div className="col-md-6">
-                                                <TimePicker hintText="End Time" textFieldStyle={{width:'100%'}} onChange={(e,date)=>this.handleEndTime(e,date)}/>
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            <div className="col-md-6">
-                                                <TextField
-                                                hintText="Location"
-                                                floatingLabelText="Location"
-                                                style={{width:'100%'}}
-                                                onChange={(e)=>this.handleLocation(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                                />
-                                            </div>
-                                            <div className="col-md-6">
-                                                <SelectField
-                                                value={this.state.type}
-                                                style={{width:'100%'}}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                selectedMenuItemStyle={{color:'#607D8B'}}
-                                                floatingLabelText="Select the type of your activity"
-                                                onChange={(e,index,value)=>{this.handleEvent(e,index,value)}}>
-                                                <MenuItem value={1} primaryText="Event" />
-                                                <MenuItem value={2} primaryText="Entertainment" />
-                                                <MenuItem value={3} primaryText="Study" />
-                                                </SelectField>
+                                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                                    <InputLabel style={{color:'#607D8B'}} htmlFor="type">
+                                                    Select the type of your activity
+                                                    </InputLabel>
+                                                    <Select
+                                                        value={this.state.type}
+                                                        onChange={this.handleEvent}
+                                                        inputProps={{id: 'type'}}>
+                                                        <MenuItem value={1}>Event</MenuItem>
+                                                        <MenuItem value={2}>Entertainment</MenuItem>
+                                                        <MenuItem value={3}>Study</MenuItem>
+                                                    </Select>
+                                                </FormControl>
                                             </div>
                                         </div>
                                         <div className="row">
                                             <div className="col-md-12">
-                                                <TextField
-                                                rows={2}
-                                                multiLine={true}
-                                                rowsMax={2}
-                                                hintText="Description"
-                                                floatingLabelText="Description"
-                                                style={{width:'100%'}}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                                onChange={(e)=>this.handleDescription(e)}
-                                                />
-                                                <TextField
-                                                rows={4}
-                                                multiLine={true}
-                                                rowsMax={5}
-                                                hintText="Details"
-                                                floatingLabelText="Details"
-                                                style={{width:'100%'}}
-                                                onChange={(e)=>this.handleDetail(e)}
-                                                floatingLabelStyle={{color:'#607D8B'}}
-                                                underlineFocusStyle={{borderColor:'#90A4AE'}}
-                                                />
+                                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                                    <InputLabel
+                                                    style={{color:'#607D8B'}}
+                                                    htmlFor="activityDescription">
+                                                    Description
+                                                    </InputLabel>
+                                                    <Input multiline
+                                                    rows='2'
+                                                    id="activityDescription"
+                                                    value={this.state.description}
+                                                    onChange={(e)=>this.handleDescription(e)}
+                                                    />
+                                                </FormControl>
+                                                <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                                    <InputLabel
+                                                    style={{color:'#607D8B'}}
+                                                    htmlFor="activityDetails">
+                                                    Details
+                                                    </InputLabel>
+                                                    <Input multiline
+                                                    rows='4'
+                                                    id="activityDetails"
+                                                    value={this.state.detail}
+                                                    onChange={(e)=>this.handleDetail(e)}
+                                                    />
+                                                </FormControl>
                                             </div>
                                         </div>
                                     </div>
@@ -424,7 +425,7 @@ class CreateActivityFeed extends React.Component {
                     </div>
                 </div>
             </div>
-
+            </MuiPickersUtilsProvider>
         )
     }
 }

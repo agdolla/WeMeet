@@ -1,20 +1,16 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
-
-//import presentations
 import {ActivityDetailComment} from '../presentations';
 import {ActivityCommentThread} from '../presentations';
 import {ActivityDetailSignedUpUserItem} from '../presentations';
-import {ActivityDetailSignedUpUserAvatar} from '../presentations'
-
-//request function
+import {ActivityDetailSignedUpUserAvatar} from '../presentations';
 import {getActivityDetail,postActivityDetailComment,
-    sendJoinActivityRequest,likeActivity,
-    unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments} from '../../utils';
+  sendJoinActivityRequest,likeActivity,
+  unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments} from '../../utils';
+import Button from '@material-ui/core/Button';
 
 var moment = require('moment');
 
-import RaisedButton from 'material-ui/RaisedButton';
 
 // var debug = require('react-debug');
 
@@ -258,7 +254,9 @@ export default class ActivityDetailBody extends React.Component{
                      paddingBottom: '8px',
                      marginBottom: '7px'
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
-                    <RaisedButton primary={true} label={buttonText} disabled={this.state.ishost || this.state.joined} onClick={(e)=>this.handleRequestJoin(e)}/>
+                    <Button variant="outlined" disabled={this.state.ishost || this.state.joined} onClick={(e)=>this.handleRequestJoin(e)}>
+                      {buttonText}
+                    </Button>
                   </div>
                 </div>
 

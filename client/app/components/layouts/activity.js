@@ -4,8 +4,6 @@ import { ActivityFeed } from '../containers';
 import { Navbar } from '../containers';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-// import FloatingActionButton from 'material-ui/FloatingActionButton';
-// import ContentAdd from 'material-ui/svg-icons/content/add';
 
 export default class Activity extends React.Component{
     constructor(props){

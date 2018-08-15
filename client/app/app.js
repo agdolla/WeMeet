@@ -1,8 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch, withRouter} from 'react-router-dom';
-
-
 import {Post} from './components/layouts';
 import {Chat} from './components/layouts';
 import {Notification} from './components/layouts';
@@ -13,19 +11,13 @@ import { ActivityDetail} from './components/layouts';
 import { Activity } from './components/layouts';
 import { Settings } from './components/layouts';
 import { Landing } from './components/layouts';
-
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {getUserId,isUserLoggedIn,socket,updateCredentials,getUserData} from './utils/credentials';
-
 import history from './utils/history';
 
 // var debug = require('react-debug');
 // var swal = require('sweetalert');
 var injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
-
-// import Perf from 'react-addons-perf';
-// window.Perf = Perf;
 
 class ActivityPage extends React.Component{
     render(){
@@ -82,21 +74,19 @@ withRouter(ThrendPage);
 class App extends React.Component {
     render() {
         return (
-            <MuiThemeProvider>
-                <Switch>
-                  <Route exact path="/" component={LandingPage} />
-                  <Route path="/post" component={ThrendPage} />
-                  <Route path="/activity/:data" component={ActivityPage} />
-                  <Route path="/settings" component={SettingsPage} />
-                  <Route path="/chat" component={ChatPage} />
-                  <Route path="/notification" component={NotificationPage}/>
-                  <Route path="/profile/:user" component={ProfilePage} />
-                  <Route path="/activityDetail/:id" component={ActivityDetailPage}/>
-                  <Route path="/search" component={SearchPage}/>
-                  <Route path="/createActivity" component={PostActivityPage} />
-                  <Route path='*' component={ActivityPage} />
-                </Switch>
-            </MuiThemeProvider>
+            <Switch>
+                <Route exact path="/" component={LandingPage} />
+                <Route path="/post" component={ThrendPage} />
+                <Route path="/activity/:data" component={ActivityPage} />
+                <Route path="/settings" component={SettingsPage} />
+                <Route path="/chat" component={ChatPage} />
+                <Route path="/notification" component={NotificationPage}/>
+                <Route path="/profile/:user" component={ProfilePage} />
+                <Route path="/activityDetail/:id" component={ActivityDetailPage}/>
+                <Route path="/search" component={SearchPage}/>
+                <Route path="/createActivity" component={PostActivityPage} />
+                <Route path='*' component={ActivityPage} />
+            </Switch>
         );
     }
 }

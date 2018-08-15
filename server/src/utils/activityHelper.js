@@ -55,7 +55,6 @@ module.exports = class ActivityHelper {
             return cursor.toArray()
         })
         .then((comments)=>{
-            console.log(comments);
             let postComments = comments.map((comment)=>{
                 return comment.comments
             });
