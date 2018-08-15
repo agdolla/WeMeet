@@ -5,7 +5,6 @@ WeMeet is a social networking service. It recommends users nearby activities and
 
 * Reset password is not implemented
 * Users should be able to send images in chat, this part is also not implemented
-* Update to material ui latest version
 * All code should be reviewed and revised
 * add infinite scroll to chat message
 * performance and security

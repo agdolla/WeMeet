@@ -16,8 +16,6 @@ import history from './utils/history';
 
 // var debug = require('react-debug');
 // var swal = require('sweetalert');
-var injectTapEventPlugin = require("react-tap-event-plugin");
-injectTapEventPlugin();
 
 class ActivityPage extends React.Component{
     render(){
