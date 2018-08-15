@@ -24,10 +24,10 @@ export default class Settings extends React.Component{
         });
     }
 
-    componentWillMount(){
+    componentDidMount() {
         this.getData();
     }
-
+    
     render(){
         return(
             <div style={{marginTop:'70px'}}>
