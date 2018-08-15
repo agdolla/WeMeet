@@ -1,14 +1,14 @@
 import React from 'react';
 import {getPostFeedData} from '../../utils';
 import {PostFeedItem} from '../presentations';
-import FlatButton from 'material-ui/FlatButton';
+import Button from '@material-ui/core/Button';
 
 export default class ProfileRecentPostFeed extends React.Component{
 
     constructor(props){
         super(props);
         this.state = {
-            "contents": [],
+            contents: [],
             loadMore: true
         };
     }
@@ -25,25 +25,29 @@ export default class ProfileRecentPostFeed extends React.Component{
         });
     }
 
-    // componentDidMount(){
-    //     this.getData(this.props.user);
-    // }
-
-    componentWillReceiveProps(newProps){
-        this.getData(newProps.user,true);
+    componentDidMount(){
+        this.getData(this.props.user);
     }
+
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.user !== this.props.user){
+            this.getData(this.props.user,true);
+        }
+    }
+
 
     render(){
         return(
-            <div style={{marginBottom: '20px'}}>
+            <div style={{marginTop: '15px', marginBottom: '20px'}}>
                 {this.state.contents.map((postItem)=>{
                     return <PostFeedItem key={postItem._id} data={postItem} currentUser={this.props.currentUser}/>
                 })}
                 {
-                    <FlatButton onClick={()=>{this.getData(this.props.user,false)}} 
-                    label={this.state.loadMore? "Load More" : "Nothing more to load"} 
-                    fullWidth={true} backgroundColor={"#fdfdfd"}
-                    disabled={!this.state.loadMore}/>
+                    <Button onClick={()=>{this.getData(this.props.user,false)}} 
+                    fullWidth style={{backgroundColor:"#fdfdfd"}}
+                    disabled={!this.state.loadMore}>
+                        {this.state.loadMore? "Load More" : "Nothing more to load"}
+                    </Button>
                 }
             </div>
         );

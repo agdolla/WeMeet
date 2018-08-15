@@ -61,7 +61,7 @@ module.exports = class ChatHelper {
             this.database.collection('message').aggregateAsync([
                 {$match: { _id: sessionId}},
                 {$unwind: "$messages"},
-                {$match:{"messages.date":{$lt:parseInt(time+1)}}},
+                {$match:{"messages.date":{$lt:parseInt(time)}}},
                 {$sort:{"messages.date":-1}},
                 {$limit:10}
             ])

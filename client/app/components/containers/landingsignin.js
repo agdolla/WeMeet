@@ -1,8 +1,6 @@
 import React from 'react'
 import {withRouter} from 'react-router-dom';
-//util function
 import {hideElement} from '../../utils';
-//request function
 import {login} from '../../utils';
 import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';

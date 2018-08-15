@@ -4,7 +4,7 @@ import React from 'react';
 import {getActivityFeedData} from '../../utils';
 
 import {ActivityFeedItem} from '../presentations';
-import FlatButton from 'material-ui/FlatButton';
+import Button from '@material-ui/core/Button';
 
 // let debug = require('react-debug');
 
@@ -31,13 +31,15 @@ export default class ProfileRecentActivityFeed extends React.Component{
         });
     }
 
-    componentWillReceiveProps(newProps){
-        this.getData(newProps.user,true);
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.user !== this.props.user){
+            this.getData(this.props.user,true);
+        }
     }
 
-    // componentDidMount(){
-    //     this.getData(this.props.user);
-    // }
+    componentDidMount(){
+        this.getData(this.props.user);
+    }
 
     render(){
         return(
@@ -46,10 +48,11 @@ export default class ProfileRecentActivityFeed extends React.Component{
                     return <ActivityFeedItem key={activityItem._id} data={activityItem} currentUser={this.props.currentUser}/>
                 })}
                 {
-                    <FlatButton onClick={()=>{this.getData(this.props.user,false)}} 
-                    label={this.state.loadMore? "Load More" : "Nothing more to load"}
-                    fullWidth={true} backgroundColor={"#fdfdfd"}
-                    disabled={!this.state.loadMore}/>
+                    <Button onClick={()=>{this.getData(this.props.user,false)}} 
+                    fullWidth style={{backgroundColor:"#fdfdfd"}}
+                    disabled={!this.state.loadMore}>
+                        {this.state.loadMore? "Load More" : "Nothing more to load"}
+                    </Button>
                 }
             </div>
         );

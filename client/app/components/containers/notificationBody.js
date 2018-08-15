@@ -1,10 +1,17 @@
 import React from 'react';
-import {NotificationFriendRequest} from '../presentations';
-import {NotificationActivity} from '../presentations'
-import {Tabs, Tab} from 'material-ui/Tabs';
+import Link from 'react-router-dom/Link';
 import Icon from '@material-ui/core/Icon';
-import Badge from 'material-ui/Badge';
-// import IconButton from 'material-ui/IconButton';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Badge from '@material-ui/core/Badge';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import Divider from '@material-ui/core/Divider';
 
 // let debug = require('react-debug');
 
@@ -17,49 +24,105 @@ export default class NotificationBody extends React.Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            value: 0
+        }
     }
+
+    handleChange = (event, value) => {
+        this.setState({ value: value });
+    };
 
     render(){
         var frbadge =
-        <Badge badgeStyle={{backgroundColor:'#DB6666', visibility:this.props.FR.length===0?"hidden":'visible'}}
-            badgeContent={this.props.FR.length}
-            primary={true}
-            >
-            <Icon className="fas fa-user-plus" style={{color:'white', width:'30px'}}/>
+        this.props.FR.length===0? <Icon className="fas fa-user-plus" style={{width:'30px'}}/>:
+        <Badge badgeContent={this.props.FR.length} color="secondary">
+            <Icon className="fas fa-user-plus" style={{width:'30px'}}/>
         </Badge>;
 
         var anbadge =
-        <Badge badgeStyle={{backgroundColor:'#DB6666', visibility:this.props.AN.length===0?"hidden":'visible'}}
-            badgeContent={this.props.AN.length}
-            primary={true}
-            >
-            <Icon className="fas fa-bell" style={{color:'white'}}/>
+        this.props.AN.length===0? <Icon className="fas fa-bell"/>:
+        <Badge badgeContent={this.props.AN.length} color="secondary">
+            <Icon className="fas fa-bell"/>
         </Badge>;
-        return(
-            <Tabs
-                style={{boxShadow:  "0 10px 28px 0 rgba(137,157,197,.12)", marginTop:'20px'}}
-                inkBarStyle={{backgroundColor:"white",height:'3px'}}
-                contentContainerStyle={{backgroundColor:'#FDFDFD',padding:'10px'}}>
 
-                <Tab icon={frbadge} style={{backgroundColor:'#61B4E4',height:60}}>
-                    <div>
-                        {this.props.FR.length===0?"Nothing here":this.props.FR.map((fr,i)=>{
-                            return <NotificationFriendRequest key={i} data={fr} 
-                            onDelete={(id)=>this.props.handleDelete(id)} 
-                            onAccept={(id,user)=>this.props.handleFriendAccept(id,user)}/>
-                        })}
-                    </div>
-                </Tab>
-                <Tab  buttonStyle={{backgroundColor:'#61B4E4',height:60}} icon={anbadge}>
-                    <div>
-                        {this.props.AN.length===0?"Nothing here":this.props.AN.map((AN,i)=>{
-                            return <NotificationActivity key={i} data={AN} 
-                            onDelete={(id)=>this.props.handleDelete(id)} 
-                            onAccept={(activityid,userid)=>this.props.handleActivityAccept(activityid,userid)}/>
-                        })}
-                    </div>
-                </Tab>
-            </Tabs>);
+        let friendRequestContent = 
+        <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
+            {this.props.FR.length===0?"Nothing here":this.props.FR.map((fr,i)=>{
+                return <div key={i}>
+                    <ListItem>
+                        <ListItemAvatar>
+                            <Link to={"/profile/"+fr.sender._id}>
+                                <Avatar src={fr.sender.avatar}/>
+                            </Link>
+                        </ListItemAvatar>
+                            <ListItemText primary={fr.sender.fullname}
+                            secondary="sent you a friend request"/>
+                        <ListItemSecondaryAction>
+                            <IconButton onClick={()=>this.props.handleFriendAccept(fr._id, fr.sender._id)}>
+                                <Icon className='fas fa-check' />
+                            </IconButton>
+                            <IconButton onClick={()=>this.props.handleDelete(fr._id)}>
+                                <Icon className='fas fa-trash' />
+                            </IconButton>
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                    <Divider inset/>
+                </div>
+            })}
+        </List>
+        let activityRequestContent = 
+        <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
+        {this.props.AN.length===0?"Nothing here":this.props.AN.map((AN,i)=>{
+            var text = "";
+            if (AN.RequestOrInvite === "request"){
+                text = "sent you a request to join activity"
+            }
+            else{
+                text = "invited you to join activity"
+            }
+            return <div key={i}>
+                    <ListItem>
+                        <ListItemAvatar>
+                            <Link to={"/profile/"+AN.sender._id}>
+                                <Avatar src={AN.sender.avatar}/>
+                            </Link>
+                        </ListItemAvatar>
+                        <ListItemText primary={AN.sender.fullname}
+                        secondary={
+                            <Link to={"/activityDetail/"+AN.activityid}>
+                                {text}
+                            </Link>
+                        }/>
+                        <ListItemSecondaryAction>
+                            <IconButton onClick={()=>this.props.handleActivityAccept(AN._id)}>
+                                <Icon className='fas fa-check' />
+                            </IconButton>
+                            <IconButton onClick={()=>this.props.handleDelete(AN._id)}>
+                                <Icon className='fas fa-trash' />
+                            </IconButton>
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                    <Divider inset/>
+                </div>
+        })}
+        </List>
+        return(
+            <div style={{marginTop: '30px'}}>
+                <Tabs
+                value={this.state.value}
+                style={{backgroundColor:'white'}}
+                indicatorColor="primary"
+                textColor="primary"
+                onChange={this.handleChange}
+                fullWidth centered>
+                    <Tab icon={frbadge}/>
+                    <Tab icon={anbadge}/>
+                </Tabs>
+                {this.state.value === 0 && friendRequestContent}
+                {this.state.value === 1 && activityRequestContent}
+            </div>
+        );
 
         }
     }

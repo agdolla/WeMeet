@@ -23,10 +23,10 @@ export default class Notification extends React.Component{
             var AN = [];
             notificationData.contents.map((notification)=>{
                 if(notification.type === "FR"){
-                    FR.insert("0",notification);
+                    FR.insert(0,notification);
                 }
                 else{
-                    AN.insert("0",notification);
+                    AN.insert(0,notification);
                 }
             });
             this.setState({
@@ -36,8 +36,17 @@ export default class Notification extends React.Component{
         });
     }
 
+    onNotification = ()=>{
+        this.getData();
+    }
+
     componentDidMount() {
         this.getData();
+        socket.on('notification',this.onNotification);
+    }
+
+    componentWillUnmount() {
+        socket.removeEventListener('notification')
     }
     
     handleDelete = (id)=>{

@@ -65,12 +65,14 @@ class Navbar extends React.Component{
       activity:true
     });
   }
+  
   onChat = ()=>{
     this.setState({
       chat:true,
       snackBar:true
     });
   }
+
   onNotification = ()=>{
     this.setState({
       notification: true
@@ -204,7 +206,7 @@ class Navbar extends React.Component{
     return(
       <div>
         <Snackbar
-          open={this.state.snackBar && !this.state.chat}
+          open={this.state.snackBar && this.props.chat!=='active'}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'left',
@@ -221,8 +223,7 @@ class Navbar extends React.Component{
               key="close"
               aria-label="Close"
               color="inherit"
-              onClick={()=>{this.setState({snackBar:false})}}
-            >
+              onClick={()=>{this.setState({snackBar:false})}}>
               <CloseIcon />
             </IconButton>,
           ]}
@@ -346,6 +347,7 @@ class Navbar extends React.Component{
                     <Link to={"/notification"}>
                       {!this.state.notification?<i className="far fa-bell" aria-hidden="true"></i>:
                         <Badge
+                        style={{width:'20px'}}
                         badgeContent={this.state.notificationCount}
                         color='secondary'>
                           <i className="far fa-bell" aria-hidden="true"/>

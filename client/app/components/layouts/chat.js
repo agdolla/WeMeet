@@ -123,7 +123,7 @@ export default class Chat extends React.Component {
 
     handleLoadMessage(e){
         e.preventDefault();
-        var time = this.state.message.length===0?(new Date().getTime()):this.state.message[0].date;
+        var time = (this.state.message===undefined || this.state.message.length===0)?(new Date().getTime()):this.state.message[0].date;
         getMessages(time,this.props.user,this.state.sessionId)
         .then(response=>{
             let messages = response.data;

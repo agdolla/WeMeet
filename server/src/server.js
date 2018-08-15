@@ -892,7 +892,7 @@ MongoClient.connect(url, {
                     }
                 })
                 .then(()=>{
-                    return chatHelper.getMessage(time,contentsid)
+                    return chatHelper.getMessage(time+1,contentsid)
                 })
                 .then((messages) => {
                     //seting lastmessage;

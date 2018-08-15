@@ -1,12 +1,14 @@
 import React from 'react';
-
 import {searchquery} from '../../utils';
-
 import {ActivityFeedItem} from '../presentations';
 import {SearchFeedUserFeedItem} from '../presentations';
 import {PostFeedItem} from '../presentations';
+//mui
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import FormControl from '@material-ui/core/FormControl';
 
-import TextField from 'material-ui/TextField';
+
 // var debug = require('react-debug');
 
 export default class SearchEntry extends React.Component{
@@ -48,15 +50,21 @@ render(){
                 <div className="panel-heading">
                     <div className="media">
                         <div className="media-body">
-                            <TextField
-                            hintText="Search..."
-                            floatingLabelText="Welcome to We Meet, please search"
-                            style={{width:'100%'}}
-                            onChange={(e)=>this.handleChange(e)}
-                            onKeyUp={(e)=>this.handleKeyUp(e)}
-                            floatingLabelStyle={{color:'#607D8B'}}
-                            underlineFocusStyle={{borderColor:'#90A4AE'}}
-                            />
+                            <FormControl style={{width:'100%', marginBottom:'10px', paddingTop: '8px'}}>
+                                <InputLabel
+                                style={{color:'#607D8B'}}
+                                htmlFor="search">
+                                Search...
+                                </InputLabel>
+                                <Input
+                                style={{paddingBottom: '5px'}}
+                                id="search"
+                                value={this.state.value}
+                                onChange={(e)=>this.handleChange(e)}
+                                onKeyUp={(e)=>this.handleKeyUp(e)}
+                                type="search"
+                                />
+                            </FormControl>
                         </div>
                     </div>
                 </div>

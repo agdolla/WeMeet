@@ -21,10 +21,6 @@ import PostFeedItem from './postFeedItem'
 import ChatEntry from './chatentry'
 import ChatNavChatItem from './chatnavchatitem'
 
-// import Notification presentations
-import NotificationActivity from './notificationactivity'
-import NotificationFriendRequest from './notificationfriendRequest'
-
 //import Search presentations
 import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
 
@@ -47,9 +43,6 @@ export{
 
     ChatEntry,
     ChatNavChatItem,
-
-    NotificationActivity,
-    NotificationFriendRequest,
 
     SearchFeedUserFeedItem
 }

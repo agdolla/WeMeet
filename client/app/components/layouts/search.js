@@ -1,7 +1,6 @@
 import React from 'react';
 import {SearchEntry} from '../containers';
 import {Navbar} from '../containers';
-// import {getUserData} from '../server';
 
 
 export default class Search extends React.Component{
