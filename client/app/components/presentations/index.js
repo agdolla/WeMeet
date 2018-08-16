@@ -6,8 +6,6 @@ import ActivityFeedItem from './activityFeedItem'
 import ActivityDetailComment from './activityDetailComment'
 import ActivityDetailCommentEntry from './activityDetailCommentEntry'
 import ActivityCommentThread from './activityCommentThread'
-import ActivityDetailSignedUpUserItem from './activityDetailSignedUpUserItem'
-import ActivityDetailSignedUpUserAvatar from './activityDetailSignedUpUserAvatar'
 
 //import Post presentations
 import PostComment from './postComment'
@@ -21,9 +19,6 @@ import PostFeedItem from './postFeedItem'
 import ChatEntry from './chatentry'
 import ChatNavChatItem from './chatnavchatitem'
 
-//import Search presentations
-import SearchFeedUserFeedItem from './searchFeedUserFeedItem'
-
 
 export{
     ActivityFeedItem,
@@ -31,9 +26,6 @@ export{
     ActivityDetailComment,
     ActivityDetailCommentEntry,
     ActivityCommentThread,
-    ActivityDetailSignedUpUserItem,
-    ActivityDetailSignedUpUserAvatar,
-
 
     PostComment,
     PostCommentEntry,
@@ -42,7 +34,5 @@ export{
     PostFeedItem,
 
     ChatEntry,
-    ChatNavChatItem,
-
-    SearchFeedUserFeedItem
+    ChatNavChatItem
 }

@@ -13,7 +13,7 @@ export default class CreateActivity extends React.Component {
     }
 
     getData(){
-        getUserData(this.props.user)
+        getUserData(this.props.userId)
         .then(response=>{
             let userData = response.data;
             this.setState({

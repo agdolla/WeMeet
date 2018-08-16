@@ -2,16 +2,24 @@ import React from 'React';
 import {Link} from 'react-router-dom';
 import {ActivityDetailComment} from '../presentations';
 import {ActivityCommentThread} from '../presentations';
-import {ActivityDetailSignedUpUserItem} from '../presentations';
-import {ActivityDetailSignedUpUserAvatar} from '../presentations';
 import {getActivityDetail,postActivityDetailComment,
   sendJoinActivityRequest,likeActivity,
-  unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments} from '../../utils';
+  unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments, addFriend} from '../../utils';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Icon from '@material-ui/core/Icon';
+import Avatar from '@material-ui/core/Avatar';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 var moment = require('moment');
-
-
 // var debug = require('react-debug');
 
 export default class ActivityDetailBody extends React.Component{
@@ -23,7 +31,8 @@ export default class ActivityDetailBody extends React.Component{
       ishost: false,
       joined: false,
       success:false,
-      loadMore: true
+      loadMore: true,
+      snackOpen: false
     };
   }
 
@@ -103,6 +112,33 @@ export default class ActivityDetailBody extends React.Component{
     })
   }
 
+  checkFriendsOfUser(friendId){
+      return this.props.currentUser===friendId || this.props.friends.filter((friend)=>{
+          return friend._id===friendId
+      }).length>0;
+  }
+
+  handleAddFriend(friendId){
+      addFriend(this.props.currentUser,friendId)
+      .then(response=>{
+          this.setState({
+              snackOpen:true
+          });
+          socket.emit('notification',{
+              sender: this.props.currentUser,
+              target: friendId
+          });
+      })
+      .catch(err=>{
+      })
+  }
+
+  handleRequestClose = () => {
+    this.setState({
+        snackOpen: false,
+    });
+  };
+
   loadComments(justPosted) {
     let date = justPosted || this.state.comments.length == 0 ? (new Date()).getTime() :
     this.state.comments[this.state.comments.length-1].postDate;
@@ -178,6 +214,26 @@ export default class ActivityDetailBody extends React.Component{
 
     return(
       <div className="activityDetail">
+        <Snackbar
+        autoHideDuration={4000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        open={this.state.snackOpen}
+        onClose={this.handleRequestClose}>
+            <SnackbarContent
+            style={{
+                backgroundColor: 'green'
+            }}
+            message={
+                <span style={{                        
+                        display: 'flex',
+                        alignItems: 'center'
+                    }}>
+                    <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
+                    Friend request sent!
+                </span>
+            }
+            />
+        </Snackbar>
         <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" >
           <div className="modal-dialog" role="document">
             <div className="modal-content">
@@ -188,15 +244,33 @@ export default class ActivityDetailBody extends React.Component{
                 <h3 className="modal-title" style={{'paddingBottom':'10px'}}> Participating users</h3>
               </div>
               <div className="modal-body">
-                <ul className="media-list">
+                <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
                   {this.state.activity.participants === undefined ||
                     this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
                     this.state.activity.participants.map((p,i)=>{
-                    return (
-                      <ActivityDetailSignedUpUserItem key={i} data={p} currUser={this.props.currentUser} friends={this.props.friends} />
-                    )
+                      var rightButton;
+                      if(this.checkFriendsOfUser(p._id)) {
+                          rightButton =  <IconButton disabled>
+                                          <Icon className="fas fa-check"/> 
+                                      </IconButton>
+                      }
+                      else {
+                          rightButton =  <IconButton onClick={()=>this.handleAddFriend(p._id)}>
+                                          <Icon className="fas fa-plus"/> 
+                                      </IconButton>
+                      }
+                      return <ListItem key={i} style={{padding:'20px'}}>
+                          <Link to={'/profile/'+p._id}>
+                              <Avatar src={p.avatar} />
+                          </Link>
+                          <ListItemText primary={p.fullname}
+                          secondary={p.description}/>
+                          <ListItemSecondaryAction>
+                              {rightButton}
+                          </ListItemSecondaryAction>
+                      </ListItem>
                   })}
-                </ul>
+                </List>
               </div>
             </div>
           </div>
@@ -237,11 +311,6 @@ export default class ActivityDetailBody extends React.Component{
                       <font style={{'color':'#61B4E4','fontSize':'10px','paddingLeft':'10px','cursor':'pointer'}}
                         data-toggle="modal" data-target="#myModal"  >View All</font>
                       <br/>
-
-                      {this.state.activity.participants === undefined ? 0:this.state.activity.participants.map((p,i)=>{
-                        return (<ActivityDetailSignedUpUserAvatar key={i} data={p} />)
-                      })}
-
                     </div>
                   </div>
                 </div>
@@ -262,10 +331,20 @@ export default class ActivityDetailBody extends React.Component{
 
                 <div className="row">
                   <div className = "col-md-12 col-sm-12 col-xs-12 body-title-icon" style={{textAlign:"right"}}>
-                    <a href="#" onClick={(e)=>this.handleLikeClick(e)}><span className="glyphicon glyphicon-heart" style={{'marginRight':'5px'}}></span>
-                      {this.state.activity.likeCounter === undefined ? 0:this.state.activity.likeCounter.length}
-                    </a>
-                    <span className="glyphicon glyphicon-comment" style={{'marginRight':'5px','marginLeft':'20px'}}></span>
+                    <FormControlLabel
+                      control={
+                        <Checkbox onClick={(e)=>this.handleLikeClick(e)}
+                        style={{width: '30px', height: '30px'}}
+                        checked={this.state.activity.likeCounter===undefined?
+                          false:didUserLike(this.state.activity.likeCounter,this.props.currentUser)}
+                        icon={<Icon style={{fontSize:'20px'}} className="far fa-heart"/>} 
+                        checkedIcon={<Icon className="fas fa-heart" style={{color:'red',fontSize:'20px'}}/>}/>
+                      }
+                      label={this.state.activity.likeCounter === undefined ? 0:this.state.activity.likeCounter.length}
+                    />
+                    <Icon className='fas fa-comments' style={{
+                      fontSize:'20px',width:'25px',marginRight:'8px',verticalAlign:'middle'
+                      }}/>
                     {this.state.activity.commentsCount}
                   </div>
                 </div>

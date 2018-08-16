@@ -1,22 +1,25 @@
 .infos h4 span{
   margin-right: 5px;
 }
+
 .infos h4{
   margin-bottom: 20px;
 }
+
 .infos{
   margin-top: 20px;
 }
+
 .system-settings{
   margin-top: 70px;
 }
-.settings .system-settings .list-group{
+/* .settings .system-settings .list-group{
   box-shadow: 0 10px 28px 0 rgba(137,157,197,.12) !important;
 }
 .settings .system-settings .list-group .list-group-item{
   border:none;
   padding: 20px;
-}
+} */
 
 .settings .panel{
   box-shadow: 0 10px 28px 0 rgba(137,157,197,.12);

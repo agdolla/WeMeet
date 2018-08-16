@@ -1,22 +1,31 @@
 import React from 'react';
-// import NavTab from './navTabs';
 import {NotificationBody} from '../containers';
 import {Navbar} from '../containers';
-import {getNotificationData, deleteNotification,acceptFriendRequest,acceptActivityRequest} from '../../utils';
+import {getNotificationData, deleteNotification,
+    acceptFriendRequest,acceptActivityRequest, getUserData} from '../../utils';
 import {socket} from '../../utils';
+
+// let debug = require('react-debug');
 
 export default class Notification extends React.Component{
 
     constructor(props){
         super(props);
         this.state = {
+            userData:{},
             FR: [],
             AN: []
         }
     }
 
-    getData = ()=>{
-        getNotificationData(this.props.user._id)
+    getData(){
+        getUserData(this.props.userId)
+        .then(response=>{
+            this.setState({
+                userData: response.data
+            })
+        });
+        getNotificationData(this.props.userId)
         .then(response=>{
             let notificationData = response.data;
             var FR = [];
@@ -50,12 +59,12 @@ export default class Notification extends React.Component{
     }
     
     handleDelete = (id)=>{
-        deleteNotification(id,this.props.user._id)
+        deleteNotification(id,this.props.userId)
         .then(response=>{
             let notificationData = response.data;
             var FR = [];
             var AN = [];
-            notificationData.contents.map((notification)=>{
+            notificationData.contents.forEach((notification)=>{
                 if(notification.type === "FR"){
                     FR.insert(0,notification);
                 }
@@ -71,18 +80,18 @@ export default class Notification extends React.Component{
     }
 
     handleFriendAccept = (id,user)=>{
-        acceptFriendRequest(id,this.props.user._id)
+        acceptFriendRequest(id,this.props.userId)
         .then(()=>{
             this.getData();
             socket.emit("friend request accepted",{
-                sender: this.props.user._id,
+                sender: this.props.userId,
                 target: user
             });
         });
     }
 
     handleActivityAccept = (notificationid)=>{
-        acceptActivityRequest(notificationid,this.props.user._id)
+        acceptActivityRequest(notificationid,this.props.userId)
         .then(()=>{
             this.getData();
         });
@@ -91,7 +100,7 @@ export default class Notification extends React.Component{
     render(){
         return(
             <div style={{marginTop:'50px'}}>
-                <Navbar user={this.props.user} notification="active"/>
+                <Navbar user={this.state.userData} notification="active"/>
                 <div className="container">
                     <div className="row notification">
                         <div className="col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1 col-xs-12">

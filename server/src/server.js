@@ -722,11 +722,11 @@ MongoClient.connect(url, {
             if (userData === null)
             return res.status(400).end();
             else {
-                notificationHelper.getNotificationData(userData.notification, function(err, notificationData) {
-                    if (err)
-                    return serverHelper.sendDatabaseError(res, err);
+                notificationHelper.getNotificationData(userData.notification)
+                .then(notificationData => {
                     res.send(notificationData);
-                });
+                })
+                .catch(err=>serverHelper.sendDatabaseError(res, err));
             }
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err));
@@ -737,33 +737,29 @@ MongoClient.connect(url, {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
         var notificationId = new ObjectID(req.params.notificationId);
-        notificationHelper.getNotificationItem(notificationId, function(err, notification) {
-            if (err)
-            return serverHelper.sendDatabaseError(res, err);
-            else {
-                db.collection('users').updateOneAsync({_id: userId},{
+        notificationHelper.getNotificationItem(notificationId)
+        .then(notification => {
+            db.collection('users').updateOneAsync({_id: userId},{
+                $addToSet: {
+                    friends: notification.sender._id
+                }
+            })
+            .then(()=>{
+                db.collection('users').updateOneAsync({_id: notification.sender._id}, {
                     $addToSet: {
-                        friends: notification.sender._id
+                        friends: userId
                     }
                 })
-                .then(()=>{
-                    db.collection('users').updateOneAsync({_id: notification.sender._id}, {
-                        $addToSet: {
-                            friends: userId
-                        }
-                    })
+            })
+            .then(()=>{
+                notificationHelper.deleteNotification(notificationId, userId)
+                .then(notificationData=>{
+                    res.send(notificationData);
                 })
-                .then(()=>{
-                    notificationHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
-                        if (err)
-                        serverHelper.sendDatabaseError(res, err);
-                        else {
-                            res.send(notificationData);
-                        }
-                    });
-                })
-            }
-        });
+                .catch(err=>serverHelper.sendDatabaseError(res, err));
+            })
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
 
     //notificationHelper.deleteNotification
@@ -771,13 +767,11 @@ MongoClient.connect(url, {
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
         var notificationId = new ObjectID(req.params.notificationId);
-        notificationHelper.deleteNotification(notificationId, userId, function(err, notificationData) {
-            if (err)
-            serverHelper.sendDatabaseError(res, err);
-            else {
-                res.send(notificationData);
-            }
-        });
+        notificationHelper.deleteNotification(notificationId, userId)
+        .then(notificationData => {
+            res.send(notificationData);
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res, err));
     });
 
     //accept activity request
@@ -785,40 +779,34 @@ MongoClient.connect(url, {
         if(req.params.fromuser.str!==req.user._id.str) return res.status(401).end();
         var user = new ObjectID(req.params.fromuser);
         var notificationId = new ObjectID(req.params.notificationId);
-        notificationHelper.getNotificationItem(notificationId,function(err,notification){
-            if(err)
-            return serverHelper.sendDatabaseError(res, err);
-            else{
-                var userToAdd;
-                if(notification.RequestOrInvite==="request"){
-                    userToAdd = notification.sender._id
-                }
-                else{
-                    userToAdd = notification.target._id
-                }
-
-                db.collection('activityItems').updateOne({
-                    _id:notification.activityid
-                },{
-                    $addToSet:{
-                        participants:userToAdd
-                    }
-                },function(err){
-                    if(err){
-                        return serverHelper.sendDatabaseError(res,err);
-                    }
-                    notificationHelper.deleteNotification(notificationId,user,function(err,notificationData){
-
-                        if(err)
-                        serverHelper.sendDatabaseError(res,err);
-                        else{
-                            res.status(201);
-                            res.send(notificationData);
-                        }
-                    })
-                })
+        notificationHelper.getNotificationItem(notificationId)
+        .then(notification=>{
+            var userToAdd;
+            if(notification.RequestOrInvite==="request"){
+                userToAdd = notification.sender._id
             }
-        });
+            else{
+                userToAdd = notification.target._id
+            }
+
+            db.collection('activityItems').updateOne({
+                _id:notification.activityid
+            },{
+                $addToSet:{
+                    participants:userToAdd
+                }
+            },function(err){
+                if(err){
+                    return serverHelper.sendDatabaseError(res,err);
+                }
+                notificationHelper.deleteNotification(notificationId,user)
+                .then(notificationData=>{
+                    res.send(notificationData);
+                })
+                .catch(err=>serverHelper.sendDatabaseError(res, err));
+            })
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
 
     //chatHelper.getMessage

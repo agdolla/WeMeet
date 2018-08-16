@@ -62,7 +62,7 @@ export default class ChatWindow extends React.Component {
                         </Tooltip>
                         <div className="media">
                             <div className="media-left">
-                                <Link to={"/rofile/"+this.state.targetUser._id}>
+                                <Link to={"/profile/"+this.state.targetUser._id}>
                                     <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
                                 </Link>
                             </div>

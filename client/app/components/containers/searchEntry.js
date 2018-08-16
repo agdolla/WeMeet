@@ -1,13 +1,24 @@
 import React from 'react';
 import {searchquery} from '../../utils';
 import {ActivityFeedItem} from '../presentations';
-import {SearchFeedUserFeedItem} from '../presentations';
 import {PostFeedItem} from '../presentations';
+import {addFriend} from '../../utils';
+import {socket} from '../../utils';
+import Link from 'react-router-dom/Link';
 //mui
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
-
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import Avatar from '@material-ui/core/Avatar';
+import IconButton from '@material-ui/core/IconButton';
+import Icon from '@material-ui/core/Icon';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
 // var debug = require('react-debug');
 
@@ -17,7 +28,8 @@ export default class SearchEntry extends React.Component{
         this.state = {
             value: "",
             searchDataResult:{},
-            title: ""
+            title: "",
+            snackOpen: false
         }
     }
     handleChange(e) {
@@ -42,57 +54,122 @@ export default class SearchEntry extends React.Component{
         }
     }
 
+    checkFriendsOfUser(friendId){
+        return this.props.user._id===friendId || this.props.user.friends.filter((friend)=>{
+            return friend._id===friendId
+        }).length>0;
+    }
 
-render(){
-    return(
-        <div>
-            <div className="panel panel-default">
-                <div className="panel-heading">
-                    <div className="media">
-                        <div className="media-body">
-                            <FormControl style={{width:'100%', marginBottom:'10px', paddingTop: '8px'}}>
-                                <InputLabel
-                                style={{color:'#607D8B'}}
-                                htmlFor="search">
-                                Search...
-                                </InputLabel>
-                                <Input
-                                style={{paddingBottom: '5px'}}
-                                id="search"
-                                value={this.state.value}
-                                onChange={(e)=>this.handleChange(e)}
-                                onKeyUp={(e)=>this.handleKeyUp(e)}
-                                type="search"
-                                />
-                            </FormControl>
+    handleAddFriend(friendId){
+        addFriend(this.props.user._id,friendId)
+        .then(response=>{
+            this.setState({
+                snackOpen:true
+            });
+            socket.emit('notification',{
+                sender: this.props.user._id,
+                target: friendId
+            });
+        })
+        .catch(err=>{
+        })
+    }
+
+    handleRequestClose = () => {
+        this.setState({
+            snackOpen: false,
+        });
+    };
+
+
+    render(){
+        return(
+            <div>
+                <div className="panel panel-default">
+                    <div className="panel-heading">
+                        <div className="media">
+                            <div className="media-body">
+                                <FormControl style={{width:'100%', marginBottom:'10px', paddingTop: '8px'}}>
+                                    <InputLabel
+                                    style={{color:'#607D8B'}}
+                                    htmlFor="search">
+                                    Search...
+                                    </InputLabel>
+                                    <Input
+                                    style={{paddingBottom: '5px'}}
+                                    id="search"
+                                    value={this.state.value}
+                                    onChange={(e)=>this.handleChange(e)}
+                                    onKeyUp={(e)=>this.handleKeyUp(e)}
+                                    type="search"
+                                    />
+                                </FormControl>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <h4 style={{marginBottom:'10px'}}>{this.state.title}</h4>
-            {
-                this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((user,i)=>{
-                    return (
-                    <SearchFeedUserFeedItem key={i} data={user} currentUser={this.props.user}/>
-                    )
-                })
-            }
+                <h4 style={{marginBottom:'10px'}}>{this.state.title}</h4>
+                <Snackbar
+                autoHideDuration={4000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                open={this.state.snackOpen}
+                onClose={this.handleRequestClose}>
+                    <SnackbarContent
+                    style={{
+                        backgroundColor: 'green'
+                    }}
+                    message={
+                        <span style={{                        
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}>
+                            <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
+                            Friend request sent!
+                        </span>
+                    }
+                    />
+                </Snackbar>
+                <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                {this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((user,i)=>{
+                    var rightButton;
+                    if(this.checkFriendsOfUser(user._id)) {
+                        rightButton =  <IconButton disabled>
+                                        <Icon className="fas fa-check"/> 
+                                    </IconButton>
+                    }
+                    else {
+                        rightButton =  <IconButton onClick={()=>this.handleAddFriend(user._id)}>
+                                        <Icon className="fas fa-plus"/> 
+                                    </IconButton>
+                    }
+                    return <ListItem key={i} style={{padding:'20px'}}>
+                        <Link to={'/profile/'+user._id}>
+                            <Avatar src={user.avatar} />
+                        </Link>
+                        <ListItemText primary={user.fullname}
+                        secondary={user.description}/>
+                        <ListItemSecondaryAction>
+                            {rightButton}
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                })}
+                </List>
 
-            {
-                this.state.searchDataResult.activities === undefined ? [] : this.state.searchDataResult.activities.map((activity,i)=>{
-                    return (
-                    <ActivityFeedItem key={i} data={activity}/>
-                    )
-                })
-            }
-            {
-                this.state.searchDataResult.posts === undefined ? [] : this.state.searchDataResult.posts.map((post,i)=>{
-                    return (
-                    <PostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
-                    )
-                })
-            }
-        </div>
-    );
-}
+                {
+                    this.state.searchDataResult.activities === undefined ? [] : this.state.searchDataResult.activities.map((activity,i)=>{
+                        return (
+                        <ActivityFeedItem key={i} data={activity}/>
+                        )
+                    })
+                }
+                {
+                    this.state.searchDataResult.posts === undefined ? [] : this.state.searchDataResult.posts.map((post,i)=>{
+                        return (
+                        <PostFeedItem key={i} data={post} currentUser={this.props.user._id}/>
+                        )
+                    })
+                }
+            </div>
+        );
+    }
 }

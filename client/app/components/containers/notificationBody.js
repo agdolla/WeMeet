@@ -50,20 +50,20 @@ export default class NotificationBody extends React.Component{
         <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
             {this.props.FR.length===0?"Nothing here":this.props.FR.map((fr,i)=>{
                 return <div key={i}>
-                    <ListItem>
-                        <ListItemAvatar>
+                    <ListItem style={{padding:'20px'}}>
                             <Link to={"/profile/"+fr.sender._id}>
-                                <Avatar src={fr.sender.avatar}/>
+                                <ListItemAvatar>
+                                    <Avatar src={fr.sender.avatar}/>
+                                </ListItemAvatar>
                             </Link>
-                        </ListItemAvatar>
                             <ListItemText primary={fr.sender.fullname}
                             secondary="sent you a friend request"/>
                         <ListItemSecondaryAction>
                             <IconButton onClick={()=>this.props.handleFriendAccept(fr._id, fr.sender._id)}>
-                                <Icon className='fas fa-check' />
+                                <Icon className='fas fa-check' style={{color:'#43A047'}}/>
                             </IconButton>
                             <IconButton onClick={()=>this.props.handleDelete(fr._id)}>
-                                <Icon className='fas fa-trash' />
+                                <Icon className='fas fa-trash' style={{color:'#e53935'}}/>
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>
@@ -82,12 +82,12 @@ export default class NotificationBody extends React.Component{
                 text = "invited you to join activity"
             }
             return <div key={i}>
-                    <ListItem>
-                        <ListItemAvatar>
+                    <ListItem style={{padding:'20px'}}>
                             <Link to={"/profile/"+AN.sender._id}>
-                                <Avatar src={AN.sender.avatar}/>
+                                <ListItemAvatar>
+                                    <Avatar src={AN.sender.avatar}/>
+                                </ListItemAvatar>
                             </Link>
-                        </ListItemAvatar>
                         <ListItemText primary={AN.sender.fullname}
                         secondary={
                             <Link to={"/activityDetail/"+AN.activityid}>
@@ -96,10 +96,10 @@ export default class NotificationBody extends React.Component{
                         }/>
                         <ListItemSecondaryAction>
                             <IconButton onClick={()=>this.props.handleActivityAccept(AN._id)}>
-                                <Icon className='fas fa-check' />
+                                <Icon className='fas fa-check' style={{color:'#43A047'}}/>
                             </IconButton>
                             <IconButton onClick={()=>this.props.handleDelete(AN._id)}>
-                                <Icon className='fas fa-trash' />
+                                <Icon className='fas fa-trash' style={{color:'#e53935'}}/>
                             </IconButton>
                         </ListItemSecondaryAction>
                     </ListItem>

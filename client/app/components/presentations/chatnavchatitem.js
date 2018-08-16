@@ -1,5 +1,4 @@
 import React from 'React';
-import {Link} from 'react-router-dom';
 import {hideElement} from '../../utils'
 import Avatar from '@material-ui/core/Avatar';
 import Divider from '@material-ui/core/Divider';
@@ -35,14 +34,12 @@ export default class ChatNavChatItem extends React.Component {
                     style={{
                     alignItems: "flex-start"
                     }}>
-                    <Link to={"/profile/"+this.props.data._id}>
-                        <ListItemAvatar
-                        style={{
-                            marginTop: "20px"
-                        }}>
-                                <Avatar src={this.props.data.avatar}/>
-                        </ListItemAvatar>
-                    </Link>
+                    <ListItemAvatar
+                    style={{
+                        marginTop: "20px"
+                    }}>
+                            <Avatar src={this.props.data.avatar}/>
+                    </ListItemAvatar>
                     <ListItemText
                     primary={this.props.data.fullname}
                     secondary={

@@ -19,15 +19,6 @@ export function getUserId() {
   return null;
 }
 
-/**
- * Get the full name of the currently authenticated user.
- */
-export function getUserFullName() {
-  if (isUserLoggedIn()) {
-    return user.fullName;
-  }
-  return null;
-}
 
 /**
  * Update the token and user document of the currently authenticated user.
@@ -58,7 +49,7 @@ export function isUserLoggedIn() {
      axiosHelper.get('/logout');
  }
 
- export function getUserData(){
+ export function getUserDataFromLocal(){
   if(isUserLoggedIn()){
     return user;
   }

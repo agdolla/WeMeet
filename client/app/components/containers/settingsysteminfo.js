@@ -16,6 +16,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 
 var swal = require('sweetalert');
 let debug = require('react-debug');
@@ -216,50 +220,52 @@ export default class SettingSystemInfo extends React.Component{
                     />
                 </Snackbar>
                 <div className="col-md-3 system-settings">
-                    <div className="list-group">
-                        <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#reset-password" aria-expanded="true" aria-controls="reset-password">
-                            Change Password <span className="pull-right"><i className="fa fa-angle-right" aria-hidden="true"></i></span>
-                        </a>
-                        <div id="reset-password" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                            <div className="panel-body">
-                                <FormControl fullWidth style={{marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="oldpass">
-                                    Old password
-                                    </InputLabel>
-                                    <Input
-                                    id="oldpass"
-                                    />
-                                </FormControl>
-                                <FormControl fullWidth style={{marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="newpass">
-                                    New Password
-                                    </InputLabel>
-                                    <Input
-                                    id="newpass"
-                                    />
-                                </FormControl>
-                                <FormControl fullWidth style={{marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="confirmpass">
-                                    Confirm Password
-                                    </InputLabel>
-                                    <Input
-                                    id="confirmpass"
-                                    />
-                                </FormControl>
-                                <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
+                    <ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                            Change Password
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails>
+                            <div className='row'>
+                            <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                <InputLabel
+                                style={{color:'#607D8B'}}
+                                htmlFor="oldpass">
+                                Old password
+                                </InputLabel>
+                                <Input
+                                id="oldpass"
+                                />
+                            </FormControl>
+                            <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                <InputLabel
+                                style={{color:'#607D8B'}}
+                                htmlFor="newpass">
+                                New Password
+                                </InputLabel>
+                                <Input
+                                id="newpass"
+                                />
+                            </FormControl>
+                            <FormControl fullWidth style={{marginBottom:'20px'}}>
+                                <InputLabel
+                                style={{color:'#607D8B'}}
+                                htmlFor="confirmpass">
+                                Confirm Password
+                                </InputLabel>
+                                <Input
+                                id="confirmpass"
+                                />
+                            </FormControl>
+                            <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
                             </div>
-                        </div>
-                        <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#reset-email" aria-expanded="true" aria-controls="reset-password">
-                            Reset Email <span className="pull-right"><i className="fa fa-angle-right" aria-hidden="true"></i></span>
-                        </a>
-                        <div id="reset-email" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                            <div className="panel-body">
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                    <ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                            Change Email
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails>
+                            <div className='row'>
                                 <FormControl fullWidth style={{marginBottom:'20px'}}>
                                     <InputLabel
                                     style={{color:'#607D8B'}}
@@ -287,35 +293,35 @@ export default class SettingSystemInfo extends React.Component{
                                 </FormControl>
                                 <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleEmailChange(e)}>Submit</button>
                             </div>
-                        </div>
-
-                        <a className="list-group-item"data-toggle="collapse" data-parent="#accordion" href="#change-avatar" aria-expanded="true" aria-controls="reset-password">
-                            Change Avatar <span className="pull-right"><i className="fa fa-angle-right" aria-hidden="true"></i></span>
-                        </a>
-
-                        <div id="change-avatar" className="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                            <div className="panel-body">
-                                <div className="row">
-                                    <div className="col-md-8 col-md-offset-3">
-                                        <div className="btn-group" role="group">
-                                            <label htmlFor="pic">
-                                                <a>
-                                                    <div className="thumbnail" style={{border: "1px dashed black", width: "100px", height: "120px" }}>
-                                                        <i className="fa fa-camera" aria-hidden="true"></i>
-                                                        <img src={this.state.img} className={hideElement(this.state.cropperOpen)}
-                                                        width="100px" height="100px"/>
-                                                    </div>
-                                                </a>
-                                            </label>
-                                            <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onClick={(e)=>this.handleFileClick(e)}
-                                            onChange={(e)=>this.handleFile(e)}></input>
-                                        </div>
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
+                    <ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                            Change Avatar
+                        </ExpansionPanelSummary>
+                        <ExpansionPanelDetails>
+                            <div className='row'>
+                                <div className="col-md-8 col-md-offset-3">
+                                    <div className="btn-group" role="group">
+                                        <label htmlFor="pic">
+                                            <a>
+                                                <div className="thumbnail" style={{border: "1px dashed black", width: "100px", height: "120px" }}>
+                                                    <i className="fa fa-camera" aria-hidden="true"></i>
+                                                    <img src={this.state.img} className={hideElement(this.state.cropperOpen)}
+                                                    width="100px" height="100px"/>
+                                                </div>
+                                            </a>
+                                        </label>
+                                        <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onClick={(e)=>this.handleFileClick(e)}
+                                        onChange={(e)=>this.handleFile(e)}></input>
                                     </div>
                                 </div>
-                                <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleAvatarChange(e)}>Submit</button>
+                                <div className='col-md-12'>
+                                    <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handleAvatarChange(e)}>Submit</button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </ExpansionPanelDetails>
+                    </ExpansionPanel>
                 </div>
             </div>
         )

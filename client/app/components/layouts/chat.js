@@ -32,7 +32,7 @@ export default class Chat extends React.Component {
             this.setState({ user:tmp })
         });
         socket.on('chat',()=>{
-            Promise.join(getSessions(this.props.user), this.getMessagesForUser(this.state.friend._id))
+            Promise.join(getSessions(this.props.userId), this.getMessagesForUser(this.state.friend._id))
             .spread((sessions, data)=>{
                 this.setState({
                     sessions: sessions.data,
@@ -49,12 +49,19 @@ export default class Chat extends React.Component {
         socket.removeAllListeners('online');
     }
 
+    componentDidUpdate(prevProps, prevState) {
+        if(JSON.stringify(this.state.user) !== JSON.stringify(prevState.user)){
+            this.getData();
+        }
+    }
+    
+
     async getData() {
-        let initialData = await Promise.join(getUserData(this.props.user), getSessions(this.props.user));
+        let initialData = await Promise.join(getUserData(this.props.userId), getSessions(this.props.userId));
         let userData = initialData[0].data;
         let sessionsData = initialData[1].data;
         let sessionData = await this.getSession(userData.friends[0]._id);
-        let messages = await getMessages((new Date().getTime()),this.props.user,sessionData)
+        let messages = await getMessages((new Date().getTime()),this.props.userId,sessionData)
 
         this.setState({
             user: userData,
@@ -76,7 +83,7 @@ export default class Chat extends React.Component {
                 }
             });
             if(result === null){
-                getSessionId(this.props.user,friend)
+                getSessionId(this.props.userId,friend)
                 .then(response=>{
                     resolve(response.data._id);
                 })
@@ -86,16 +93,16 @@ export default class Chat extends React.Component {
     }
 
     handlePostMessage(message){
-        postMessage(this.state.sessionId, this.props.user, this.state.friend._id ,message)
+        postMessage(this.state.sessionId, this.props.userId, this.state.friend._id ,message)
         .then(async response=>{
             let newMessage = response.data;
-            let sessions = await getSessions(this.props.user);
+            let sessions = await getSessions(this.props.userId);
             this.setState({
                 message: newMessage,
                 sessions: sessions.data,
                 btnText:"load earier messages"
             },()=>{
-                socket.emit('chat',{currUser:this.props.user,friend:this.state.friend._id});
+                socket.emit('chat',{currUser:this.props.userId,friend:this.state.friend._id});
             });
         });
     }
@@ -114,7 +121,7 @@ export default class Chat extends React.Component {
 
     async getMessagesForUser(userId) {
         let sessionData = await this.getSession(userId);
-        let messages = await getMessages((new Date().getTime()),this.props.user,sessionData);
+        let messages = await getMessages((new Date().getTime()),this.props.userId,sessionData);
         return {
             sessionData: sessionData,
             messages: messages
@@ -124,7 +131,7 @@ export default class Chat extends React.Component {
     handleLoadMessage(e){
         e.preventDefault();
         var time = (this.state.message===undefined || this.state.message.length===0)?(new Date().getTime()):this.state.message[0].date;
-        getMessages(time,this.props.user,this.state.sessionId)
+        getMessages(time,this.props.userId,this.state.sessionId)
         .then(response=>{
             let messages = response.data;
             if(messages.length===0){
@@ -142,7 +149,7 @@ export default class Chat extends React.Component {
     render() {
         var chatwindow =
         (
-            <ChatWindow target={this.state.friend} curUser={this.props.user}
+            <ChatWindow target={this.state.friend} curUser={this.props.userId}
             onPost={(message)=>this.handlePostMessage(message)}
             message={this.state.message}
             onLoad={(e)=>this.handleLoadMessage(e)}

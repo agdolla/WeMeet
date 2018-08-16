@@ -1,12 +1,10 @@
 import React from 'react';
 import { withRouter } from "react-router-dom";
-// var debug = require('react-debug');
-
-//credentials function
 import {isUserLoggedIn} from '../../utils';
-
 import {LandingBackground} from '../containers';
 import {LandingSignup,LandingSignin} from '../containers'
+
+// var debug = require('react-debug');
 
 
 class Landing extends React.Component {
