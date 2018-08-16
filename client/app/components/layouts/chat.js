@@ -2,7 +2,7 @@ import React from 'react';
 import {Navbar} from '../containers';
 import {ChatNavBody} from '../containers';
 import {ChatWindow} from '../containers';
-import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
+import {getMessages,postMessage,getSessions,getSessionId} from '../../utils';
 import {socket} from '../../utils';
 import Drawer from '@material-ui/core/Drawer';
 
@@ -14,7 +14,7 @@ export default class Chat extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: {},
+            user: props.user,
             message :[],
             sessions: [],
             friend: "",
@@ -32,7 +32,7 @@ export default class Chat extends React.Component {
             this.setState({ user:tmp })
         });
         socket.on('chat',()=>{
-            Promise.join(getSessions(this.props.userId), this.getMessagesForUser(this.state.friend._id))
+            Promise.join(getSessions(this.state.user._id), this.getMessagesForUser(this.state.friend._id))
             .spread((sessions, data)=>{
                 this.setState({
                     sessions: sessions.data,
@@ -57,16 +57,14 @@ export default class Chat extends React.Component {
     
 
     async getData() {
-        let initialData = await Promise.join(getUserData(this.props.userId), getSessions(this.props.userId));
-        let userData = initialData[0].data;
-        let sessionsData = initialData[1].data;
-        let sessionData = await this.getSession(userData.friends[0]._id);
-        let messages = await getMessages((new Date().getTime()),this.props.userId,sessionData)
+        let sessions = await getSessions(this.state.user._id);
+        let sessionsData = sessions.data;
+        let sessionData = await this.getSession(this.state.user.friends[0]._id);
+        let messages = await getMessages((new Date().getTime()),this.state.user._id,sessionData)
 
         this.setState({
-            user: userData,
             sessions: sessionsData,
-            friend: userData.friends[0],
+            friend: this.state.user.friends[0],
             sessionId: sessionData,
             message: messages.data,
             btnText: messages.data.length===0?"say hello to your friend!":"load earier messages"
@@ -83,7 +81,7 @@ export default class Chat extends React.Component {
                 }
             });
             if(result === null){
-                getSessionId(this.props.userId,friend)
+                getSessionId(this.state.user._id,friend)
                 .then(response=>{
                     resolve(response.data._id);
                 })
@@ -93,16 +91,16 @@ export default class Chat extends React.Component {
     }
 
     handlePostMessage(message){
-        postMessage(this.state.sessionId, this.props.userId, this.state.friend._id ,message)
+        postMessage(this.state.sessionId, this.state.user._id, this.state.friend._id ,message)
         .then(async response=>{
             let newMessage = response.data;
-            let sessions = await getSessions(this.props.userId);
+            let sessions = await getSessions(this.state.user._id);
             this.setState({
                 message: newMessage,
                 sessions: sessions.data,
                 btnText:"load earier messages"
             },()=>{
-                socket.emit('chat',{currUser:this.props.userId,friend:this.state.friend._id});
+                socket.emit('chat',{currUser:this.state.user._id,friend:this.state.friend._id});
             });
         });
     }
@@ -121,7 +119,7 @@ export default class Chat extends React.Component {
 
     async getMessagesForUser(userId) {
         let sessionData = await this.getSession(userId);
-        let messages = await getMessages((new Date().getTime()),this.props.userId,sessionData);
+        let messages = await getMessages((new Date().getTime()),this.state.user._id,sessionData);
         return {
             sessionData: sessionData,
             messages: messages
@@ -131,7 +129,7 @@ export default class Chat extends React.Component {
     handleLoadMessage(e){
         e.preventDefault();
         var time = (this.state.message===undefined || this.state.message.length===0)?(new Date().getTime()):this.state.message[0].date;
-        getMessages(time,this.props.userId,this.state.sessionId)
+        getMessages(time,this.state.user._id,this.state.sessionId)
         .then(response=>{
             let messages = response.data;
             if(messages.length===0){
@@ -149,7 +147,7 @@ export default class Chat extends React.Component {
     render() {
         var chatwindow =
         (
-            <ChatWindow target={this.state.friend} curUser={this.props.userId}
+            <ChatWindow target={this.state.friend} curUser={this.state.user._id}
             onPost={(message)=>this.handlePostMessage(message)}
             message={this.state.message}
             onLoad={(e)=>this.handleLoadMessage(e)}

@@ -67,7 +67,6 @@ export default class SettingSystemInfo extends React.Component{
                 newEmail: this.state.newEmail
             })
             .then(response=>{
-                debug(response);
                 var msg = "";
                 var color = "";
                 if(response.data){

@@ -25,8 +25,6 @@ export default class PostFeed extends React.Component{
             let postFeedData = response.data;
             this.setState({
                 contents:postFeedData
-            },()=>{
-                document.addEventListener('scroll', this.trackScrolling);
             });
         });
     }

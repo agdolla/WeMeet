@@ -13,51 +13,21 @@ import { Settings } from './components/layouts';
 import { Landing } from './components/layouts';
 import {getUserId,isUserLoggedIn,socket,updateCredentials} from './utils/credentials';
 import history from './utils/history';
+import {getUserData} from './utils'
 
-// var debug = require('react-debug');
+// let debug = require('react-debug');
 // var swal = require('sweetalert');
 
 class ActivityPage extends React.Component{
     render(){
-        let isFacebook = this.props.location.search!=="";
-        if(isFacebook || isUserLoggedIn()){
-            if(!isFacebook){
-                var userId = getUserId();
-                window.onload = ()=>{
-                    socket.emit('user',userId);
-                }
-                return(<Activity userId={userId}/>);
-
-            }
-            else{ //facebook login
-                const rawData = new URLSearchParams(this.props.location.search).get('data');
-                var data = JSON.parse(rawData);
-                updateCredentials(data.user);
-                this.props.history.push('/activity');
-                location.reload();
-            }
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return <Activity user={this.props.userData}/>;
     }
 }
 withRouter(ActivityPage);
 
 class ThrendPage extends React.Component{
     render(){
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return (<Post userId={userId}/>);
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return <Post user={this.props.userData}/>;
     }
 }
 withRouter(ThrendPage);
@@ -67,150 +37,121 @@ class App extends React.Component {
         return (
             <Switch>
                 <Route exact path="/" component={LandingPage} />
-                <Route path="/post" component={ThrendPage} />
-                <Route path="/activity/:data" component={ActivityPage} />
-                <Route path="/settings" component={SettingsPage} />
-                <Route path="/chat" component={ChatPage} />
-                <Route path="/notification" component={NotificationPage}/>
-                <Route path="/profile/:user" component={ProfilePage} />
-                <Route path="/activityDetail/:id" component={ActivityDetailPage}/>
-                <Route path="/search" component={SearchPage}/>
-                <Route path="/createActivity" component={CreateActivityPage} />
-                <Route path='*' component={ActivityPage} />
+                <WeMeet />
             </Switch>
         );
     }
 }
 
-class SettingsPage extends React.Component {
-    render() {
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return (
-                <Settings userId={userId} />
-            );
+class WeMeet extends React.Component {
+
+    componentDidMount() {
+        let isFacebook = this.props.location.search!=="";
+        if(isFacebook){
+            const rawData = new URLSearchParams(this.props.location.search).get('data');
+            var data = JSON.parse(rawData);
+            updateCredentials(data.user);
+            history.push('/');
         }
-        else{
-            this.props.history.push('/');
+        if(!isUserLoggedIn()){
+            history.push('/');
+            location.reload();
+            return;
+        }
+        let userId = getUserId();
+        window.onload = ()=>{
+            socket.emit('user',userId);
+        }
+        getUserData(userId)
+        .then(response=>{
+            this.setState(response.data);
+        })
+    }
+
+    componentDidUpdate() {
+        if(!isUserLoggedIn()){
+            history.push('/');
             location.reload();
         }
+    }
+    
+    render() {
+        if(this.state===null) return null;
+        return (
+            <Switch>
+                <Route path="/post" component={()=>{return <ThrendPage userData={this.state}/>}}/>
+                <Route path="/activity" component={()=>{return <ActivityPage userData={this.state}/>}}/>
+                <Route path="/settings" component={()=>{return <SettingsPage userData={this.state}/>}} />
+                <Route path="/chat" component={()=>{return <ChatPage userData={this.state} />}} />
+                <Route path="/notification" component={()=>{return <NotificationPage userData={this.state}/>}}/>
+                <Route path="/profile/:user" component={(props)=>{return <ProfilePage {...props} userData={this.state} />}} />
+                <Route path="/activityDetail/:id" component={(props)=>{return <ActivityDetailPage {...props} userData={this.state}/>}}/>
+                <Route path="/search" component={()=>{return <SearchPage userData={this.state}/>}}/>
+                <Route path="/createActivity" component={()=>{return <CreateActivityPage userData={this.state}/>}} />
+                <Route path='*' component={()=>{return <ActivityPage userData={this.state}/>}} />
+            </Switch> 
+        )
+    }
+}
+withRouter(WeMeet);
+
+class SettingsPage extends React.Component {
+    render() {
+        return <Settings user={this.props.userData} />
     }
 }
 withRouter(SettingsPage);
 
 class ChatPage extends React.Component{
     render() {
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return (
-                <Chat userId={userId}/>
-            );
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return (
+            <Chat user={this.props.userData}/>
+        );
     }
 }
 withRouter(ChatPage);
 
 class NotificationPage extends React.Component{
     render(){
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return(
-                <Notification userId={userId} />
-            );
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return(
+            <Notification user={this.props.userData} />
+        );
     }
 }
 withRouter(NotificationPage);
 
 class ActivityDetailPage extends React.Component{
     render(){
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return(
-                <ActivityDetail userId={userId} id={this.props.match.params.id}/>
-            )
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return(
+            <ActivityDetail user={this.props.userData} id={this.props.match.params.id}/>
+        )
     }
 }
 withRouter(ActivityDetailPage);
 
 class SearchPage extends React.Component{
     render(){
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return(
-                <Search userId={userId}/>
-            );
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return(
+            <Search user={this.props.userData}/>
+        );
     }
 }
 withRouter(SearchPage);
 
 class ProfilePage extends React.Component{
     render(){
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return(
-                <Profile user={this.props.match.params.user} currUser={userId}/>
-            );
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return(
+            <Profile user={this.props.match.params.user} currUser={this.props.userData}/>
+        );
     }
 }
 withRouter(ProfilePage);
 
 class CreateActivityPage extends React.Component {
     render() {
-        if(isUserLoggedIn()){
-            var userId = getUserId();
-            window.onload = ()=>{
-                socket.emit('user',userId);
-            }
-            return (
-                <CreateActivity userId={userId}/>
-            );
-        }
-        else{
-            this.props.history.push('/');
-            location.reload();
-        }
+        return (
+            <CreateActivity user={this.props.userData}/>
+        );
     }
 }
 withRouter(CreateActivityPage);

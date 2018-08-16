@@ -22,7 +22,6 @@ export default class ProfileRecentActivityFeed extends React.Component{
         let count = refreshed?0:this.state.contents.length;
         getActivityFeedData(user, count)
         .then(response=>{
-            // debug(response.data);
             let activities = refreshed?response.data.contents:this.state.contents.concat(response.data.contents);
             this.setState({
                 contents:activities,
