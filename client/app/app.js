@@ -123,7 +123,7 @@ withRouter(NotificationPage);
 class ActivityDetailPage extends React.Component{
     render(){
         return(
-            <ActivityDetail user={this.props.userData} id={this.props.match.params.id}/>
+            <ActivityDetail user={this.props.userData} activityId={this.props.match.params.id}/>
         )
     }
 }

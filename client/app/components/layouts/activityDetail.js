@@ -12,7 +12,7 @@ export default class ActivityDetail extends React.Component{
         return(
             <div style={{marginTop:'70px'}}>
                 <Navbar activity="active" user={this.props.user}/>
-                <ActivityDetailBody id={this.props.user._id} avatar={this.props.user.avatar} 
+                <ActivityDetailBody id={this.props.activityId} avatar={this.props.user.avatar} 
                 currentUser={this.props.user._id} friends={this.props.user.friends}/>
             </div>
         )

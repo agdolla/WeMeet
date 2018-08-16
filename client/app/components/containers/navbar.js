@@ -28,7 +28,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 
 var swal = require('sweetalert');
-var debug = require('react-debug');
+// var debug = require('react-debug');
 
 class Navbar extends React.Component{
 
@@ -80,6 +80,7 @@ class Navbar extends React.Component{
   }
 
   onFriendRequestAccepted = (data)=>{
+    location.reload();
     this.notifyMe('/chat',data.sender+" accepted your request");
   }
 

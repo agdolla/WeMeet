@@ -597,9 +597,12 @@ MongoClient.connect(url, {
     //get activity detail
     app.get('/activityItem/:activityId', serverHelper.isLoggedIn, (req, res) => {
         var activityId = new ObjectID(req.params.activityId);
+        console.log(activityId);
         activityHelper.getActivityFeedItem(activityId)
         .then(activityData=>res.send(activityData))
-        .catch(err=>serverHelper.sendDatabaseError(res,err))
+        .catch(err=>{
+            serverHelper.sendDatabaseError(res,err)
+        })
     });
 
     //like activity

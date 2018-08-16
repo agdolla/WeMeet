@@ -110,8 +110,13 @@ module.exports = class NotificationHelper {
 
     hasNewNotification(userId){
         return new Promise((resolve, reject)=>{
-            this.database.collection('notifications').findOneAsync({
+            this.database.collection('users').findOneAsync({
                 _id: userId
+            })
+            .then(userData=>{
+                return this.database.collection('notifications').findOneAsync({
+                    _id: userData.notification
+                })
             })
             .then(notifications=>{
                 if(notifications === null){
@@ -119,7 +124,7 @@ module.exports = class NotificationHelper {
                 }
                 resolve(notifications.contents.length);
             })
-            .catch(err=>reject(err));
+            .catch(err=>{reject(err)});
         });
     }
 }

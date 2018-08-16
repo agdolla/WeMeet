@@ -72,7 +72,7 @@ export default class Notification extends React.Component{
         });
     }
 
-    handleFriendAccept = (id,user)=>{
+    handleFriendAccept = (id, user)=>{
         acceptFriendRequest(id,this.props.user._id)
         .then(()=>{
             this.getData();
@@ -80,6 +80,7 @@ export default class Notification extends React.Component{
                 sender: this.props.user._id,
                 target: user
             });
+            location.reload();
         });
     }
 
