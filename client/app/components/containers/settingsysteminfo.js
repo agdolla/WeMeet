@@ -69,20 +69,24 @@ export default class SettingSystemInfo extends React.Component{
             .then(response=>{
                 var msg = "";
                 var color = "";
+                var invalid = false;
                 if(response.data){
                     msg = "Old email is wrong or new email has wrong format";
-                    color = "#d32f2f"
+                    color = "#d32f2f";
+                    invalid = true;
                 }
                 else{
                     msg = "Successfully Changed  Email";
-                    color = "#43A047"
+                    color = "#43A047";
+                    invalid = false;
                 }
                 this.setState({
                     oldEmail: "",
                     newEmail: "",
                     snackBarColor: color,
                     snackBarMsg: msg,
-                    open: true
+                    open: true,
+                    changeEmailFailed: invalid
                 });
             });
         }
