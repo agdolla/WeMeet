@@ -1,9 +1,10 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {hideElement} from '../../utils';
+import {uploadImg} from '../../utils';
 
 // var debug = require('react-debug');
 var emojione = require('emojione');
+let swal = require('sweetalert');
 
 export default class PostEntry extends React.Component{
 
@@ -13,7 +14,8 @@ export default class PostEntry extends React.Component{
             text: "",
             img: [],
             fileTooLarge:false,
-            fileWrongType:false
+            fileWrongType:false,
+            tooManyFiles: false
         }
     }
 
@@ -33,41 +35,6 @@ export default class PostEntry extends React.Component{
                     img:[]
                 }
             );
-        }
-    }
-
-    uploadImg(e){
-        e.preventDefault();
-        var files = e.target.files;
-
-        for (var i = 0; i<files.length; i++) {
-            var file = files[i];
-
-            if(file.size > 1500000){
-                return this.setState({
-                    fileTooLarge:true
-                })
-            }
-            if(!file.type.match('image.*')){
-                return this.setState({
-                    fileWrongType:true
-                })
-            }
-            var reader = new FileReader();
-
-            // Closure to capture the file information.
-            reader.onload = (() => {
-                return (e) => {
-                    var img = this.state.img;
-                    img.push(e.target.result);
-                    this.setState({
-                        img:img
-                    })
-                };
-            })(file);
-
-            // Read in the image file as a data URL.
-            reader.readAsDataURL(file);
         }
     }
 
@@ -96,24 +63,31 @@ export default class PostEntry extends React.Component{
                                 <label htmlFor="pic">
                                     <a><i className="fa fa-camera" aria-hidden="true"></i></a>
                                 </label>
-                                <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onChange={(e)=>this.uploadImg(e)} multiple></input>
+                                <input type="file" accept=".jpg,.jpeg,.png,.gif" id="pic" onChange={(e)=>
+                                    uploadImg(e,()=>{
+                                        swal("Error", "Only 3 images at a time please", "error");
+                                    },()=>{
+                                        swal("Error", "File size is too large", "error");
+                                    },()=>{
+                                        swal("Error", "File type is wrong", "error");
+                                    },(res)=>{
+                                        var img = this.state.img;
+                                        img.push(res.target.result);
+                                        this.setState({
+                                            img:img
+                                        })
+                                    })} multiple></input>
                                 <a id="openEmoji"><span><i className="fa fa-lg fa-smile-o" aria-hidden="true"></i></span></a>
                             </div>
                             <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handlePost(e)}>Submit</button>
                         </div>
                         <div className="media-footer">
-                            <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileWrongType)} role="alert">
-                                <strong>File is not a image file</strong>
-                            </div>
-                            <div className={"alert alert-warning alert-dismissible "+hideElement(!this.state.fileTooLarge)} role="alert">
-                                <strong>File is too large</strong>
-                            </div>
                             <div className="postImg">
                                 {
                                     this.state.img.map((element, index) =>{
                                         return(
-                                        <a style={{"width":"calc("+(100/(this.state.img.length>2?2:this.state.img.length))+"% - 4px)"}}>
-                                            <img src={element} key={index} alt="" style={{'width':"100%"}}/>
+                                        <a key={index} style={{"width":"calc("+(100/(this.state.img.length>2?2:this.state.img.length))+"% - 4px)"}}>
+                                            <img src={element} alt="" style={{'width':"100%"}}/>
                                         </a>
                                         )
                                     })

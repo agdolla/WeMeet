@@ -90,8 +90,8 @@ export default class Chat extends React.Component {
         });
     }
 
-    handlePostMessage(message){
-        postMessage(this.state.sessionId, this.state.user._id, this.state.friend._id ,message)
+    handlePostMessage(message, imgs){
+        postMessage(this.state.sessionId, this.state.user._id, this.state.friend._id, message, imgs)
         .then(async response=>{
             let newMessage = response.data;
             let sessions = await getSessions(this.state.user._id);
@@ -148,7 +148,7 @@ export default class Chat extends React.Component {
         var chatwindow =
         (
             <ChatWindow target={this.state.friend} curUser={this.state.user._id}
-            onPost={(message)=>this.handlePostMessage(message)}
+            onPost={(message, imgs)=>this.handlePostMessage(message, imgs)}
             message={this.state.message}
             onLoad={(e)=>this.handleLoadMessage(e)}
             onExpand={()=>this.setState({open:!this.state.open})}

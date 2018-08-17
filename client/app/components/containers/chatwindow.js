@@ -10,6 +10,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import List from '@material-ui/core/List';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
 
 let moment = require('moment');
 // var debug = require('react-debug');
@@ -20,7 +26,10 @@ export default class ChatWindow extends React.Component {
         super(props);
         this.state = {
             targetUser: props.target,
-            message: props.message
+            message: props.message,
+            open: false,
+            selectedImgs: [],
+            currentIdx: 0
         }
     }
 
@@ -32,8 +41,8 @@ export default class ChatWindow extends React.Component {
         this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
     }
 
-    async handlePostMessage(text){
-        await this.props.onPost(text);
+    async handlePostMessage(text, imgs){
+        await this.props.onPost(text, imgs);
         this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
     }
 
@@ -48,6 +57,14 @@ export default class ChatWindow extends React.Component {
                     this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             })
         }
+    }
+
+    handleClose = () => {
+        this.setState({ open: false });
+    };
+
+    handleClickOpen(imgs, idx){
+        this.setState({ open: true, selectedImgs: imgs, currentIdx: idx });
     }
 
     render() {
@@ -86,6 +103,34 @@ export default class ChatWindow extends React.Component {
                         </div>
                     </div>
 
+                    <Dialog
+                    fullScreen
+                    open={this.state.open}
+                    onClose={this.handleClose}>
+                        <DialogContent style={{textAlign: "center"}}>
+                            <img src={this.state.selectedImgs[this.state.currentIdx]}/>
+                        </DialogContent>
+                        <DialogActions>
+                            <IconButton onClick={()=>{
+                                this.setState({
+                                    currentIdx: (this.state.currentIdx+this.state.selectedImgs.length-1)%this.state.selectedImgs.length
+                                })
+                            }}>
+                                <Icon className='fas fa-chevron-left' />
+                            </IconButton>
+                            <IconButton onClick={()=>{
+                                this.setState({
+                                    currentIdx: (this.state.currentIdx+1)%this.state.selectedImgs.length
+                                })
+                            }}>
+                                <Icon className='fas fa-chevron-right' />
+                            </IconButton>
+                            <Button onClick={this.handleClose} color="primary">
+                            Close
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
                     <div className="panel-body" ref="chatwindow">
                         <Button onClick={(e)=>this.props.onLoad(e)} fullWidth
                         disabled={this.state.message===undefined || this.state.message.length===0}>
@@ -115,13 +160,31 @@ export default class ChatWindow extends React.Component {
                                             <span style={{fontSize:'12px', marginLeft:'15px'}}>{time}</span>
                                         </span>
                                     }
-                                    secondary={msg.text}
+                                    secondary={
+                                        <span>
+                                            <GridList cellHeight={160} cols={3}>
+                                                {msg.imgs.map((img, idx)=>{
+                                                    return <GridListTile key={idx}>
+                                                        <img src={img}/>
+                                                        <GridListTileBar
+                                                        actionIcon={
+                                                            <IconButton onClick={()=>this.handleClickOpen(msg.imgs, idx)}>
+                                                                <Icon style={{color:'white'}} className='fas fa-search-plus' />
+                                                            </IconButton>
+                                                        }
+                                                        />
+                                                    </GridListTile>
+                                                })}
+                                            </GridList>
+                                            {msg.text}
+                                        </span>
+                                    }
                                     />
                                 </ListItem>
                             })}
                         </List>
                     </div>
-                    <ChatEntry onPost={(message)=>this.handlePostMessage(message)}/>
+                    <ChatEntry onPost={(message, imgs)=>this.handlePostMessage(message,imgs)}/>
                 </div>
             </div>
 

@@ -26,6 +26,7 @@ let PostHelper = require('./utils/postHelper');
 let ChatHelper = require('./utils/chatHelper');
 let NotificationHelper = require('./utils/notificationHelper');
 const Jimp = require("jimp");
+const uuidV1 = require('uuid/v1');
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 let secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -865,15 +866,22 @@ MongoClient.connect(url, {
         if(senderid.str!==req.user._id.str) return res.status(401).end();
         var targetid = body.target;
         var text = body.text;
-        var lastmessage = {
-            "sender": new ObjectID(senderid),
-            "target": new ObjectID(targetid),
-            "date": time,
-            "text": text
+        let imgs = body.imgs;
+        let name = uuidV1();
+        var imgPath = [];
+        for (var i = 0; i < imgs.length; i++) {
+            imgPath.push("img/chat/"+name+i+".jpg");
         }
-        chatHelper.getSessionContentsID(new ObjectID(id), function(err, contentsid) {
+        var lastmessage = {
+            sender: new ObjectID(senderid),
+            target: new ObjectID(targetid),
+            date: time,
+            text: text,
+            imgs: imgPath
+        }
+        chatHelper.getSessionContentsID(new ObjectID(id), (err, contentsid)=>{
             if (err)
-            serverHelper.sendDatabaseError(res, err);
+                serverHelper.sendDatabaseError(res, err);
             else {
                 db.collection('message').updateOneAsync({
                     _id: new ObjectID(contentsid)
@@ -897,6 +905,14 @@ MongoClient.connect(url, {
                     })
                     .then(()=>{
                         res.send(messages);
+                        imgs.forEach((img,idx)=>{
+                            var buffer = new Buffer.from(img.split(",")[1], 'base64');
+                            Jimp.read(buffer)
+                            .then(image =>{
+                                image.quality(50)
+                                .write("../client/build/"+imgPath[idx]);
+                            })
+                        })
                     })
                 })
                 .catch(err=>serverHelper.sendDatabaseError(res,err));

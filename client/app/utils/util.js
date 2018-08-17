@@ -28,3 +28,31 @@ export function didUserLike(likeCounter, userId) {
 export function isBottom(el) {
   return el.getBoundingClientRect().bottom <= window.innerHeight;
 }
+
+export function uploadImg(e, tooManyFiles, sizeToLarge, typeWrong, success){
+  e.preventDefault();
+  var files = e.target.files;
+  if(files.length > 3){
+    return tooManyFiles();
+  }
+
+  for (var i = 0; i<files.length; i++) {
+      var file = files[i];
+
+      if(file.size > 1500000){
+          return sizeToLarge();
+      }
+      if(!file.type.match('image.*')){
+          return typeWrong();
+      }
+      var reader = new FileReader();
+
+      reader.onload = (() => {
+          return (e) => {
+            success(e);
+          };
+      })(file);
+
+      reader.readAsDataURL(file);
+  }
+}

@@ -304,21 +304,24 @@ var initialData = {
             "sender":new ObjectID("000000000000000000000001"),
             "target":new ObjectID("000000000000000000000002"),
             "date" : 1478149540000,
-            "text": "what's up"
+            "text": "what's up",
+            "imgs": ["img/chat/study.jpg"]
           },
           {
             "sender":new ObjectID("000000000000000000000002"),
             "target":new ObjectID("000000000000000000000001"),
             "date" : 1478149540000,
             "text": `
-  Mr Trump tweeted that the process of selecting his new cabinet and other positions was "very organised".`
-
+  Mr Trump tweeted that the process of selecting his new cabinet and other positions was "very organised".`,
+            "imgs": []
+            
           },
           {
             "sender":new ObjectID("000000000000000000000001"),
             "target":new ObjectID("000000000000000000000002"),
             "date" : 1478149540000,
-            "text": "cool"
+            "text": "cool",
+            "imgs": []
           }
         ]
       },
@@ -329,20 +332,23 @@ var initialData = {
               "sender":new ObjectID("000000000000000000000001"),
               "target":new ObjectID("000000000000000000000003"),
               "date" : 1478149540000,
-              "text": "yo"
+              "text": "yo",
+              "imgs": []
             },
             {
               "sender":new ObjectID("000000000000000000000003"),
               "target":new ObjectID("000000000000000000000001"),
               "date" : 1478149540000,
-              "text": `Good Night!.`
+              "text": `Good Night!.`,
+              "imgs": []
 
             },
             {
               "sender":new ObjectID("000000000000000000000001"),
               "target":new ObjectID("000000000000000000000003"),
               "date" : 1478149540000,
-              "text": "Good night!"
+              "text": "Good night!",
+              "imgs": []
             }
           ]
         }
