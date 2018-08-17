@@ -44,6 +44,7 @@
         "eslint-plugin-node": "^7.0.1",
         "express-session": "^1.15.6",
         "helmet": "^3.13.0",
-        "passport.socketio": "^3.7.0"
+        "passport.socketio": "^3.7.0",
+        "zxcvbn": "^4.4.2"
     }
 }

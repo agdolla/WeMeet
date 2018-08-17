@@ -45,7 +45,7 @@ import {searchquery} from './search'
 //client side settings request function
 import {changeUserInfo} from './settings'
 import {ChangeAvatar} from './settings'
-import {changeEmail} from './settings'
+import {changeEmail, changePassword} from './settings'
 
 //client side user get request function
 import {getNotificationData} from './usergetrequest'
@@ -115,6 +115,7 @@ export{
     changeUserInfo,
     ChangeAvatar,
     changeEmail,
+    changePassword,
 
     //export usergetrequest function
     getNotificationData,

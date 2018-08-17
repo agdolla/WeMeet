@@ -11,6 +11,10 @@ export function ChangeAvatar(user,img){
     });
 }
 
-export function changeEmail(data){
-    return axiosHelper.put('/settings/emailChange/user/'+data.userId,data);
+export function changeEmail(userId, data){
+    return axiosHelper.put('/settings/emailChange/user/'+userId, data);
+}
+
+export function changePassword(userId, data){
+    return axiosHelper.put('/settings/passChange/user/'+userId, data);
 }

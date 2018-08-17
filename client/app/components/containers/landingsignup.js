@@ -7,7 +7,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
-var zxcvbn = require('zxcvbn');
+let zxcvbn = require('zxcvbn');
 
 class LandingSignup extends React.Component{
     constructor(props){
@@ -108,14 +108,16 @@ class LandingSignup extends React.Component{
                 case 2:{
                     this.setState({
                         passwordStrength:60,
-                        passwordClass:"progress-bar-success"
+                        passwordClass:"progress-bar-success",
+                        passwordTooSimple:false
                     })
                 }
                 break;
                 case 3:{
                     this.setState({
                         passwordStrength:80,
-                        passwordClass:"progress-bar-success"
+                        passwordClass:"progress-bar-success",
+                        passwordTooSimple:false
                     })
                 }
                 break;

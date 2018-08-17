@@ -1,5 +1,5 @@
 import React from 'react'
-import {changeEmail, ChangeAvatar} from '../../utils';
+import {changeEmail, ChangeAvatar, changePassword} from '../../utils';
 import 'node_modules/cropperjs/dist/cropper.css';
 import {hideElement} from '../../utils';
 import Cropper from 'react-cropper';
@@ -20,7 +20,7 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-
+let zxcvbn = require('zxcvbn');
 var swal = require('sweetalert');
 let debug = require('react-debug');
 
@@ -36,7 +36,12 @@ export default class SettingSystemInfo extends React.Component{
             snackBarColor:"",
             snackBarMsg:"",
             open: false,
-            changeEmailFailed: false
+            changeEmailFailed: false,
+            oldPass: "",
+            newPass: "",
+            newPass2: "",
+            passwordStrength:0,
+            passwordClass:"progress-bar-danger",
         }
     }
 
@@ -58,11 +63,93 @@ export default class SettingSystemInfo extends React.Component{
         this.setState({newEmail: e.target.value});
     }
 
+    handleOldPass(e){
+        this.setState({oldPass: e.target.value});   
+    }
+    
+    handleNewPass(e){
+        switch (zxcvbn(e.target.value).score) {
+            case 0:
+                this.setState({
+                    passwordStrength:0,
+                    newPass: e.target.value,
+                    passwordClass: 'progress-bar-danger'
+                })
+                break;
+            case 1:
+                this.setState({
+                    passwordStrength:40,
+                    newPass: e.target.value,
+                    passwordClass: 'progress-bar-danger'
+                })
+                break;
+            case 2:
+                this.setState({
+                    passwordStrength:60,
+                    newPass: e.target.value,
+                    passwordClass:"progress-bar-success"
+                })
+                break;
+            case 3:
+                this.setState({
+                    passwordStrength:80,
+                    newPass: e.target.value,
+                    passwordClass:"progress-bar-success"
+                })
+                break;
+            case 4:
+                this.setState({
+                    passwordStrength:100,
+                    newPass: e.target.value,
+                    passwordClass:"progress-bar-success"
+                })
+                break;
+            default:
+                break;
+        }
+    }
+
+    handleNewPass2(e){
+        this.setState({newPass2: e.target.value});
+    }
+
+    //1.password is strong, two passwords match
+    handleChangePass() {
+        if(this.state.oldPass==="" || this.state.newPass==="" || this.state.newPass2===""){
+            swal('Error', 'Please fill all the fields', 'error');
+            return;
+        }
+        let data = {
+            oldPass: this.state.oldPass,
+            newPass: this.state.newPass
+        }
+        if(data.oldPass === data.newPass){
+            swal('Error', "New password can't be the same as the old one", 'error');
+            return;
+        }
+        if(this.state.passwordStrength >= 60 && this.state.newPass === this.state.newPass2){
+            changePassword(this.state.userData._id, data)
+            .then(response=>{
+                let err = response.data;
+                if(err){
+                    swal('Error', 'Old password is wrong', 'error');
+                }
+                else{
+                    swal('Success', '', 'success');
+                }
+            });
+        }
+        else{
+            if(this.state.passwordStrength < 60)
+                swal('Error', 'Password is too simple', 'error');
+            else swal('Error', "Comfirm your password", 'error');
+        }
+    }
+
     handleEmailChange(e){
         e.preventDefault();
         if(this.state.oldEmail!=="" && this.state.newEmail!==""){
-            changeEmail({
-                userId: this.state.userData._id,
+            changeEmail(this.state.userData._id,{
                 oldEmail: this.state.oldEmail,
                 newEmail: this.state.newEmail
             })
@@ -223,7 +310,7 @@ export default class SettingSystemInfo extends React.Component{
                     />
                 </Snackbar>
                 <div className="col-md-3 system-settings">
-                    <ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                    {'facebookID' in this.state.userData ? null:<ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                             Change Password
                         </ExpansionPanelSummary>
@@ -236,7 +323,9 @@ export default class SettingSystemInfo extends React.Component{
                                 Old password
                                 </InputLabel>
                                 <Input
+                                type="password"
                                 id="oldpass"
+                                onChange={(e)=>this.handleOldPass(e)}
                                 />
                             </FormControl>
                             <FormControl fullWidth style={{marginBottom:'20px'}}>
@@ -246,9 +335,19 @@ export default class SettingSystemInfo extends React.Component{
                                 New Password
                                 </InputLabel>
                                 <Input
+                                type="password"
                                 id="newpass"
+                                onChange={(e)=>this.handleNewPass(e)}
                                 />
                             </FormControl>
+                            <div className="progress" style={{height:'6px', marginTop:'-20px',borderRadius:'0'}}>
+                                <div className={"progress-bar "+this.state.passwordClass}
+                                role="progressbar"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                                style={{width:this.state.passwordStrength+"%"}}>
+                                </div>
+                            </div>
                             <FormControl fullWidth style={{marginBottom:'20px'}}>
                                 <InputLabel
                                 style={{color:'#607D8B'}}
@@ -256,13 +355,16 @@ export default class SettingSystemInfo extends React.Component{
                                 Confirm Password
                                 </InputLabel>
                                 <Input
+                                type="password"
                                 id="confirmpass"
+                                onChange={(e)=>this.handleNewPass2(e)}
                                 />
                             </FormControl>
-                            <button type="button" className="btn btn-blue-grey pull-right" name="button">Submit</button>
+                            <button type="button" onClick={()=>this.handleChangePass()} 
+                            className="btn btn-blue-grey pull-right" name="button">Submit</button>
                             </div>
                         </ExpansionPanelDetails>
-                    </ExpansionPanel>
+                    </ExpansionPanel>}
                     <ExpansionPanel style={{boxShadow: '0 10px 28px 0 rgba(137,157,197,.12)'}}>
                         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                             Change Email

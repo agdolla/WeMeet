@@ -13,7 +13,6 @@
     }
   },
   "required": [
-    "userId",
     "oldEmail",
     "newEmail"
   ]

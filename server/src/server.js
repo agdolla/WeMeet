@@ -27,6 +27,7 @@ let ChatHelper = require('./utils/chatHelper');
 let NotificationHelper = require('./utils/notificationHelper');
 const Jimp = require("jimp");
 const uuidV1 = require('uuid/v1');
+let zxcvbn = require('zxcvbn');
 // var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
 // var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
 let secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
@@ -98,14 +99,15 @@ MongoClient.connect(url, {
     app.use(passport.session());
 
     //schemas
-    var statusUpdateSchema = require('./schemas/statusUpdate.json');
-    var commentSchema = require('./schemas/comment.json');
-    var userInfoSchema = require('./schemas/userInfo.json');
-    var emailChangeSchema = require('./schemas/emailChange.json');
-    var activitySchema = require('./schemas/activity.json');
-    var userSchema = require('./schemas/user.json');
-    var loginSchema = require('./schemas/login.json');
-    var validate = require('express-jsonschema').validate;
+    let statusUpdateSchema = require('./schemas/statusUpdate.json');
+    let commentSchema = require('./schemas/comment.json');
+    let userInfoSchema = require('./schemas/userInfo.json');
+    let emailChangeSchema = require('./schemas/emailChange.json');
+    let activitySchema = require('./schemas/activity.json');
+    let userSchema = require('./schemas/user.json');
+    let loginSchema = require('./schemas/login.json');
+    let passSchema = require('./schemas/passChange.json');
+    let validate = require('express-jsonschema').validate;
 
     passport.serializeUser(function(user, done) {
         done(null, user._id);
@@ -361,14 +363,11 @@ MongoClient.connect(url, {
     app.get('/chatNotification/:userid',serverHelper.isLoggedIn,(req, res) =>{
         if(req.params.userid.str!==req.user._id.str) return res.status(401).end();
         var userid = req.params.userid;
-        serverHelper.getUserData(new ObjectID(userid),function(err,userdata){
-            if(err)
-                serverHelper.sendDatabaseError(res,err);
-            else {
-
-                res.send(userdata.sessions);
-            }
+        serverHelper.getUserData(new ObjectID(userid))
+        .then(userdata=>{
+            res.send(userdata.sessions);
         })
+        .catch(err=>serverHelper.sendDatabaseError(res,err));
     })
 
     app.get('/newNotification/:userId', serverHelper.isLoggedIn, (req, res)=>{
@@ -386,11 +385,11 @@ MongoClient.connect(url, {
     //get user data
     app.get('/user/:userId',serverHelper.isLoggedIn,cache(10),(req, res) => {
         var userId = req.params.userId;
-        serverHelper.getUserData(new ObjectID(userId), function(err, userData) {
-            if (err)
-            return serverHelper.sendDatabaseError(res, err);
+        serverHelper.getUserData(new ObjectID(userId))
+        .then((userData) => {
             res.send(userData);
-        });
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res, err));
     });
 
 
@@ -463,11 +462,11 @@ MongoClient.connect(url, {
             }
         })
         .then(()=>{
-            serverHelper.getUserData(userId, function(err, userData) {
-                if (err)
-                return serverHelper.sendDatabaseError(res, err);
+            serverHelper.getUserData(userId)
+            .then(userData=>{
                 res.send(userData);
-            });
+            })
+            .catch(err=>serverHelper.sendDatabaseError(res, err))
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
@@ -497,10 +496,9 @@ MongoClient.connect(url, {
         var data = req.body;
         if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
         var userId = new ObjectID(req.params.userId);
-        serverHelper.getUserData(userId, function(err, userData) {
-            if (err)
-                return serverHelper.sendDatabaseError(res, err);
-            else if (userData.email === data.oldEmail && serverHelper.validateEmail(data.newEmail)) {
+        serverHelper.getUserData(userId)
+        .then(userData=>{
+            if (userData.email === data.oldEmail && serverHelper.validateEmail(data.newEmail)) {
                 db.collection('users').updateOneAsync({
                     _id: userId
                 }, {
@@ -515,7 +513,46 @@ MongoClient.connect(url, {
             } else {
                 res.send(true);
             }
-        });
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res,err));
+    });
+
+    app.put('/settings/passChange/user/:userId', validate({body: passSchema}), serverHelper.isLoggedIn, (req, res)=>{
+        if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
+        let data = req.body;
+        let oldPass = data.oldPass;
+        let newPass = data.newPass;
+        let userId = new ObjectID(req.params.userId);
+        db.collection('users').findOneAsync({
+            _id: userId
+        })
+        .then(userData=>{
+            bcrypt.compareAsync(oldPass, userData.password)
+            .then(success=>{
+                if(!success || zxcvbn(newPass).score < 2){
+                    return 'error';
+                }
+                return bcrypt.hashAsync(newPass,10);
+            })
+            .then(hash=>{
+                if(hash === 'error'){
+                    return 'error';
+                }
+                return db.collection('users').updateOneAsync({
+                    _id: userId
+                },{
+                    $set: {
+                        password: hash
+                    }
+                })
+            })
+            .then((result)=>{
+                if(result === 'error')
+                    res.send(true);
+                else res.send(false);
+            })
+            .catch(err=>serverHelper.sendDatabaseError(res,err));
+        })
     });
 
     app.put('/settings/avatar/user/:userId', serverHelper.isLoggedIn, (req, res) => {
@@ -998,17 +1035,16 @@ MongoClient.connect(url, {
                 }
                 var resolvedActivities = [];
                 a.forEach((element)=>{
-                    serverHelper.getUserData(new ObjectID(element.author),(err,userObj)=>{
+                    serverHelper.getUserData(new ObjectID(element.author))
+                    .then((userObj)=>{
                         element.author = userObj;
                         resolvedActivities.push(element);
-                        if(err){
-                            return reject(err);
-                        }
                         if(resolvedActivities.length===a.length){
                             data["activities"] = resolvedActivities;
                             resolve(data);
                         }
                     })
+                    .catch(err=>reject(err));
                 });
             })
         })
@@ -1068,17 +1104,17 @@ MongoClient.connect(url, {
         res.redirect('/');
     });
 
-    app.get('/activityNotification',serverHelper.isLoggedIn,(req, res) =>{
-        db.collection('activityItems').count(function(err,count){
-            res.send({result:count});
-        });
-    });
+    // app.get('/activityNotification',serverHelper.isLoggedIn,(req, res) =>{
+    //     db.collection('activityItems').count(function(err,count){
+    //         res.send({result:count});
+    //     });
+    // });
 
-    app.get('/postNotification',serverHelper.isLoggedIn,(req, res) =>{
-        db.collection('postFeedItems').count(function(err,count){
-            res.send({result:count});
-        });
-    });
+    // app.get('/postNotification',serverHelper.isLoggedIn,(req, res) =>{
+    //     db.collection('postFeedItems').count(function(err,count){
+    //         res.send({result:count});
+    //     });
+    // });
 
     app.post('/friendRequest/:sender/:target',serverHelper.isLoggedIn,(req, res) =>{
         var sender = req.params.sender;

@@ -72,30 +72,34 @@ module.exports = class ServerHelper {
     }
 
     sendDatabaseError(res, err) {
+        console.log(err);
         res.status(500).send("A database error occurred: " + err);
     }
 
-    getUserData(userId, callback) {
-        this.database.collection('users').findOneAsync({
-            _id: userId
+    getUserData(userId) {
+        return new Promise((resolve, reject)=>{
+            this.database.collection('users').findOneAsync({
+                _id: userId
+            })
+            .then(userData => {
+                if(userData===null){
+                    resolve(null)
+                }
+                else {
+                    this.resolveUserObjects(userData.friends, (err, userMap) => {
+                        if(err) reject(err);
+                        userData.friends = userData.friends.map((id) => userMap[id]);
+                        delete userData.password;
+                        delete userData.notification;
+                        delete userData.post;
+                        delete userData.activity;
+                        delete userData.sessions;
+                        resolve(userData);
+                    });
+                }
+            })
+            .catch(err => {reject(err)})
         })
-        .then(userData => {
-            if(userData===null){
-                callback(null,userData)
-            }
-            else {
-                this.resolveUserObjects(userData.friends, (err, userMap) => {
-                    userData.friends = userData.friends.map((id) => userMap[id]);
-                    delete userData.password;
-                    delete userData.notification;
-                    delete userData.post;
-                    delete userData.activity;
-                    delete userData.sessions;
-                    callback(null, userData);
-                });
-            }
-        })
-        .catch(err => {callback(err)})
     }
 
     validateEmail(email) {
