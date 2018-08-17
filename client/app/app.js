@@ -13,10 +13,26 @@ import { Settings } from './components/layouts';
 import { Landing } from './components/layouts';
 import {getUserId,isUserLoggedIn,socket,updateCredentials} from './utils/credentials';
 import history from './utils/history';
-import {getUserData} from './utils'
+import {getUserData} from './utils';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 // let debug = require('react-debug');
 // var swal = require('sweetalert');
+
+const theme = createMuiTheme({
+    typography: {
+        fontFamily: 'inherit !important'
+    },
+    overrides:{
+        MuiInput:{
+            underline: {
+                '&:after': {
+                    borderBottomColor: '#90A4AE'
+                }
+            }
+        }
+    }
+});
 
 class ActivityPage extends React.Component{
     render(){
@@ -35,10 +51,12 @@ withRouter(ThrendPage);
 class App extends React.Component {
     render() {
         return (
+            <MuiThemeProvider theme={theme}>
             <Switch>
                 <Route exact path="/" component={LandingPage} />
                 <WeMeet />
             </Switch>
+          </MuiThemeProvider>
         );
     }
 }

@@ -2,7 +2,7 @@ import React from 'react';
 import {uploadImg} from '../../utils';
 import GridList from '@material-ui/core/GridList';
 import GridListTile from '@material-ui/core/GridListTile';
-var emojione = require('emojione');
+// var emojione = require('emojione');
 let swal = require('sweetalert');
 
 

@@ -7,8 +7,6 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
 
-let zxcvbn = require('zxcvbn');
-
 class LandingSignup extends React.Component{
     constructor(props){
         super(props);
@@ -205,6 +203,7 @@ class LandingSignup extends React.Component{
                                     </InputLabel>
                                     <Input
                                     id="signUpPass"
+                                    type="password"
                                     value={this.state.signUpPass}
                                     onChange={(e)=>this.handleChange("signUpPass",e)}
                                     onKeyUp={(e)=>this.handleSignUp(e)}
@@ -228,6 +227,7 @@ class LandingSignup extends React.Component{
                                 </InputLabel>
                                 <Input
                                 id="signUpPass2"
+                                type="password"
                                 value={this.state.signUpPass2}
                                 onChange={(e)=>this.handleChange("signUpPass2",e)}
                                 onKeyUp={(e)=>this.handleSignUp(e)}

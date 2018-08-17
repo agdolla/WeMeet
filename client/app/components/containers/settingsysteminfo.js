@@ -20,9 +20,8 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
-let zxcvbn = require('zxcvbn');
 var swal = require('sweetalert');
-let debug = require('react-debug');
+// let debug = require('react-debug');
 
 export default class SettingSystemInfo extends React.Component{
     constructor(props){

@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom';
 import {uploadImg} from '../../utils';
 
 // var debug = require('react-debug');
-var emojione = require('emojione');
+// var emojione = require('emojione');
 let swal = require('sweetalert');
 
 export default class PostEntry extends React.Component{
