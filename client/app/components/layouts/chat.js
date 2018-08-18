@@ -65,7 +65,7 @@ export default class Chat extends React.Component {
         let messages = await getMessages((new Date().getTime()),userData._id,sessionData)
 
         this.setState({
-            userData: userData,
+            user: userData,
             sessions: sessionsData,
             friend: userData.friends[0],
             sessionId: sessionData,
