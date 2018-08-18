@@ -194,7 +194,8 @@ export default class PostFeedItem extends React.Component{
                                 <div style={{marginTop:'2px'}}><span style={{marginLeft:'5px'}}>{this.state.data.commentsCount}</span></div>
                             </div>
                             <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)} 
-                            loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}>
+                            loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}
+                            commentsCount={this.state.data.commentsCount}>
                                 {this.state.comments.map((comment,i)=>{
                                     return (
                                     <PostComment key={i} data={comment} />

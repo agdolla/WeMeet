@@ -18,8 +18,8 @@ export default class PostCommentThread extends React.Component{
                     })}
                 </ul>
                 {
-                    this.props.loadMore &&
-                    <Button fullWidth onClick={()=>this.props.loadCommentClick()}>
+                    <Button fullWidth disabled={!this.props.loadMore || 
+                    this.props.commentsCount===0 || this.props.children.length === this.props.commentsCount} onClick={()=>this.props.loadCommentClick()}>
                         Load comments
                     </Button>
                 }
