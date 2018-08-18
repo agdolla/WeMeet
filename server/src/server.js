@@ -1,16 +1,15 @@
+let PROD = process.argv.length>=3 && process.argv[2]==='-p';
 let express = require('express');
 let compression = require('compression');
 let app = express();
 let http = require('http');
-// let https = require('https');
 let bodyParser = require('body-parser');
 let Promise = require("bluebird");
-// let fs = Promise.promisifyAll(require('fs'));
 let dbName = 'wemeet';
 let MongoDB = Promise.promisifyAll(require('mongodb'));
 let MongoClient = MongoDB.MongoClient;
 let ObjectID = MongoDB.ObjectID;
-let url = 'mongodb://localhost:27017/'+dbName;
+let url = 'mongodb://localhost:27017/'+dbName+', localhost:27018';
 let bcrypt = Promise.promisifyAll(require('bcryptjs'));
 let mcache = require('memory-cache');
 let passport = require('passport');
@@ -25,11 +24,19 @@ let ActivityHelper = require('./utils/activityHelper');
 let PostHelper = require('./utils/postHelper');
 let ChatHelper = require('./utils/chatHelper');
 let NotificationHelper = require('./utils/notificationHelper');
-const Jimp = require("jimp");
-const uuidV1 = require('uuid/v1');
+let Jimp = require("jimp");
+let uuidV1 = require('uuid/v1');
 let zxcvbn = require('zxcvbn');
-// var privateKey = fs.readFileSync(path.join(__dirname, 'wemeet.key'));
-// var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
+
+if(PROD){
+    var https = require('https');
+    var path = require('path');
+    var fs = Promise.promisifyAll(require('fs'));
+    var privateKey = fs.readFileSync(path.join(__dirname, 'private.key'));
+    var certificate = fs.readFileSync(path.join(__dirname, 'wemeet.crt'));
+    var ca = fs.readFileSync(path.join(__dirname, 'wemeet.ca-bundle'));
+}
+
 let secretKey = `2f862fc1c64e437b86cef1373d3a3f8248ab4675220b3afab1c5ea97e
 fda064351da14375118884b463b47a4c0699f67aed0094f339998f102d99bdfe479dbefae0
 6933592c86abd20c5447a5f9af1b275c909de4108ae2256bcb0285daad0aa890171849fb3c
@@ -37,11 +44,6 @@ a332ca4da03fc80b9228f56cad935b6b9fd33ce6437a4b1f96648546a122a718720452b7cf
 38acc120c64b4a1622399bd6984460e4f4387db1a164c6dd4c80993930c57444905f6b46e7
 a7f1dba60f898302c4865cfee74b82517852e5bd5890a547d59071319b5dfc0faa92ce4f01
 f090e49cab2422031b17ea54a7c4b660bf491d7b47343cdf6042918669d7df54e7d3a1be6e9a571be9aef`;
-app.use(helmet());
-app.use(bodyParser.json({limit: '2mb'}));
-app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
-app.use(compression());
-app.disable('x-powered-by');
 
 let cache = (duration) => {
     return (req, res, next) => {
@@ -60,6 +62,16 @@ let cache = (duration) => {
         }
     }
 }
+
+
+
+app.use(helmet());
+app.use(bodyParser.json({limit: '2mb'}));
+app.use(bodyParser.urlencoded({limit: '2mb', extended: true}));
+app.use(compression());
+app.disable('x-powered-by');
+
+
 
 MongoClient.connect(url, { 
     useNewUrlParser: true,
@@ -181,7 +193,7 @@ MongoClient.connect(url, {
         passwordField : 'password',
         passReqToCallback : true
     },function(req,email,password,done){
-        email.trim().toLowerCase();
+        email = email.trim().toLowerCase();
         db.collection('users').findOneAsync({email:email})
         .then(user=>{
             if(user===null){
@@ -211,10 +223,10 @@ MongoClient.connect(url, {
 
     passport.use('facebook', new facebookStrategy(
         {
-            clientID        : '228542127549383',
-            clientSecret    : 'de414785354473b5715fa05dab6dae86',
-            callbackURL     : 'http://localhost:3000/auth/facebook/callback',
-            profileFields: ['id', 'displayName', 'link', 'photos', 'emails']
+            clientID        : PROD?'228378300899099':'228542127549383',
+            clientSecret    : PROD?'f3e7619971ab2fc9bb8eba4969b606f4':'de414785354473b5715fa05dab6dae86',
+            callbackURL     : PROD?'/auth/facebook/callback':'http://localhost:3000/auth/facebook/callback',
+            profileFields: ['id', 'displayName']
         }
         ,function(token, refreshToken, profile, done){
             db.collection('users').findOneAsync({facebookID: profile.id})
@@ -635,7 +647,6 @@ MongoClient.connect(url, {
     //get activity detail
     app.get('/activityItem/:activityId', serverHelper.isLoggedIn, (req, res) => {
         var activityId = new ObjectID(req.params.activityId);
-        console.log(activityId);
         activityHelper.getActivityFeedItem(activityId)
         .then(activityData=>res.send(activityData))
         .catch(err=>{
@@ -1218,16 +1229,24 @@ MongoClient.connect(url, {
             }
         });
     });
+    var server, httpsServer;
 
-
-    //  var server = http.createServer(function (req, res) {
-    //      res.writeHead(301, { "Location": "https://www.w1meet.com:443/"});
-    //      res.end();
-    //  },app);
-    // var httpsServer = https.createServer({key: privateKey, cert: certificate, requestCert: true, rejectUnauthorized: false},
-    //                     app);
-    var server = http.createServer(app);
-    var io = require('socket.io')(server);
+    if(PROD){
+        server = http.createServer(function (req, res) {
+             res.writeHead(301, { "Location": "https://www.w1meet.com:443/"});
+             res.end();
+        },app);
+        httpsServer = https.createServer({
+            key: privateKey, 
+            cert: certificate, 
+            ca: ca, 
+            requestCert: true, 
+            rejectUnauthorized: false},app);
+    }
+    else{
+        server = http.createServer(app);
+    }
+    var io = require('socket.io')(PROD? httpsServer:server);
     var passportSocketIo = require("passport.socketio");
     io.set('authorization', passportSocketIo.authorize({
         key: 'wemeetSessionId',
@@ -1355,14 +1374,19 @@ MongoClient.connect(url, {
 
     });
 
-    server.listen(3000, function() {
-        console.log('app listening on port 3000!');
-    });
-    // httpsServer.listen(443,function(){
-    // console.log('https on port 443');
-    // });
-    //
-    // server.listen(80, function() {
-    //     console.log('http on port 80');
-    // });
+    
+    if(PROD){
+        httpsServer.listen(443,function(){
+            console.log('https on port 443');
+        });
+        
+        server.listen(80, function() {
+            console.log('http on port 80');
+        });
+    }
+    else{
+        server.listen(3000, function() {
+            console.log('app listening on port 3000!');
+        });
+    }
 });

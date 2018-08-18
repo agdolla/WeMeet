@@ -26,7 +26,20 @@ export default class ChatNavChatItem extends React.Component {
     render() {
         var icon = this.props.data.online?
         <Icon className="fas fa-circle" style={{color:'green',fontSize:'20px'}}/>:
-        <Icon className="far fa-circle" style={{fontSize:'20px'}}/>
+        <Icon className="far fa-circle" style={{fontSize:'20px'}}/>;
+        let lastmessage = this.props.lastmessage;
+        var messagePreview = "";
+        if(lastmessage !== undefined && Object.keys(lastmessage).length !== 0){
+            if(lastmessage.text.length===0&&lastmessage.imgs.length!==0){
+                messagePreview = "[Image]"
+            }
+            else if(lastmessage.text.length < 60){
+                messagePreview = lastmessage.text;
+            }
+            else {
+                messagePreview = lastmessage.text.substring(0,60)+'...';
+            }
+        }
 
         return (
             <div>
@@ -44,10 +57,7 @@ export default class ChatNavChatItem extends React.Component {
                     primary={this.props.data.fullname}
                     secondary={
                         <span>
-                            {this.props.lastmessage===undefined||Object.keys(this.props.lastmessage).length===0?"":
-                            (this.props.lastmessage.text.length < 60 ? this.props.lastmessage.text : 
-                                (this.props.lastmessage.text.substring(0,60)+'...'))}
-                            
+                            {messagePreview}
                             <span className={"label label-danger "+
                             hideElement(this.props.lastmessage===undefined||
                             Object.keys(this.props.lastmessage).length===0||

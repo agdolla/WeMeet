@@ -44,17 +44,16 @@ export default class ChatWindow extends React.Component {
 
     async handlePostMessage(text, imgs){
         await this.props.onPost(text, imgs);
-        this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight*2;
     }
 
     componentDidUpdate(prevProps, prevState) {
         if((this.props.target._id!==prevProps.target._id
-        || JSON.stringify(this.props.message)!==JSON.stringify(prevProps.message))){
+        || JSON.stringify({object: this.props.message})!==JSON.stringify({object: prevProps.message}))){
             this.setState({
                 targetUser:this.props.target,
                 message:this.props.message
             },()=>{
-                if(JSON.stringify(prevState.targetUser) !== JSON.stringify(this.state.targetUser))
+                if(this.props.message.length <= 10)
                     this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             })
         }
@@ -105,11 +104,13 @@ export default class ChatWindow extends React.Component {
                     </div>
 
                     <Dialog
-                    fullScreen
                     open={this.state.open}
                     onClose={this.handleClose}>
-                        <DialogContent style={{textAlign: "center"}}>
-                            <img src={this.state.selectedImgs[this.state.currentIdx]}/>
+                        <DialogContent>
+                                <img style={{
+                                    maxHeight: '100%',
+                                    maxWidth: '100%'
+                                }} src={this.state.selectedImgs[this.state.currentIdx]}/>
                         </DialogContent>
                         <DialogActions>
                             <IconButton onClick={()=>{
@@ -134,7 +135,7 @@ export default class ChatWindow extends React.Component {
 
                     <div className="panel-body" ref="chatwindow">
                         <Button onClick={(e)=>this.props.onLoad(e)} fullWidth
-                        disabled={this.state.message===undefined || this.state.message.length===0}>
+                        disabled={this.props.btnText === "nothing more to load"}>
                             {this.props.btnText}
                         </Button>
 

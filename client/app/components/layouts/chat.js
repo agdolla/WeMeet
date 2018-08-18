@@ -2,7 +2,7 @@ import React from 'react';
 import {Navbar} from '../containers';
 import {ChatNavBody} from '../containers';
 import {ChatWindow} from '../containers';
-import {getMessages,postMessage,getSessions,getSessionId} from '../../utils';
+import {getUserData,getMessages,postMessage,getSessions,getSessionId} from '../../utils';
 import {socket} from '../../utils';
 import Drawer from '@material-ui/core/Drawer';
 
@@ -51,20 +51,23 @@ export default class Chat extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         if(JSON.stringify(this.state.user) !== JSON.stringify(prevState.user)){
-            this.getData();
+            this.getData(true);
         }
     }
     
 
     async getData() {
-        let sessions = await getSessions(this.state.user._id);
+        let user = await getUserData(this.state.user._id);
+        let userData = user.data;
+        let sessions = await getSessions(userData._id);
         let sessionsData = sessions.data;
-        let sessionData = await this.getSession(this.state.user.friends[0]._id);
-        let messages = await getMessages((new Date().getTime()),this.state.user._id,sessionData)
+        let sessionData = await this.getSession(userData.friends[0]._id);
+        let messages = await getMessages((new Date().getTime()),userData._id,sessionData)
 
         this.setState({
+            userData: userData,
             sessions: sessionsData,
-            friend: this.state.user.friends[0],
+            friend: userData.friends[0],
             sessionId: sessionData,
             message: messages.data,
             btnText: messages.data.length===0?"say hello to your friend!":"load earier messages"
