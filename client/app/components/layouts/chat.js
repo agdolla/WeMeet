@@ -54,7 +54,6 @@ export default class Chat extends React.Component {
             this.getData(true);
         }
     }
-    
 
     async getData() {
         let user = await getUserData(this.state.user._id);
@@ -129,8 +128,7 @@ export default class Chat extends React.Component {
         }
     }
 
-    handleLoadMessage(e){
-        e.preventDefault();
+    handleLoadMessage(){
         var time = (this.state.message===undefined || this.state.message.length===0)?(new Date().getTime()):this.state.message[0].date;
         getMessages(time,this.state.user._id,this.state.sessionId)
         .then(response=>{
@@ -153,7 +151,7 @@ export default class Chat extends React.Component {
             <ChatWindow target={this.state.friend} curUser={this.state.user._id}
             onPost={(message, imgs)=>this.handlePostMessage(message, imgs)}
             message={this.state.message}
-            onLoad={(e)=>this.handleLoadMessage(e)}
+            onLoad={()=>this.handleLoadMessage()}
             onExpand={()=>this.setState({open:!this.state.open})}
             btnText={this.state.btnText}>
             </ChatWindow>

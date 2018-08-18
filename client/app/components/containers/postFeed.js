@@ -3,6 +3,7 @@ import {PostEntry} from '../presentations';
 import {PostFeedItem} from '../presentations';
 import {getAllPosts,postStatus} from '../../utils';
 import {socket,isBottom} from '../../utils';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // var debug = require('react-debug');
 
@@ -14,27 +15,16 @@ export default class PostFeed extends React.Component{
         this.state = {
             contents: [],
             moreToLoad: true,
-            submitted:false
+            loading: true
         }
     }
 
-
-    getData(){
-        getAllPosts((new Date()).getTime())
-        .then(response=>{
-            let postFeedData = response.data;
-            this.setState({
-                contents:postFeedData
-            });
-        });
-    }
-
-    handleLoadMore(){
+    handleLoad(init){
         document.removeEventListener('scroll', this.trackScrolling);
         this.setState({
-            submitted:true
+            loading:init
         });
-        var date = this.state.contents.length===0?(new Date()).getTime():
+        var date = init || this.state.contents.length===0?(new Date()).getTime():
         this.state.contents[this.state.contents.length-1].contents.postDate;
         getAllPosts(date)
         .then(response=>{
@@ -42,13 +32,14 @@ export default class PostFeed extends React.Component{
             if(postFeedData.length===0){
                 return this.setState({
                     moreToLoad:false,
-                    submitted:false
+                    loading: false
                 })
             }
-            var newPostData = this.state.contents.concat(postFeedData);
+            var newPostData = (init?[]:this.state.contents).concat(postFeedData);
             this.setState({
                 contents:newPostData,
-                submitted:false
+                moreToLoad: true,
+                loading: false
             },() =>{
                 document.addEventListener('scroll', this.trackScrolling);
             });
@@ -59,41 +50,50 @@ export default class PostFeed extends React.Component{
         postStatus(this.props.user._id, text, img)
         .then(()=>{
             socket.emit('newPost',{user:this.props.user._id});
-            this.getData();
+            this.handleLoad(true);
         });
     }
 
 
-    componentDidUpdate(prevProps, prevState) {
-        if(JSON.stringify(this.state.contents) !== JSON.stringify(prevState.contents))
-            this.getData();
-    }
+    // componentDidUpdate(prevProps, prevState) {
+    //     if(this.state.contents.count === prevState.count)
+    //         this.handleLoadMore();
+    // }
     
 
     trackScrolling = () => {
         let wrappedElement = document.getElementById('postFeed');
-        if (isBottom(wrappedElement)) {
-            this.handleLoadMore();
+        if (wrappedElement!==null && isBottom(wrappedElement)) {
+            this.handleLoad(false);
         }
-    };
+    }
+
+    componentDidMount(){
+        this.handleLoad();
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener('scroll', this.trackScrolling);
+    }
 
     render(){
-        if(this.state.contents.length === 0){
-            return(
-                <div>
-                    <PostEntry userData={this.props.user} onPost={(text,img)=>this.onPost(text,img)}/>
-                    <div className="alert alert-info" role="alert">
-                        No one has posted anthing yet!
-                    </div>
-                </div>
-            );
-        }
         return (
             <div className="postFeedItem" id="postFeed">
                 <PostEntry userData={this.props.user} onPost={(text,img)=>this.onPost(text,img)}/>
-                {this.state.contents.map((postFeedItem,i)=>{
+                {
+                    this.state.loading? <div style={{textAlign:'center', color:'#61B4E4', marginTop:'30px', marginBottom:'30px'}}>
+                    <CircularProgress size={30} />
+                </div>:<div></div>
+                }
+                {
+                    !this.state.loading&&this.state.contents.length===0?
+                    <div className="alert alert-info" role="alert">
+                        No one has posted anthing yet!
+                    </div>
+                    :this.state.contents.map((postFeedItem,i)=>{
                     return <PostFeedItem key={i} data={postFeedItem} currentUser={this.props.user._id}/>
-                })}
+                    })
+                }
                 {
                     !this.state.moreToLoad &&
                     <div style = {{marginTop: '30px', marginBottom: '30px', textAlign: 'center'}}>
@@ -102,14 +102,5 @@ export default class PostFeed extends React.Component{
                 }
             </div>
         );
-    }
-
-    componentDidMount(){
-        document.addEventListener('scroll', this.trackScrolling);
-        this.getData();
-    }
-
-    componentWillUnmount(){
-        document.removeEventListener('scroll', this.trackScrolling);
     }
 }

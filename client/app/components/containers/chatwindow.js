@@ -16,6 +16,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 let moment = require('moment');
 // var debug = require('react-debug');
@@ -29,7 +30,8 @@ export default class ChatWindow extends React.Component {
             message: props.message,
             open: false,
             selectedImgs: [],
-            currentIdx: 0
+            currentIdx: 0,
+            loading: true
         }
     }
 
@@ -42,8 +44,13 @@ export default class ChatWindow extends React.Component {
         });
     }
 
-    async handlePostMessage(text, imgs){
-        await this.props.onPost(text, imgs);
+    handlePostMessage(text, imgs){
+        this.setState({
+            loading: true
+        },()=>{
+            this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
+            // this.props.onPost(text, imgs);
+        });
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -51,7 +58,8 @@ export default class ChatWindow extends React.Component {
         || JSON.stringify({object: this.props.message})!==JSON.stringify({object: prevProps.message}))){
             this.setState({
                 targetUser:this.props.target,
-                message:this.props.message
+                message:this.props.message,
+                loading: false
             },()=>{
                 if(this.props.message.length <= 10)
                     this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
@@ -184,12 +192,17 @@ export default class ChatWindow extends React.Component {
                                     />
                                 </ListItem>
                             })}
+                            {
+                                this.state.loading?
+                                <ListItem>
+                                    <CircularProgress size={30} style={{marginLeft:'8px',color:'#61B4E4'}}/>
+                                </ListItem>:null
+                            }
                         </List>
                     </div>
                     <ChatEntry onPost={(message, imgs)=>this.handlePostMessage(message,imgs)}/>
                 </div>
             </div>
-
         )
     }
 }

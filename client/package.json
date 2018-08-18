@@ -5,9 +5,9 @@
   "author": "Shengbo Lou <loushengbo@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "./node_modules/.bin/webpack --config='webpack.config.prod'",
+    "build": "./node_modules/.bin/webpack --config=webpack.config.prod",
     "serve": "./node_modules/.bin/webpack-dev-server --content-base build",
-    "watch": "./node_modules/.bin/webpack --config='webpack.config.dev' --watch"
+    "watch": "./node_modules/.bin/webpack --config=webpack.config.dev --watch"
   },
   "repository": {
     "type": "git",
