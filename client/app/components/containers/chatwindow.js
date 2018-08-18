@@ -49,7 +49,7 @@ export default class ChatWindow extends React.Component {
             loading: true
         },()=>{
             this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
-            // this.props.onPost(text, imgs);
+            this.props.onPost(text, imgs);
         });
     }
 
