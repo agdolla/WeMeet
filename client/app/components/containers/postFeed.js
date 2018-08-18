@@ -22,7 +22,7 @@ export default class PostFeed extends React.Component{
     handleLoad(init){
         document.removeEventListener('scroll', this.trackScrolling);
         this.setState({
-            loading:init
+            loading:true
         });
         var date = init || this.state.contents.length===0?(new Date()).getTime():
         this.state.contents[this.state.contents.length-1].contents.postDate;
