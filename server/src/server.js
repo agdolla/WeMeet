@@ -93,7 +93,9 @@ MongoClient.connect(url, {
     app.use(bodyParser.json());
     app.use(bodyParser.text());
     app.use(cookieParser());
-    app.use(express.static('../client/build'));
+    app.use(express.static('../client/build',{
+        maxAge: 2592000000
+    }));
     app.set('trust proxy', 1);
     app.use(session({
         name: 'wemeetSessionId',

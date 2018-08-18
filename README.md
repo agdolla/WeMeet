@@ -10,3 +10,4 @@ WeMeet is a social networking service. It recommends users nearby activities and
 * All realtime functionalities should be reviewed and redesigned
 * All the react life cycle must be checked
 * search paging
+* loading indicator
