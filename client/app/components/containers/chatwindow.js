@@ -152,9 +152,7 @@ export default class ChatWindow extends React.Component {
                             this.setState({
                                 loadingMore: true
                             },()=>{
-                                setTimeout(() => {
-                                    this.props.onLoad(e)
-                                }, 3000);
+                                this.props.onLoad(e)
                             })
                         }} fullWidth
                         disabled={this.props.btnText === "nothing more to load" || this.state.loadingMore}>
