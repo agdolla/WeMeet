@@ -3,10 +3,10 @@ WeMeet is a social networking service. It recommends users nearby activities and
 
 ## TODO
 * All code should be reviewed and revised
-* performance and security
-* Writing some tests
+* Improve performance and security
+* Write some tests
 
 ### Urgent
 * All realtime functionalities should be reviewed and redesigned
-* All the react life cycle must be checked
+* All the react life cycles must be checked
 * search paging

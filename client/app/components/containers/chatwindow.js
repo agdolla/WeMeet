@@ -31,7 +31,8 @@ export default class ChatWindow extends React.Component {
             open: false,
             selectedImgs: [],
             currentIdx: 0,
-            loading: true
+            loading: true,
+            loadingMore: false
         }
     }
 
@@ -59,7 +60,8 @@ export default class ChatWindow extends React.Component {
             this.setState({
                 targetUser:this.props.target,
                 message:this.props.message,
-                loading: false
+                loading: false,
+                loadingMore: false
             },()=>{
                 if(this.props.message.length <= 10)
                     this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
@@ -87,9 +89,13 @@ export default class ChatWindow extends React.Component {
                         </Tooltip>
                         <div className="media">
                             <div className="media-left">
-                                <Link to={"/profile/"+this.state.targetUser._id}>
-                                    <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
-                                </Link>
+                                {
+                                    this.state.loading?
+                                    <CircularProgress size={30} style={{color:'#61B4E4'}}/>:
+                                    <Link to={"/profile/"+this.state.targetUser._id}>
+                                        <img className="media-object" src={this.state.targetUser.avatar } alt="image" height="45" width="45"></img>
+                                    </Link>
+                                }
                             </div>
                             <div className="media-body">
                                 <div className="row">
@@ -142,10 +148,26 @@ export default class ChatWindow extends React.Component {
                     </Dialog>
 
                     <div className="panel-body" ref="chatwindow">
-                        <Button onClick={(e)=>this.props.onLoad(e)} fullWidth
-                        disabled={this.props.btnText === "nothing more to load"}>
+                        <Button onClick={(e)=>{
+                            this.setState({
+                                loadingMore: true
+                            },()=>{
+                                setTimeout(() => {
+                                    this.props.onLoad(e)
+                                }, 3000);
+                            })
+                        }} fullWidth
+                        disabled={this.props.btnText === "nothing more to load" || this.state.loadingMore}>
                             {this.props.btnText}
                         </Button>
+
+                        {
+                            this.state.loadingMore&&this.props.btnText !== "nothing more to load"?<div style={{textAlign: 'center'}}>
+                            <CircularProgress size={20} style={{
+                                color:'#61B4E4'
+                            }}/>
+                            </div>:null
+                        }
 
                         <List>
                             {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{

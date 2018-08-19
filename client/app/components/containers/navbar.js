@@ -323,8 +323,6 @@ class Navbar extends React.Component{
                     <ListItemAvatar>
                       <Avatar src={this.props.user.avatar} />
                     </ListItemAvatar>
-                    <ListItemText
-                      primary={<h5>{this.props.user.fullname}</h5>}/>
                       <ListItemSecondaryAction>
                         <IconButton aria-haspopup="true"
                           onClick={this.handleClick}

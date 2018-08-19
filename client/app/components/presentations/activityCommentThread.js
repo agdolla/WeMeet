@@ -32,7 +32,8 @@ export default class ActivityCommentThread extends React.Component{
                                 </ul>
                                 {
                                     this.props.loadMore &&
-                                    <Button fullWidth onClick={()=>this.props.onLoadComments()}>
+                                    <Button fullWidth disabled={!this.props.loadMore || this.props.count===0 ||
+                                    this.props.count===this.props.children.length} onClick={()=>this.props.onLoadComments()}>
                                         Load Comments
                                     </Button>
                                 }

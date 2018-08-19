@@ -20,11 +20,7 @@ export default class SettingProfileInfo extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            userData:{
-                fullname: "",
-                nickname: "",
-                description: ""
-            },
+            userData:this.props.userData,
             changeInfoFailed:false,
             open: false,
             snackBarMsg: "",
@@ -33,11 +29,11 @@ export default class SettingProfileInfo extends React.Component{
         }
     }
 
-    componentDidMount(){
-        this.setState({
-            userData: this.props.userData
-        })
-    }
+    // componentDidMount(){
+    //     this.setState({
+    //         userData: this.props.userData
+    //     })
+    // }
 
     componentDidUpdate(prevProps, prevState) {
         if(JSON.stringify(this.props.userData) !== JSON.stringify(prevProps.userData))
@@ -58,9 +54,8 @@ export default class SettingProfileInfo extends React.Component{
                 birthday:moment(this.state.userData.birthday).toDate()
             })
             .then(response=>{
-                let userData = response.data;
+                // let userData = response.data;
                 this.setState({
-                    userData: userData,
                     changeInfoFailed:false,
                     snackBarMsg: "Successfully Changed Info!",
                     snackBarColor: "#2E7D32",
@@ -79,6 +74,7 @@ export default class SettingProfileInfo extends React.Component{
             });
         }
     }
+    
 
     handleChange(e){
         e.preventDefault();
@@ -100,7 +96,11 @@ export default class SettingProfileInfo extends React.Component{
     };
 
     handleSnackBarClose = () =>{
-        this.setState({open:false});
+        this.setState({
+            open:false
+        },()=>{
+            location.reload();
+        });
     }
 
     render(){
