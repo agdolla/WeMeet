@@ -5,7 +5,7 @@ import {ActivityDetailBody} from '../containers';
 export default class ActivityDetail extends React.Component{
 
     constructor(props){
-        super(props);
+        super(props); 
     }
 
     render(){
