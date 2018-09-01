@@ -1,11 +1,18 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 import Lightbox from 'react-images';
-import {PostComment, PostCommentThread} from './';
+import {PostCommentThread} from './';
 import {likePost, unLikePost, postComment, didUserLike, getPostComments} from '../../utils';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Icon from '@material-ui/core/Icon';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import Divider from '@material-ui/core/Divider';
 
 var moment = require('moment');
 
@@ -110,18 +117,20 @@ export default class PostFeedItem extends React.Component{
 
         var imgs = [];
         var images = [];
-        imgs = contents.img;
         var display = [];
+        imgs = contents.img;
         imgs.map((obj,i)=>{
             display.push(
-                <a onClick={(e)=>this.handleImgClick(i,e)} key={i} style={{"width":"calc("+(100/(imgs.length>2?2:imgs.length))+"% - 4px)"}}>
-                    <img src={obj} style={{'width':"100%"}}/>
-                </a>
+                <GridListTile key={i}>
+                    <a onClick={(e)=>this.handleImgClick(i,e)}>
+                        <img src={obj} style={{'width':"100%"}}/>
+                    </a>
+                </GridListTile>
             );
             images.push({
                 src: obj,
                 caption: contents.text
-            })
+            });
         });
         var time = moment(contents.postDate).calendar();
 
@@ -147,6 +156,7 @@ export default class PostFeedItem extends React.Component{
                     <p>
                         {contents.text}
                     </p>
+                    {display.length >0 ? <Divider light/> : null}
                     {
                         <Lightbox
                         images={images}
@@ -171,9 +181,9 @@ export default class PostFeedItem extends React.Component{
                         }}
                         />
                     }
-                    <div className="postImg">
+                    <GridList cellHeight={160} cols={3} style={{marginTop:'20px'}}>
                         {display}
-                    </div>
+                    </GridList>
                 </div>
                 <div className="panel-footer">
                     <div className="row">
@@ -197,8 +207,26 @@ export default class PostFeedItem extends React.Component{
                             loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}
                             commentsCount={this.state.data.commentsCount}>
                                 {this.state.comments.map((comment,i)=>{
+                                    //default time c
+                                    var commentTime = moment(comment.postDate).calendar();
+                                    //if less than 24 hours, use relative time
+                                    if((new Date().getTime()) - comment.postDate <= 86400000)
+                                        commentTime = moment(comment.postDate).fromNow();
                                     return (
-                                    <PostComment key={i} data={comment} />
+                                    <div>
+                                        <ListItem key={i}>
+                                            <ListItemAvatar>
+                                                <Avatar src={comment.author.avatar} />
+                                            </ListItemAvatar>
+                                            <ListItemText primary={
+                                                <span>
+                                                    {comment.author.fullname}
+                                                    <span style={{fontSize:'12px', marginLeft:'15px'}}>{commentTime}</span>
+                                                </span>
+                                            } 
+                                            secondary={comment.text} />
+                                        </ListItem>
+                                    </div>
                                     )
                                 })}
                             </PostCommentThread>

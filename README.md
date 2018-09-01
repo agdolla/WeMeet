@@ -5,6 +5,8 @@ WeMeet is a social networking service. It recommends users nearby activities and
 * All code should be reviewed and revised
 * Improve performance and security
 * Write some tests
+* replace all the possible components with material-ui components
+* activity chat room
 
 ### Urgent
 * All realtime functionalities should be reviewed and redesigned

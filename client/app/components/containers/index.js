@@ -1,5 +1,4 @@
 import ActivityFeed from './activityFeed';
-
 import ActivityDetailBody from './activityDetailBody';
 
 import ChatNavBody from './chatnavbody';

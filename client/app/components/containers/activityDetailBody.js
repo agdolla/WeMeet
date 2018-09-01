@@ -1,6 +1,5 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
-import {ActivityDetailComment} from '../presentations';
 import {ActivityCommentThread} from '../presentations';
 import {getActivityDetail,postActivityDetailComment,
   sendJoinActivityRequest,likeActivity,
@@ -14,10 +13,12 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import IconButton from '@material-ui/core/IconButton';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import Divider from '@material-ui/core/Divider';
 
 var moment = require('moment');
 // var debug = require('react-debug');
@@ -317,11 +318,11 @@ export default class ActivityDetailBody extends React.Component{
                 <div className="row">
                   <div className = "col-md-12 col-sm-12 col-xs-12 remain-places" style={{'paddingTop':'25px',textAlign:"center"}} >
                   <div className={"alert alert-success"+hideElement(!this.state.success)}  role="alert" style={{
-                    'marginLeft': '43%',
-                     marginRight: '43%',
-                     paddingTop: '8px',
-                     paddingBottom: '8px',
-                     marginBottom: '7px'
+                    marginLeft: '43%',
+                    marginRight: '43%',
+                    paddingTop: '8px',
+                    paddingBottom: '8px',
+                    marginBottom: '7px'
                   }}><font className={hideElement(!this.state.success)} style={{fontSize:13}}>Request sent!</font></div>
                     <Button variant="outlined" disabled={this.state.ishost || this.state.joined} onClick={(e)=>this.handleRequestJoin(e)}>
                       {buttonText}
@@ -369,8 +370,27 @@ export default class ActivityDetailBody extends React.Component{
     user={this.props.currentUser} avatar={this.props.avatar} onPost={(comment)=>this.handlePostComment(comment)}
     onLoadComments={()=>this.loadComments(false)} loadMore={this.state.loadMore}>
       {this.state.comments.map((comment,i)=>{
+        //default time format
+        var commentTime = moment(comment.postDate).calendar();
+        //if less than 24 hours, use relative time
+        if((new Date().getTime()) - comment.postDate <= 86400000)
+          commentTime = moment(comment.postDate).fromNow();
         return (
-          <ActivityDetailComment key={i} data={comment} />
+          <div>
+            <ListItem key={i}>
+              <ListItemAvatar>
+                <Avatar src={comment.author.avatar} />
+              </ListItemAvatar>
+              <ListItemText primary={
+                <span>
+                  {comment.author.fullname}
+                  <span style={{fontSize:'12px', marginLeft:'15px'}}>{commentTime}</span>
+                </span>
+              }
+              secondary={comment.text}/>
+            </ListItem>
+            <Divider light inset />
+          </div>
         )
       })}
     </ActivityCommentThread>

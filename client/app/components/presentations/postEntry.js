@@ -77,7 +77,7 @@ export default class PostEntry extends React.Component{
                                             img:img
                                         })
                                     })} multiple></input>
-                                <a id="openEmoji"><span><i className="fa fa-lg fa-smile-o" aria-hidden="true"></i></span></a>
+                                <a id="openEmoji"><span><i className="far fa-smile" aria-hidden="true"></i></span></a>
                             </div>
                             <button type="button" className="btn btn-blue-grey pull-right" name="button" onClick={(e)=>this.handlePost(e)}>Submit</button>
                         </div>
