@@ -4,7 +4,7 @@ import {unLikeActivity} from './activityitem'
 import {createActivity} from './activityitem'
 import {getActivityDetail} from './activityitem'
 import {getAllActivities} from './activityitem'
-import {postActivityDetailComment, getActivityItemCommments} from './activityitem'
+import {postActivityDetailComment, getActivityItemCommments, getActivityMessages} from './activityitem'
 
 //client side authentication request function
 import {signup} from './authentication'
@@ -70,6 +70,7 @@ export{
     getActivityDetail,
     postActivityDetailComment,
     getActivityItemCommments,
+    getActivityMessages,
 
     //export authentication function
     signup,

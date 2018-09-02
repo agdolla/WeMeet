@@ -1,7 +1,7 @@
 const databaseName = "wemeet";
 const ObjectID = require('mongodb').ObjectID;
 const mongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://localhost:27017/' + databaseName;
+// const url = 'mongodb://localhost:27017/' + databaseName;
 
 // Put the initial mock objects here.
 var initialData = {
@@ -214,6 +214,27 @@ var initialData = {
           "text": "iufihishf"
         }
       ]
+    }
+  },
+
+  activityItemChatMessages: {
+    "1": {
+      _id: new ObjectID("000000000000000000000001"),
+      messages:[
+        {
+          "author": new ObjectID("000000000000000000000001"),
+          "postDate": 1478129314000,
+          "text": "hahaha"
+        }
+      ]
+    },
+    "2": {
+      _id: new ObjectID("000000000000000000000002"),
+      messages:[]
+    },
+    "3": {
+      _id: new ObjectID("000000000000000000000003"),
+      messages:[]
     }
   },
 

@@ -656,6 +656,17 @@ MongoClient.connect(url, {
         })
     });
 
+    //get activity chat messages
+    app.get('/activityItem/:activityId/messages/:date', serverHelper.isLoggedIn, (req, res)=>{
+        let activityId = new ObjectID(req.params.activityId);
+        let date = parseInt(req.params.date);
+        activityHelper.getActivityChatMessages(activityId, date)
+        .then(messages=>{
+            res.send(messages);
+        })
+        .catch(err=>serverHelper.sendDatabaseError(res,err));
+    });
+
     //like activity
     app.put('/activityItem/:activityId/likelist/:userId', serverHelper.isLoggedIn, (req, res) => {
         var activityId = new ObjectID(req.params.activityId);
@@ -1231,6 +1242,7 @@ MongoClient.connect(url, {
             }
         });
     });
+
     var server, httpsServer;
 
     if(PROD){
@@ -1248,6 +1260,7 @@ MongoClient.connect(url, {
     else{
         server = http.createServer(app);
     }
+
     var io = require('socket.io')(PROD? httpsServer:server);
     var passportSocketIo = require("passport.socketio");
     io.set('authorization', passportSocketIo.authorize({
@@ -1371,6 +1384,59 @@ MongoClient.connect(url, {
                         }
                     });
                 }
+            });
+        });
+
+        socket.on('join activity chat room',(data)=>{
+            socket.join(data.activityId);
+            serverHelper.getUserData(new ObjectID(data.user))
+            .then(userData=>{
+                io.to(data.activityId).emit('user joined',{
+                    numberOfUsers: io.sockets.adapter.rooms[data.activityId].length,
+                    user: userData
+                })
+            })
+            .catch(err=>{
+                console.log(err);
+            })
+        });
+
+        socket.on('leave activity chat room',(data)=>{
+            socket.leave(data.activityId);
+            serverHelper.getUserData(new ObjectID(data.user))
+            .then(userData=>{
+                let users = io.sockets.adapter.rooms[data.activityId];
+                if(users !== undefined) {
+                    io.to(data.activityId).emit('user left',{
+                        numberOfUsers: users.length,
+                        user: userData
+                    })
+                }
+            })
+            .catch(err=>{
+                console.log(err);
+            })
+        });
+
+        socket.on('activity chat message', (data)=>{
+            let activityId = new ObjectID(data.activityId);
+            
+            let chatData = {
+                author: new ObjectID(data.author),
+                postDate: (new Date()).getTime(),
+                text: data.text
+            }
+            //save data
+            activityHelper.saveActivityChatMessages(activityId, chatData)
+            .then(()=>{
+                return serverHelper.getUserData(new ObjectID(chatData.author));
+            })
+            .then(userData=>{
+                chatData.author = userData
+                io.to(activityId).emit('new activity chat message', chatData);
+            })
+            .catch(err=>{
+                console.log(err);
             });
         });
 

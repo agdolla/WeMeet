@@ -1,6 +1,7 @@
 import React from 'React';
 import {Link} from 'react-router-dom';
 import {ActivityCommentThread} from '../presentations';
+import {ActivityChatPanel} from './';
 import {getActivityDetail,postActivityDetailComment,
   sendJoinActivityRequest,likeActivity,
   unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments, addFriend} from '../../utils';
@@ -363,6 +364,7 @@ export default class ActivityDetailBody extends React.Component{
               </div>
             </div>
           </div>
+          <ActivityChatPanel id={this.props.id} currentUser={this.props.currentUser}/>
         </div>
       </div>
     </div>

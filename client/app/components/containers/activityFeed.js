@@ -68,24 +68,6 @@ export default class ActivityFeed extends React.Component{
     }
 
     render(){
-        // if(this.state.contents === null){
-        //     return <div style={{textAlign: 'center', marginTop: '50px'}}>
-        //         <CircularProgress in={this.state.loading} unmountOnExit/>
-        //     </div>
-        // }
-        // if(this.state.contents.length === 0){
-        //     return(
-        //         <div className="alert alert-info" role="alert">
-        //             No one has posted any activities yet.
-        //             Post your first activity 
-        //             <Link to="/createActivity">
-        //                 <strong>
-        //                  here
-        //                 </strong>
-        //             </Link>
-        //         </div>
-        //     );
-        // }
         return(
             <div id="activityFeed">
                 {

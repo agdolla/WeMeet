@@ -1,5 +1,6 @@
 import ActivityFeed from './activityFeed';
 import ActivityDetailBody from './activityDetailBody';
+import ActivityChatPanel from './activityChatPanel';
 
 import ChatNavBody from './chatnavbody';
 import ChatWindow from './chatwindow';
@@ -29,6 +30,7 @@ import SettingSystemInfo from './settingsysteminfo';
 export{
     ActivityFeed,
     ActivityDetailBody,
+    ActivityChatPanel,
 
     ChatNavBody,
     ChatWindow,

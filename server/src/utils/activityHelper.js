@@ -59,7 +59,38 @@ module.exports = class ActivityHelper {
                 return comment.comments
             });
             return this.serverHelper.resolveComments(postComments);
+        });
+    }
+
+    getActivityChatMessages(activityItemId, date) {
+        return this.database.collection('activityItemChatMessages').aggregateAsync([
+            {$match: {_id: activityItemId}},
+            {$unwind: '$messages'},
+            {$match: {'messages.postDate':{$lt:date}}},
+            {$sort: {'messages.postDate':-1}},
+            {$limit: 10}
+        ])
+        .then(cursor=>{
+            return cursor.toArray()
         })
+        .then(messages=>{
+            let chatMessages = messages.reverse().map(message=>{
+                return message.messages
+            });
+            return this.serverHelper.resolveComments(chatMessages);
+        });
+    }
+
+    saveActivityChatMessages(activityId, data) {
+        return this.database.collection('activityItemChatMessages').findOneAndUpdateAsync({
+            _id: activityId
+        },{
+            $push:{
+                messages: data
+            }
+        },{
+            upsert: true
+        });
     }
 
     getAllActivities(time){
