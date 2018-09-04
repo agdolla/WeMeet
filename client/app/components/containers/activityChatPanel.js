@@ -1,4 +1,5 @@
 import React from 'React';
+import Link from 'react-router-dom/Link';
 import {socket} from '../../utils/credentials';
 import {getActivityMessages} from '../../utils';
 
@@ -151,7 +152,9 @@ export default class ActivityChatPanel extends React.Component {
                                 if(msg.type !== undefined) {
                                     return <ListItem key={i}>
                                         <ListItemAvatar>
-                                            <Avatar src={msg.user.avatar} />
+                                            <Link to={'/profile/'+msg.user._id}>
+                                                <Avatar src={msg.user.avatar} />
+                                            </Link>
                                         </ListItemAvatar>
                                         <ListItemText primary={
                                             <span>
@@ -171,7 +174,9 @@ export default class ActivityChatPanel extends React.Component {
                                     marginBottom:'10px'
                                 }}>
                                     <ListItemAvatar>
-                                        <Avatar src={msg.author.avatar}/>
+                                        <Link to={'/profile/'+msg.author._id}>
+                                            <Avatar src={msg.author.avatar} />
+                                        </Link>
                                     </ListItemAvatar>
                                     <ListItemText primary={
                                         <span>

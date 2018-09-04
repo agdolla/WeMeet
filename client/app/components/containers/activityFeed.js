@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from "react-router-dom";
+import Link from "react-router-dom/Link";
 import {ActivityFeedItem} from '../presentations';
 import {getAllActivities, isBottom} from '../../utils';
 import CircularProgress from '@material-ui/core/CircularProgress';

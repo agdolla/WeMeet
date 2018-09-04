@@ -1,5 +1,5 @@
 import React from 'React';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import {ActivityCommentThread} from '../presentations';
 import {ActivityChatPanel} from './';
 import {getActivityDetail,postActivityDetailComment,
@@ -381,7 +381,9 @@ export default class ActivityDetailBody extends React.Component{
           <div>
             <ListItem key={i}>
               <ListItemAvatar>
-                <Avatar src={comment.author.avatar} />
+                <Link to={'/profile/'+comment.author._id}>
+                  <Avatar src={comment.author.avatar} />
+                </Link>
               </ListItemAvatar>
               <ListItemText primary={
                 <span>

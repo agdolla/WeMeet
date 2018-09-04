@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import {socket} from '../../utils'
 import {addFriend} from '../../utils';
 // material ui

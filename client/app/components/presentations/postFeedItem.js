@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import Lightbox from 'react-images';
 import {PostCommentThread} from './';
 import {likePost, unLikePost, postComment, didUserLike, getPostComments} from '../../utils';
@@ -190,7 +190,7 @@ export default class PostFeedItem extends React.Component{
                         <div className="col-md-12">
                             <div style={{display: 'flex', flexDirection: 'row'}}>
                                 <FormControlLabel
-                                style={{marginTop:'-3px', marginLeft: '-10px'}}
+                                style={{marginTop:'3px', marginLeft: '5px'}}
                                 control={
                                     <Checkbox onClick={(e)=>this.handleLikeClick(e)}
                                     style={{width: '30px', height: '30px'}}
@@ -200,8 +200,8 @@ export default class PostFeedItem extends React.Component{
                                 }
                                 label={data.likeCounter.length}
                                 />
-                                <Icon className="fas fa-comments" style={{marginTop:'1px', fontSize:'20px', width:'25px'}}/>
-                                <div style={{marginTop:'2px'}}><span style={{marginLeft:'5px'}}>{this.state.data.commentsCount}</span></div>
+                                <Icon className="fas fa-comments" style={{marginTop:'8px', fontSize:'20px', width:'25px'}}/>
+                                <div style={{marginTop:'8px'}}><span style={{marginLeft:'5px'}}>{this.state.data.commentsCount}</span></div>
                             </div>
                             <PostCommentThread onPostComment={(comment)=>this.handlePostComment(comment)} 
                             loadCommentClick={()=>this.loadComments(false)} loadMore={this.state.loadMore}
@@ -216,7 +216,9 @@ export default class PostFeedItem extends React.Component{
                                     <div>
                                         <ListItem key={i}>
                                             <ListItemAvatar>
-                                                <Avatar src={comment.author.avatar} />
+                                                <Link to={'/profile/'+comment.author._id}>
+                                                    <Avatar src={comment.author.avatar} />
+                                                </Link>
                                             </ListItemAvatar>
                                             <ListItemText primary={
                                                 <span>

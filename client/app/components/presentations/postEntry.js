@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import {uploadImg} from '../../utils';
 
 // var debug = require('react-debug');

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import { ActivityFeed } from '../containers';
 import { Navbar } from '../containers';
 import Button from '@material-ui/core/Button';
