@@ -80,7 +80,6 @@ class Navbar extends React.Component{
   }
 
   onFriendRequestAccepted = (data)=>{
-    location.reload();
     this.notifyMe('/chat',data.sender+" accepted your request");
   }
 
@@ -125,7 +124,7 @@ class Navbar extends React.Component{
   }
   
 
-  notifyMe(route,message) {
+  notifyMe(route, message) {
     if (!Notification) {
       swal({
         title:'Desktop notifications not available in your browser!',
@@ -143,8 +142,9 @@ class Navbar extends React.Component{
       });
       notification.onclick = (event)=>{
         event.preventDefault();
-        event.target.close();
         this.props.history.push(route);
+        location.reload();
+        event.target.close();
       }
     }
   }

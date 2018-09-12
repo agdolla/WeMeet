@@ -107,4 +107,39 @@ module.exports = class ServerHelper {
         return re.test(email);
     }
 
+    friendReuqest(senderId, targetId) {
+        return new Promise((resolve, reject)=>{
+            this.database.collection('notificationItems').insertOneAsync({
+                sender: senderId,
+                target: targetId,
+                type:"FR"
+            })
+            .then((result)=>{
+                return new Promise((resolve, reject)=>{
+                    this.database.collection('users').findOneAsync({_id: targetId})
+                    .then(userData=>{
+                        resolve({
+                            userData: userData,
+                            result: result
+                        })
+                    })
+                    .catch(err=>reject(err));
+                })
+            })
+            .then(res=>{
+                return this.database.collection('notifications').updateOneAsync({
+                    _id:res.userData.notification
+                },{
+                    $addToSet:{
+                        contents: res.result.insertedId
+                    }
+                })
+            })
+            .then(()=>{
+                resolve();
+            })
+            .catch(err=>reject(err));
+        });
+    }
+
 }

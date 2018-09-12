@@ -14,7 +14,6 @@ import Navbar from './navbar';
 import NotificationBody from './notificationBody';
 
 import CreateActivityFeed from './createActivityFeed';
-import CreateActivityFriendItem from './createActivityFriendItem';
 
 import PostFeed from './postFeed';
 
@@ -44,7 +43,6 @@ export{
     NotificationBody,
 
     CreateActivityFeed,
-    CreateActivityFriendItem,
 
     PostFeed,
 

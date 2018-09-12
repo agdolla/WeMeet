@@ -2,9 +2,8 @@ import React from 'React';
 import Link from 'react-router-dom/Link';
 import {ActivityCommentThread} from '../presentations';
 import {ActivityChatPanel} from './';
-import {getActivityDetail,postActivityDetailComment,
-  sendJoinActivityRequest,likeActivity,
-  unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments, addFriend} from '../../utils';
+import {getActivityDetail,postActivityDetailComment,likeActivity,
+  unLikeActivity,socket, hideElement,didUserLike, getActivityItemCommments} from '../../utils';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -20,6 +19,11 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Divider from '@material-ui/core/Divider';
+import ErrorIcon from '@material-ui/icons/Error';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 var moment = require('moment');
 // var debug = require('react-debug');
@@ -34,7 +38,13 @@ export default class ActivityDetailBody extends React.Component{
       joined: false,
       success:false,
       loadMore: true,
-      snackOpen: false
+      snackOpen: false,
+      snackbarContent: "",
+      snackbarColor: 'green',
+      snackbarType: 'success',
+      inviteDialogOpen: false,
+      invitedFriendList:[],
+
     };
   }
 
@@ -99,19 +109,12 @@ export default class ActivityDetailBody extends React.Component{
 
   handleRequestJoin(e){
     e.preventDefault();
-    sendJoinActivityRequest(this.props.currentUser,this.state.activity.author._id,  this.state.activity._id)
-    .then(response=>{
-      socket.emit('notification',{
-        sender: this.props.currentUser,
-        target: this.state.activity.author._id
-      });
-      this.setState({
-        success:true
-      });
-    })
-    .catch(err=>{
-      //todo: hande err
-    })
+    socket.emit('activity notification',{
+      sender: this.props.currentUser,
+      target: this.state.activity.author._id,
+      activityId: this.state.activity._id,
+      type: 'request'
+    });
   }
 
   checkFriendsOfUser(friendId){
@@ -121,18 +124,10 @@ export default class ActivityDetailBody extends React.Component{
   }
 
   handleAddFriend(friendId){
-      addFriend(this.props.currentUser,friendId)
-      .then(response=>{
-          this.setState({
-              snackOpen:true
-          });
-          socket.emit('notification',{
-              sender: this.props.currentUser,
-              target: friendId
-          });
-      })
-      .catch(err=>{
-      })
+    socket.emit('friend notification',{
+      sender: this.props.currentUser,
+      target: friendId
+    });
   }
 
   handleRequestClose = () => {
@@ -154,12 +149,79 @@ export default class ActivityDetailBody extends React.Component{
             comments: activityComments
         })
     })
-}
+  }
+
+  handleError = (res)=>{
+    let err = res.error;
+    let message = err ? 'failed to send request!' : 'request sent!';
+    let backgroundColor = err ? '#f44336' : '#4CAF50';
+    this.setState({
+      snackOpen: true,
+      snackbarColor: backgroundColor,
+      snackbarContent: message,
+      snackbarType: err? 'error': 'success'
+    });
+  }
 
 
   componentDidMount(){
     this.getData();
+    socket.on('activity notification', this.handleError);
+    socket.on('friend notification',this.handleError);
   }
+
+  componentWillUnmount = () => {
+    socket.removeListener('activity notification',this.handleError);
+    socket.removeListener('friend notification',this.handleError);
+  }
+
+  handleDialogClose = ()=>{
+    this.setState({
+      inviteDialogOpen: false,
+      invitedFriendList:[]
+    })
+  }
+
+  handleDialogOpen = ()=>{
+    this.setState({
+      inviteDialogOpen: true
+    })
+  }
+
+  handleUsersDialogClose = ()=>{
+    this.setState({
+      usersDialogOpen: false
+    })
+  }
+
+  handleUsersDialogOpen = ()=>{
+    this.setState({
+      usersDialogOpen: true
+    })
+  }
+
+  handleInvite(value){
+    var newFriendList = Array.from(this.state.invitedFriendList);
+    if(newFriendList.indexOf(value)==-1)
+      newFriendList.push(value);
+    else newFriendList.splice(newFriendList.indexOf(value), 1);
+    this.setState({
+      invitedFriendList: newFriendList
+    })
+  }
+
+  handleSendInvitation(){
+    this.state.invitedFriendList.map((targetid)=>{
+      socket.emit('activity notification',{
+          sender: this.props.currentUser,
+          target: targetid,
+          activityId: this.props.id,
+          type: 'invite'
+      });
+    });
+    this.handleDialogClose();
+  }
+  
 
   render(){
     var buttonText;
@@ -213,9 +275,48 @@ export default class ActivityDetailBody extends React.Component{
         name = null;
     }
 
-
     return(
       <div className="activityDetail">
+        <Dialog
+          open={this.state.inviteDialogOpen}
+          onClose={this.handleDialogClose}>
+          <DialogTitle>{"Invite your friends"}</DialogTitle>
+          <DialogContent style={{width: '400px'}}>
+            <List>
+            {this.props.friends.map((friend,i)=>{
+              return <ListItem key={i}>
+                <ListItemAvatar>
+                  <Avatar src={friend.avatar} />
+                </ListItemAvatar>
+                <ListItemText primary={friend.fullname} />
+                <ListItemSecondaryAction>
+                {this.state.activity.participants !== undefined&&
+                this.state.activity.participants.filter((participant)=>{
+                  return participant._id === friend._id
+                }).length===0?
+                <Checkbox
+                  onChange={()=>this.handleInvite(friend._id)}
+                  checked={this.state.invitedFriendList.indexOf(friend._id) !== -1}
+                />:
+                <Checkbox
+                  disabled
+                  checked={true}
+                />
+                }
+              </ListItemSecondaryAction>
+              </ListItem>
+            })}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={()=>this.handleSendInvitation()} color="primary" autoFocus>
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
         autoHideDuration={4000}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
@@ -223,60 +324,55 @@ export default class ActivityDetailBody extends React.Component{
         onClose={this.handleRequestClose}>
             <SnackbarContent
             style={{
-                backgroundColor: 'green'
+                backgroundColor: [this.state.snackbarColor]
             }}
             message={
                 <span style={{                        
                         display: 'flex',
                         alignItems: 'center'
                     }}>
-                    <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
-                    Friend request sent!
+                    {this.state.snackbarType === 'success'?
+                    <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>:
+                    <ErrorIcon style={{fontSize: '20px', marginRight:'10px'}}/>}
+                    {this.state.snackbarContent}
                 </span>
             }
             />
         </Snackbar>
-        <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" >
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header" style={{'paddingBottom':'4px'}}>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-                <h3 className="modal-title" style={{'paddingBottom':'10px'}}> Participating users</h3>
-              </div>
-              <div className="modal-body">
-                <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
-                  {this.state.activity.participants === undefined ||
-                    this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
-                    this.state.activity.participants.map((p,i)=>{
-                      var rightButton;
-                      if(this.checkFriendsOfUser(p._id)) {
-                          rightButton =  <IconButton disabled>
-                                          <Icon className="fas fa-check"/> 
-                                      </IconButton>
-                      }
-                      else {
-                          rightButton =  <IconButton onClick={()=>this.handleAddFriend(p._id)}>
-                                          <Icon className="fas fa-plus"/> 
-                                      </IconButton>
-                      }
-                      return <ListItem key={i} style={{padding:'20px'}}>
-                          <Link to={'/profile/'+p._id}>
-                              <Avatar src={p.avatar} />
-                          </Link>
-                          <ListItemText primary={p.fullname}
-                          secondary={p.description}/>
-                          <ListItemSecondaryAction>
-                              {rightButton}
-                          </ListItemSecondaryAction>
-                      </ListItem>
-                  })}
-                </List>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Dialog
+        open={this.state.usersDialogOpen}
+        onClose={this.handleUsersDialogClose}>
+          <DialogTitle>{"Joined Users"}</DialogTitle>
+          <DialogContent style={{width: '600px'}}>
+            <List>
+              {this.state.activity.participants === undefined ||
+                this.state.activity.participants.length === 0 ? "No one has signed up yet!" :
+                this.state.activity.participants.map((p,i)=>{
+                  var rightButton;
+                  if(this.checkFriendsOfUser(p._id)) {
+                      rightButton =  <IconButton disabled>
+                                      <Icon className="fas fa-check"/> 
+                                  </IconButton>
+                  }
+                  else {
+                      rightButton =  <IconButton onClick={()=>this.handleAddFriend(p._id)}>
+                                      <Icon className="fas fa-plus"/> 
+                                  </IconButton>
+                  }
+                  return <ListItem key={i} style={{padding:'20px'}}>
+                      <Link to={'/profile/'+p._id}>
+                          <Avatar src={p.avatar} />
+                      </Link>
+                      <ListItemText primary={p.fullname}
+                      secondary={p.description}/>
+                      <ListItemSecondaryAction>
+                          {rightButton}
+                      </ListItemSecondaryAction>
+                  </ListItem>
+              })}
+            </List>
+          </DialogContent>
+        </Dialog>
         <div className= "adbackground" style={{"backgroundImage": "url("+this.state.activity.img+")"}}>
         </div>
         <div className = "container">
@@ -308,10 +404,10 @@ export default class ActivityDetailBody extends React.Component{
 
                     <div className = "col-md-4" style={{'paddingTop': '20px'}} >
                       <div className = "col-md-12 col-sm-12 col-xs-12 body-title-signed-in">
-                        {this.state.activity.participants === undefined ? 0:this.state.activity.participants.length} people <font style={{'color':'grey'}}>signed up</font>
+                        {this.state.activity.participants === undefined ? 0:this.state.activity.participants.length} people <font style={{'color':'grey'}}>joined</font>
 
                       <font style={{'color':'#61B4E4','fontSize':'10px','paddingLeft':'10px','cursor':'pointer'}}
-                        data-toggle="modal" data-target="#myModal"  >View All</font>
+                      onClick={this.handleUsersDialogOpen}>View All</font>
                       <br/>
                     </div>
                   </div>
@@ -328,6 +424,12 @@ export default class ActivityDetailBody extends React.Component{
                     <Button variant="outlined" disabled={this.state.ishost || this.state.joined} onClick={(e)=>this.handleRequestJoin(e)}>
                       {buttonText}
                     </Button>
+                    {
+                      this.state.ishost?
+                      <Button onClick={this.handleDialogOpen} variant="outlined" color="primary" style={{marginLeft: '10px'}}>
+                      Invite friends
+                      </Button>:null
+                    }
                   </div>
                 </div>
 

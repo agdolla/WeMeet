@@ -4,6 +4,7 @@ import {unLikeActivity} from './activityitem'
 import {createActivity} from './activityitem'
 import {getActivityDetail} from './activityitem'
 import {getAllActivities} from './activityitem'
+import {acceptActivityRequest} from './activityitem'
 import {postActivityDetailComment, getActivityItemCommments, getActivityMessages} from './activityitem'
 
 //client side authentication request function
@@ -11,8 +12,7 @@ import {signup} from './authentication'
 import {login} from './authentication'
 
 //cliend side chat request function
-import {getMessages} from './chat'
-import {postMessage} from './chat'
+import {getMessages, getSessionId} from './chat'
 
 //client side credentials function
 import {socket} from './credentials'
@@ -32,16 +32,9 @@ import {postComment} from './postitem'
 import {postStatus} from './postitem'
 import {getAllPosts,getPostComments} from './postitem'
 
-
 //client side httprequest function
-import {acceptActivityRequest} from './server'
-import {getSessionId} from './server'
-import {addFriend} from './server'
-import {sendJoinActivityRequest} from './server'
-import {sendInviteActivityRequest} from './server'
+import {searchquery} from './server'
 
-//client side search request function
-import {searchquery} from './search'
 //client side settings request function
 import {changeUserInfo} from './settings'
 import {ChangeAvatar} from './settings'
@@ -71,6 +64,7 @@ export{
     postActivityDetailComment,
     getActivityItemCommments,
     getActivityMessages,
+    acceptActivityRequest,
 
     //export authentication function
     signup,
@@ -86,7 +80,7 @@ export{
 
     //export chat function
     getMessages,
-    postMessage,
+    getSessionId,
 
     //export notification function
     deleteNotification,
@@ -101,16 +95,8 @@ export{
     getAllPosts,
     getPostComments,
 
-    //export search function
+    //server function
     searchquery,
-
-
-    //export httprequest function
-    acceptActivityRequest,
-    getSessionId,
-    addFriend,
-    sendJoinActivityRequest,
-    sendInviteActivityRequest,
 
     //export settings function
     changeUserInfo,

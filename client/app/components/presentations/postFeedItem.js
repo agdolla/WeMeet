@@ -16,6 +16,12 @@ import Divider from '@material-ui/core/Divider';
 
 var moment = require('moment');
 
+moment.updateLocale('en', {
+    longDateFormat : {
+        LT: "h:mm:ss A"
+    }
+});
+
 export default class PostFeedItem extends React.Component{
 
     constructor(props){
@@ -132,9 +138,10 @@ export default class PostFeedItem extends React.Component{
                 caption: contents.text
             });
         });
+
         var time = moment(contents.postDate).calendar();
 
-        if((new Date().getTime()) - contents.postDate <= 86400000)
+        if((new Date().getTime()) - contents.postDate <= 3600000)
             time = moment(contents.postDate).fromNow();
 
         return(

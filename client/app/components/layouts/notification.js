@@ -77,7 +77,8 @@ export default class Notification extends React.Component{
         .then(()=>{
             this.getData();
             socket.emit("friend request accepted",{
-                sender: this.props.user._id,
+                senderId: this.props.user._id,
+                senderName: this.props.user.fullname,
                 target: user
             });
             location.reload();

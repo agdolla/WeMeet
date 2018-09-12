@@ -299,8 +299,11 @@ var initialData = {
           "sender":new ObjectID("000000000000000000000001"),
           "target":new ObjectID("000000000000000000000002"),
           "date" : 1478149540000,
-          "text": "cool",
-          "isread":true
+          "text": "cool"
+        },
+        "unread": {
+          "000000000000000000000001": 0,
+          "000000000000000000000002": 0
         }
       },
       "2": {
@@ -311,8 +314,11 @@ var initialData = {
           "sender":new ObjectID("000000000000000000000001"),
           "target":new ObjectID("000000000000000000000003"),
           "date" : 1478149540000,
-          "text": "Good night!",
-          "isread":true
+          "text": "Good night!"
+        },
+        "unread": {
+          "000000000000000000000001": 0,
+          "000000000000000000000003": 0
         }
       }
     },
@@ -323,14 +329,12 @@ var initialData = {
         "messages": [
           {
             "sender":new ObjectID("000000000000000000000001"),
-            "target":new ObjectID("000000000000000000000002"),
             "date" : 1478149540000,
             "text": "what's up",
             "imgs": ["img/chat/study.jpg"]
           },
           {
             "sender":new ObjectID("000000000000000000000002"),
-            "target":new ObjectID("000000000000000000000001"),
             "date" : 1478149540000,
             "text": `
   Mr Trump tweeted that the process of selecting his new cabinet and other positions was "very organised".`,
@@ -339,7 +343,6 @@ var initialData = {
           },
           {
             "sender":new ObjectID("000000000000000000000001"),
-            "target":new ObjectID("000000000000000000000002"),
             "date" : 1478149540000,
             "text": "cool",
             "imgs": []
@@ -351,14 +354,12 @@ var initialData = {
           "messages": [
             {
               "sender":new ObjectID("000000000000000000000001"),
-              "target":new ObjectID("000000000000000000000003"),
               "date" : 1478149540000,
               "text": "yo",
               "imgs": []
             },
             {
               "sender":new ObjectID("000000000000000000000003"),
-              "target":new ObjectID("000000000000000000000001"),
               "date" : 1478149540000,
               "text": `Good Night!.`,
               "imgs": []
@@ -366,7 +367,6 @@ var initialData = {
             },
             {
               "sender":new ObjectID("000000000000000000000001"),
-              "target":new ObjectID("000000000000000000000003"),
               "date" : 1478149540000,
               "text": "Good night!",
               "imgs": []

@@ -13,6 +13,12 @@ import Button from '@material-ui/core/Button';
 // let debug = require('react-debug');
 let moment = require('moment');
 
+moment.updateLocale('en', {
+    longDateFormat : {
+        LT: "h:mm:ss A"
+    }
+});
+
 export default class ActivityChatPanel extends React.Component {
 
     constructor(props) {
@@ -24,51 +30,56 @@ export default class ActivityChatPanel extends React.Component {
             numberOfUsers: 0,
         }
     }
+    
+    onUserJoined = (data)=>{
+        let joinMessage = {
+            user: data.user,
+            type: "joined"
+        }
+
+        let newMsgs = this.state.msgs;
+        newMsgs.push(joinMessage);
+
+        this.setState({
+            numberOfUsers: data.numberOfUsers,
+            msgs: newMsgs
+        },()=>{
+            this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
+        });   
+    }
+
+    onUserLeft = (data)=>{
+        let leftMessage = {
+            user: data.user,
+            type: "left"
+        }
+    
+        let newMsgs = this.state.msgs;
+        newMsgs.push(leftMessage);
+    
+        this.setState({
+            numberOfUsers: data.numberOfUsers,
+            msgs: newMsgs
+        },()=>{
+            this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
+        });
+    }
+
+    onNewActivityChatMessage = (data)=>{
+        var newMsgs = Array.from(this.state.msgs);
+        newMsgs.push(data);
+        this.setState({
+            msgs: newMsgs
+        },()=>{
+            this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
+        });
+    }
+
 
     componentDidMount() {
-        socket.on('new activity chat message', data=>{
-            var newMsgs = this.state.msgs;
-            newMsgs.push(data);
-            this.setState({
-                msgs: newMsgs
-            },()=>{
-                this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
-            });
-        });
-
-        socket.on('user joined', data=>{
-            let joinMessage = {
-                user: data.user,
-                type: "joined"
-            }
-
-            let newMsgs = this.state.msgs;
-            newMsgs.push(joinMessage);
-
-            this.setState({
-                numberOfUsers: data.numberOfUsers,
-                msgs: newMsgs
-            },()=>{
-                this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
-            });
-        });
-
-        socket.on('user left', data=>{
-            let leftMessage = {
-                user: data.user,
-                type: "left"
-            }
-
-            let newMsgs = this.state.msgs;
-            newMsgs.push(leftMessage);
-
-            this.setState({
-                numberOfUsers: data.numberOfUsers,
-                msgs: newMsgs
-            },()=>{
-                this.refs.activityChatWindow.scrollTop=this.refs.activityChatWindow.scrollHeight;
-            });
-        });
+        socket.on('new activity chat message', this.onNewActivityChatMessage);
+        socket.on('user joined', this.onUserJoined);
+        socket.on('user left', this.onUserLeft);
 
         //join room
         socket.emit('join activity chat room', {
@@ -87,9 +98,9 @@ export default class ActivityChatPanel extends React.Component {
         });
 
         //remove socket io listener
-        socket.off('new activity chat message');
-        socket.off('user joined');
-        socket.off('user left');
+        socket.removeListener('new activity chat message', this.onNewActivityChatMessage);
+        socket.removeListener('user joined', this.onUserJoined);
+        socket.removeListener('user left', this.onUserLeft);
     }
     
     handleChange(e){
@@ -151,11 +162,11 @@ export default class ActivityChatPanel extends React.Component {
                             this.state.msgs.map((msg, i)=>{
                                 if(msg.type !== undefined) {
                                     return <ListItem key={i}>
-                                        <ListItemAvatar>
-                                            <Link to={'/profile/'+msg.user._id}>
+                                        <Link to={'/profile/'+msg.user._id}>
+                                            <ListItemAvatar>
                                                 <Avatar src={msg.user.avatar} />
-                                            </Link>
-                                        </ListItemAvatar>
+                                            </ListItemAvatar>
+                                        </Link>
                                         <ListItemText primary={
                                             <span>
                                                 <strong>{msg.user.fullname}</strong>
@@ -166,18 +177,19 @@ export default class ActivityChatPanel extends React.Component {
                                 }
                                 //default time format
                                 var time = moment(msg.postDate).calendar();
-                                //if less than 24 hours, use relative time
-                                if((new Date().getTime()) - msg.postDate <= 86400000)
+                                //if less than 1 hour, use relative time
+                                if((new Date().getTime()) - msg.postDate <= 3600000)
                                     time = moment(msg.postDate).fromNow();
+                                
                                 return <ListItem key={i} style={{
                                     alignItems: "flex-start",
                                     marginBottom:'10px'
                                 }}>
-                                    <ListItemAvatar>
-                                        <Link to={'/profile/'+msg.author._id}>
+                                    <Link to={'/profile/'+msg.author._id}>
+                                        <ListItemAvatar>
                                             <Avatar src={msg.author.avatar} />
-                                        </Link>
-                                    </ListItemAvatar>
+                                        </ListItemAvatar>
+                                    </Link>
                                     <ListItemText primary={
                                         <span>
                                             {msg.author.fullname}

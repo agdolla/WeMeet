@@ -1,5 +1,5 @@
 import React from 'React';
-import {Link} from 'react-router-dom';
+import Link from 'react-router-dom/Link';
 import {ChatEntry} from '../presentations';
 import IconButton from '@material-ui/core/IconButton';
 import Icon from '@material-ui/core/Icon';
@@ -19,7 +19,15 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 let moment = require('moment');
-// var debug = require('react-debug');
+let swal = require('sweetalert');
+// let debug = require('react-debug');
+
+moment.updateLocale('en', {
+    longDateFormat : {
+        LT: "h:mm:ss A"
+    }
+});
+
 
 export default class ChatWindow extends React.Component {
 
@@ -32,7 +40,8 @@ export default class ChatWindow extends React.Component {
             selectedImgs: [],
             currentIdx: 0,
             loading: true,
-            loadingMore: false
+            loadingMore: false,
+            loadingMessage: false
         }
     }
 
@@ -46,9 +55,36 @@ export default class ChatWindow extends React.Component {
     }
 
     handlePostMessage(text, imgs){
+        if(this.state.loadingMessage)
+            return;
         this.setState({
-            loading: true
+            loadingMessage: true
         },()=>{
+            setTimeout(()=>{
+                if(!this.state.loadingMessage)
+                    return;
+                this.setState({
+                    loadingMessage: false
+                });
+                swal({
+                    title: 'Error sending messages',
+                    text: "Do you want to send '"+text+"' again?",
+                    icon: 'error',
+                    buttons: {
+                        cancel: "cancel",
+                        resend: "resend"
+                    }
+                })
+                .then((value)=>{
+                    switch(value) {
+                        case 'resend':
+                            this.handlePostMessage(text, imgs);
+                            break;
+                        default:
+                            break;
+                    }
+                })
+            }, 5000);
             this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             this.props.onPost(text, imgs);
         });
@@ -61,9 +97,11 @@ export default class ChatWindow extends React.Component {
                 targetUser:this.props.target,
                 message:this.props.message,
                 loading: false,
-                loadingMore: false
+                loadingMore: false,
+                loadingMessage: false,
             },()=>{
-                if(this.props.message.length <= 10)
+                if(this.props.message.length <= 10 ||
+                    this.props.message.length === prevProps.message.length+1)
                     this.refs.chatwindow.scrollTop=this.refs.chatwindow.scrollHeight;
             })
         }
@@ -169,24 +207,27 @@ export default class ChatWindow extends React.Component {
 
                         <List>
                             {this.state.message === undefined ? 0: this.state.message.map((msg,i)=>{
-                                        //default time format
+                                
+                                //default time format
                                 var time = moment(msg.date).calendar();
-                                //if less than 24 hours, use relative time
-                                if((new Date().getTime()) - 12 <= 86400000)
+
+                                //if less than 1 hour, use relative time
+                                if((new Date().getTime()) - msg.date <= 3600000)
                                     time = moment(msg.date).fromNow();
 
+                                let sender = msg.sender === this.props.curUser._id ? this.props.curUser : this.state.targetUser;
                                 return <ListItem key={i}
                                 style={{
                                     alignItems: "flex-start",
                                     marginBottom:'10px'
                                 }}>
                                     <ListItemAvatar>
-                                        <Avatar src={msg.sender.avatar}/>
+                                        <Avatar src={sender.avatar}/>
                                     </ListItemAvatar>
                                     <ListItemText
                                     primary={
                                         <span>
-                                            <strong>{msg.sender.fullname}</strong>
+                                            <strong>{sender.fullname}</strong>
                                             <span style={{fontSize:'12px', marginLeft:'15px'}}>{time}</span>
                                         </span>
                                     }
@@ -213,7 +254,7 @@ export default class ChatWindow extends React.Component {
                                 </ListItem>
                             })}
                             {
-                                this.state.loading?
+                                this.state.loadingMessage?
                                 <ListItem>
                                     <CircularProgress size={30} style={{marginLeft:'8px',color:'#61B4E4'}}/>
                                 </ListItem>:null

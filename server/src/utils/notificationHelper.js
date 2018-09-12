@@ -127,4 +127,43 @@ module.exports = class NotificationHelper {
             .catch(err=>{reject(err)});
         });
     }
+
+    activityNotification(senderId, targetId, activityId, type) {
+        return new Promise((resolve, reject)=>{
+            this.database.collection('notificationItems').insertOneAsync({
+                sender: senderId,
+                target: targetId,
+                type:"AN",
+                RequestOrInvite: type,
+                activityid: activityId
+            })
+            .then((result)=>{
+                return new Promise((resolve, reject)=>{
+                    this.database.collection('users').findOneAsync({
+                        _id: targetId
+                    })
+                    .then(res=>{
+                        resolve({
+                            userData: res,
+                            result: result
+                        })
+                    })
+                    .catch(err=>reject(err));
+                })
+            })
+            .then((res)=>{
+                return this.database.collection('notifications').updateOneAsync({
+                    _id:res.userData.notification
+                },{
+                    $addToSet:{
+                        contents: res.result.insertedId
+                    }
+                })
+            })
+            .then(()=>{
+                resolve();
+            })
+            .catch(err=>reject(err));
+        });
+    }
 }

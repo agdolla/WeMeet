@@ -49,3 +49,7 @@ export function getActivityItemCommments(activityItemId, date) {
 export function getActivityMessages(activityId, date) {
     return axiosHelper.get('/activityItem/'+activityId+'/messages/'+date);
 }
+
+export function acceptActivityRequest(notificationid,fromuser){
+    return axiosHelper.put('/acceptactivity/'+notificationid+'/'+fromuser);
+}

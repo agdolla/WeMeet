@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'react-router-dom/Link';
 import {socket} from '../../utils'
-import {addFriend} from '../../utils';
 // material ui
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
@@ -18,8 +17,10 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Collapse from '@material-ui/core/Collapse';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import ErrorIcon from '@material-ui/icons/Error';
 
 var moment = require('moment');
+// let debug = require('react-debug');
 
 export default class ProfilePersonalInfo extends React.Component{
 
@@ -27,7 +28,8 @@ export default class ProfilePersonalInfo extends React.Component{
         super(props);
         this.state = {
             snackOpen: false,
-            collapseOpen: false
+            collapseOpen: false,
+            sentRequestFailed: false
         }
     }
 
@@ -36,17 +38,10 @@ export default class ProfilePersonalInfo extends React.Component{
     }
 
     handleAddFriend(targetId) {
-        addFriend(this.props.currentUser, targetId)
-        .then(response=>{
-            this.setState({
-                snackOpen: true
-            },()=>{
-                socket.emit('notification',{
-                    sender: this.props.currentUser,
-                    target: targetId
-                });
-            });
-        })
+        socket.emit('friend notification',{
+            sender: this.props.currentUser,
+            target: targetId
+        });
     }
 
     handleRequestClose = () => {
@@ -59,6 +54,21 @@ export default class ProfilePersonalInfo extends React.Component{
         this.setState(state => ({ collapseOpen: !state.collapseOpen }));
     };
 
+    componentDidMount = () => {
+        socket.on('friend notification',this.handleFriendNotification);
+    }
+    
+    componentWillUnmount = ()=>{
+        socket.removeListener('friend notification',this.handleFriendNotification);
+    }
+
+    handleFriendNotification = (err)=>{
+        this.setState({
+            snackOpen: true,
+            sentRequestFailed: err.error
+        })
+    }
+
     render(){
         return(
             <div>
@@ -69,15 +79,18 @@ export default class ProfilePersonalInfo extends React.Component{
                 onClose={this.handleRequestClose}>
                     <SnackbarContent
                     style={{
-                        backgroundColor: 'green'
+                        backgroundColor: [this.state.sentRequestFailed?'#f44336':'#4CAF50']
                     }}
                     message={
                         <span style={{                        
                                 display: 'flex',
                                 alignItems: 'center'
                             }}>
+                            {this.state.sentRequestFailed?
+                            <ErrorIcon style={{fontSize: '20px', marginRight:'10px'}}/>:
                             <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
-                            Friend request sent!
+                            }
+                            {this.state.sentRequestFailed?'failed to send request!' : 'request sent!'}
                         </span>
                     }
                     />

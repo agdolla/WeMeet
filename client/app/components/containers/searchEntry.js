@@ -2,7 +2,6 @@ import React from 'react';
 import {searchquery} from '../../utils';
 import {ActivityFeedItem} from '../presentations';
 import {PostFeedItem} from '../presentations';
-import {addFriend} from '../../utils';
 import {socket} from '../../utils';
 import Link from 'react-router-dom/Link';
 //mui
@@ -19,6 +18,7 @@ import Icon from '@material-ui/core/Icon';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ErrorIcon from '@material-ui/icons/Error';
 
 // var debug = require('react-debug');
 
@@ -29,7 +29,8 @@ export default class SearchEntry extends React.Component{
             value: "",
             searchDataResult:{},
             title: "",
-            snackOpen: false
+            snackOpen: false,
+            sentRequestFailed: false
         }
     }
     handleChange(e) {
@@ -61,18 +62,10 @@ export default class SearchEntry extends React.Component{
     }
 
     handleAddFriend(friendId){
-        addFriend(this.props.user._id,friendId)
-        .then(response=>{
-            this.setState({
-                snackOpen:true
-            });
-            socket.emit('notification',{
-                sender: this.props.user._id,
-                target: friendId
-            });
-        })
-        .catch(err=>{
-        })
+        socket.emit('friend notification',{
+            sender: this.props.user._id,
+            target: friendId
+        });
     }
 
     handleRequestClose = () => {
@@ -80,6 +73,21 @@ export default class SearchEntry extends React.Component{
             snackOpen: false,
         });
     };
+
+    componentDidMount = () => {
+        socket.on('friend notification',this.handleFriendNotification);
+    }
+    
+    componentWillUnmount = ()=>{
+        socket.removeListener('friend notification',this.handleFriendNotification);
+    }
+
+    handleFriendNotification = (err)=>{
+        this.setState({
+            snackOpen: true,
+            sentRequestFailed: err.error
+        })
+    }
 
 
     render(){
@@ -116,20 +124,25 @@ export default class SearchEntry extends React.Component{
                 onClose={this.handleRequestClose}>
                     <SnackbarContent
                     style={{
-                        backgroundColor: 'green'
+                        backgroundColor: [this.state.sentRequestFailed?'#f44336':'#4CAF50']
                     }}
                     message={
                         <span style={{                        
-                                display: 'flex',
-                                alignItems: 'center'
-                            }}>
-                            <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
-                            Friend request sent!
+                            display: 'flex',
+                            alignItems: 'center'
+                        }}>
+                        {this.state.sentRequestFailed?
+                        <ErrorIcon style={{fontSize: '20px', marginRight:'10px'}}/>:
+                        <CheckCircleIcon style={{fontSize: '20px', marginRight:'10px'}}/>
+                        }
+                        {this.state.sentRequestFailed?'failed to send request!' : 'request sent!'}
                         </span>
                     }
                     />
                 </Snackbar>
-                <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
+                <List style={{backgroundColor: '#ffffff',
+                padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)',
+                marginBottom:'30px'}}>
                 {this.state.searchDataResult.users=== undefined ? [] : this.state.searchDataResult.users.map((user,i)=>{
                     var rightButton;
                     if(this.checkFriendsOfUser(user._id)) {

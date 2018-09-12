@@ -1,6 +1,8 @@
 'use strict'
 const Promise = require("bluebird");
 let ServerHelper = require('./serverHelper');
+let uuidV1 = require('uuid/v1');
+let Jimp = require("jimp");
 
 module.exports = class ChatHelper {
     constructor(db) {
@@ -18,7 +20,7 @@ module.exports = class ChatHelper {
                     resolve(null)
                 }
                 else {
-                    this.resolveSessionObject(userData.sessions)
+                    this.resolveSessionObject(userData.sessions, userId)
                     .then(sessionMap => {
                         var sessions = userData.sessions.map((id) => sessionMap[id]);
                         resolve(sessions);
@@ -29,7 +31,60 @@ module.exports = class ChatHelper {
         })
     }
 
-    resolveSessionObject(sessionList) {
+    postMessage(senderId, targetId, sessionId, date, message, imgs) {
+        return new Promise((resolve, reject)=>{
+            let name = uuidV1();
+            var imgPath = [];
+            for (var i = 0; i < imgs.length; i++) {
+                imgPath.push("img/chat/"+name+i+".jpg");
+            }
+            var lastmessage = {
+                sender: senderId,
+                date: date,
+                text: message,
+                imgs: imgPath
+            }
+            this.getSessionContentsID(sessionId, (err, contentsId)=>{
+                if (err)
+                    reject(err);
+                else {
+                    this.database.collection('message').updateOneAsync({
+                        _id: contentsId
+                    }, {
+                        $push: {
+                            messages: lastmessage
+                        }
+                    })
+                    .then(() => {
+                        this.database.collection('messageSession').findAndModifyAsync(
+                            {_id: sessionId},
+                            [],
+                            {
+                                $set:{"lastmessage": lastmessage, ["unread."+senderId]: 0},
+                                $inc:{["unread."+targetId]: 1}
+                            },
+                            {new:true}
+                        )
+                        .then((updatedSession)=>{
+                            let updatedSessionData = updatedSession.value;
+                            resolve(updatedSessionData);
+                            imgs.forEach((img,idx)=>{
+                                var buffer = new Buffer.from(img.split(",")[1], 'base64');
+                                Jimp.read(buffer)
+                                .then(image =>{
+                                    image.quality(50)
+                                    .write("../client/build/"+imgPath[idx]);
+                                })
+                            })
+                        })
+                    })
+                    .catch(err=>reject(err));
+                }
+            });
+        });
+    }
+
+    resolveSessionObject(sessionList, userId) {
         return new Promise((resolve, reject) =>  {
             if (sessionList.length === 0) {
                 resolve({});
@@ -39,7 +94,6 @@ module.exports = class ChatHelper {
                         return {_id: id}
                     })
                 };
-                // Resolve 'like' counter
                 this.database.collection('messageSession').findAsync(query)
                 .then(cursor => {
                     return cursor.toArrayAsync();
@@ -75,16 +129,16 @@ module.exports = class ChatHelper {
                         return message.messages;
                     });
                     resultMsgs = resultMsgs.reverse();
-                    var userList = [resultMsgs[0].sender, resultMsgs[0].target];
-                    this.serverHelper.resolveUserObjects(userList, (err, userMap)=>{
-                        if (err)
-                            reject(err);
-                        resultMsgs.forEach((message) => {
-                            message.target = userMap[message.target];
-                            message.sender = userMap[message.sender];
-                        });
-                        resolve(resultMsgs);
-                    })
+                    // var userList = [resultMsgs[0].sender, resultMsgs[0].target];
+                    // this.serverHelper.resolveUserObjects(userList, (err, userMap)=>{
+                    //     if (err)
+                    //         reject(err);
+                    //     resultMsgs.forEach((message) => {
+                    //         message.target = userMap[message.target];
+                    //         message.sender = userMap[message.sender];
+                    //     });
+                    // })
+                    resolve(resultMsgs);
                 }
             })
             .catch(err=>reject(err));
@@ -115,38 +169,46 @@ module.exports = class ChatHelper {
         .catch(err=>cb(err));
     }
 
-    createSession(userid, targetid, cb){
-        this.database.collection("message").insertOneAsync({
-            messages:[]
-        })
-        .then(message=>{
-            var newSession = {
-                users : [userid, targetid],
-                contents: message.insertedId,
-                lastmessage : {}
-            };
-            return newSession;
-        })
-        .then(newSession=>{
-            this.database.collection("messageSession").insertOneAsync(newSession)
-            .then(messageSession=>{
-                this.database.collection("users").updateMany({
-                    $or:[
-                        {_id:userid},
-                        {_id:targetid}
-                    ]
-                },{$addToSet:{
-                    sessions: messageSession.insertedId
-                }},function(err){
-                    if(err)
-                    cb(err)
-                    else{
-                        cb(null,newSession);
-                    }
-                })
+    createSession(userid, targetid){
+        return new Promise((resolve, reject)=>{
+            this.database.collection("message").insertOneAsync({
+                messages:[]
             })
-            .catch(err=>cb(err));
-        })
-        .catch(err=>cb(err));
+            .then(message=>{
+                var newSession = {
+                    users : [userid, targetid],
+                    contents: message.insertedId,
+                    lastmessage : {},
+                    unread: {
+                        [userid.toString()]: 0,
+                        [targetid.toString(0)]: 0
+                    }
+                };
+                return newSession;
+            })
+            .then(newSession=>{
+                return new Promise((resolve, reject)=>{
+                    this.database.collection("messageSession").insertOneAsync(newSession)
+                    .then(messageSession=>{
+                        return this.database.collection("users").updateManyAsync({
+                            $or:[
+                                {_id:userid},
+                                {_id:targetid}
+                            ]
+                        },{$addToSet:{
+                            sessions: messageSession.insertedId
+                        }})
+                    })
+                    .then(()=>{
+                        resolve(newSession);
+                    })
+                    .catch(err=>reject(err));
+                });
+            })
+            .then(sessionResult=>{
+                resolve(sessionResult);
+            })
+            .catch(err=>reject(err));
+        });
     }
 }

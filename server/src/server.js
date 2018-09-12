@@ -164,28 +164,32 @@ MongoClient.connect(url, {
                 return user;
             })
             .then(user=>{
-                Promise.join(
+                return Promise.join(
                     db.collection('users').insertOneAsync(user),
                     db.collection('postFeeds').insertOneAsync({contents:[]}),
                     db.collection('notifications').insertOneAsync({contents:[]}),
                     db.collection('activities').insertOneAsync({contents:[]}),
-                    function(user,post,noti,act){
+                    (user,post,noti,act)=>{
                         db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
                             $addToSet:{
                                 friends:user.insertedId
                             }
-                        });
+                        })
+                        .catch(err=>{done(err)});
                         db.collection('users').updateOneAsync({_id:user.insertedId},{
                             $set: {
                                 activity:act.insertedId,
                                 notification: noti.insertedId,
                                 post:post.insertedId
                             }
-                        });
+                        })
+                        .catch(err=>{done(err)});
+                        chatHelper.createSession(new ObjectID("000000000000000000000001"), user.insertedId)
+                        .catch(err=>{done(err)});
                         return done(null,user.insertedId);
                     })
                 })
-                .catch(err=>{done(err)})
+                .catch(err=>{done(err)});
             });
         })
     );
@@ -250,28 +254,33 @@ MongoClient.connect(url, {
                         db.collection('postFeeds').insertOneAsync({contents:[]}),
                         db.collection('notifications').insertOneAsync({contents:[]}),
                         db.collection('activities').insertOneAsync({contents:[]}),
-                        function(userAsync,post,noti,act){
+                        (user,post,noti,act)=>{
                             db.collection('users').updateOneAsync({_id:new ObjectID("000000000000000000000001")},{
                                 $addToSet:{
-                                    friends:userAsync.insertedId
+                                    friends:user.insertedId
                                 }
-                            });
-                            db.collection('users').updateOneAsync({_id:userAsync.insertedId},{
+                            })
+                            .catch(err=>done(err));
+                            db.collection('users').updateOneAsync({_id:user.insertedId},{
                                 $set: {
                                     activity:act.insertedId,
                                     notification: noti.insertedId,
                                     post:post.insertedId
                                 }
-                            });
+                            })
+                            .catch(err=>done(err));
+                            chatHelper.createSession(new ObjectID("000000000000000000000001"), user.insertedId)
+                            .catch(err=>done(err));
                             var newUserObj = {}
-                            newUserObj._id = userAsync.insertedId;
+                            newUserObj._id = user.insertedId;
                             newUserObj.avatar = encodeURIComponent(user.avatar);
                             newUserObj.fullname = user.fullname;
                             newUserObj.friends = user.friends;
                             return done(null,newUserObj,{
                                 user:newUserObj
                             });
-                        });
+                        })
+                        .catch(err=>done(err));
                     }
                     else{
                         var newUserObj = {}
@@ -602,25 +611,6 @@ MongoClient.connect(url, {
         .catch(err=>{throw(err)})
     });
 
-    // app.put('/settings/location/user/:userId', serverHelper.isLoggedIn,(req, res) => {
-    //     if(req.params.userId.str!==req.user._id.str) return res.status(401).end();
-    //     var userId = req.params.userId;
-    //     var body = req.body;
-    //     db.collection('users').updateOne({
-    //         _id: new ObjectID(userId)
-    //     }, {
-    //         $set: {
-    //             location: body
-    //         }
-    //     }, function(err) {
-    //         if (err)
-    //         return serverHelper.sendDatabaseError(res, err);
-    //         else {
-    //             res.send(true);
-    //         }
-    //     });
-    // });
-
     // get activity Feed data
     app.get('/user/:userid/activity/:count',cache(30), serverHelper.isLoggedIn,(req, res) => {
         let userId = new ObjectID(req.params.userid);
@@ -808,21 +798,17 @@ MongoClient.connect(url, {
                 $addToSet: {
                     friends: notification.sender._id
                 }
-            })
-            .then(()=>{
-                db.collection('users').updateOneAsync({_id: notification.sender._id}, {
-                    $addToSet: {
-                        friends: userId
-                    }
-                })
-            })
-            .then(()=>{
-                notificationHelper.deleteNotification(notificationId, userId)
-                .then(notificationData=>{
-                    res.send(notificationData);
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res, err));
-            })
+            });
+            db.collection('users').updateOneAsync({_id: notification.sender._id}, {
+                $addToSet: {
+                    friends: userId
+                }
+            });
+            chatHelper.createSession(notification.sender._id, userId);
+            return notificationHelper.deleteNotification(notificationId, userId);
+        })
+        .then(notificationData=>{
+            res.send(notificationData);
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
@@ -889,98 +875,23 @@ MongoClient.connect(url, {
                 res.send();
             }
             else {
-                if(message.lastmessage===undefined? false: (message.lastmessage.target===undefined?"": 
-                message.lastmessage.target.str===userid.str)){
-                    db.collection('messageSession').updateOneAsync({_id:new ObjectID(id)},{
-                        $set:{
-                            "lastmessage.isread":true
-                        }
-                    })
-                    .then(()=>{
-                        return chatHelper.getMessage(time, message.contents);
-                    })
-                    .then((messages)=>{
-                        res.status(201);
-                        res.send(messages);
-                    })
-                    .catch(err=>serverHelper.sendDatabaseError(res,err));
-                }
-                else {
-                    chatHelper.getMessage(time, message.contents)
-                    .then((messages)=>{
-                        res.status(201);
-                        res.send(messages);
-                    })
-                    .catch(err=>serverHelper.sendDatabaseError(res,err));
-                }
+                db.collection('messageSession').updateOneAsync({_id:new ObjectID(id)},{
+                    $set:{
+                        ["unread."+userid]: 0
+                    }
+                })
+                .then(()=>{
+                    return chatHelper.getMessage(time, message.contents);
+                })
+                .then((messages)=>{
+                    res.status(201);
+                    res.send(messages);
+                })
+                .catch(err=>serverHelper.sendDatabaseError(res,err));
             }
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err))
     });
-
-    //post message
-    app.post('/chatsession/:id', serverHelper.isLoggedIn,(req, res) => {
-        var id = req.params.id;
-        var body = req.body;
-        var time = (new Date()).getTime();
-        var senderid = body.sender;
-        if(senderid.str!==req.user._id.str) return res.status(401).end();
-        var targetid = body.target;
-        var text = body.text;
-        let imgs = body.imgs;
-        let name = uuidV1();
-        var imgPath = [];
-        for (var i = 0; i < imgs.length; i++) {
-            imgPath.push("img/chat/"+name+i+".jpg");
-        }
-        var lastmessage = {
-            sender: new ObjectID(senderid),
-            target: new ObjectID(targetid),
-            date: time,
-            text: text,
-            imgs: imgPath
-        }
-        chatHelper.getSessionContentsID(new ObjectID(id), (err, contentsid)=>{
-            if (err)
-                serverHelper.sendDatabaseError(res, err);
-            else {
-                db.collection('message').updateOneAsync({
-                    _id: new ObjectID(contentsid)
-                }, {
-                    $push: {
-                        messages: lastmessage
-                    }
-                })
-                .then(()=>{
-                    return chatHelper.getMessage(time+1,contentsid)
-                })
-                .then((messages) => {
-                    //seting lastmessage;
-                    lastmessage.isread = false;
-                    db.collection("messageSession").updateOneAsync({
-                        _id: new ObjectID(id)
-                    }, {
-                        $set: {
-                            "lastmessage": lastmessage
-                        }
-                    })
-                    .then(()=>{
-                        res.send(messages);
-                        imgs.forEach((img,idx)=>{
-                            var buffer = new Buffer.from(img.split(",")[1], 'base64');
-                            Jimp.read(buffer)
-                            .then(image =>{
-                                image.quality(50)
-                                .write("../client/build/"+imgPath[idx]);
-                            })
-                        })
-                    })
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res,err));
-            }
-        });
-    });
-
 
     app.get('/getsession/:userid/:targetid', cache(600), serverHelper.isLoggedIn,(req, res) => {
         var userid = req.params.userid;
@@ -988,20 +899,8 @@ MongoClient.connect(url, {
         var targetid = req.params.targetid;
         chatHelper.getSession(new ObjectID(userid), new ObjectID(targetid))
         .then(session=>{
-            if(session===null){
-                chatHelper.createSession(new ObjectID(userid), new ObjectID(targetid),function(err,newSession){
-                    if(err)
-                    serverHelper.sendDatabaseError(res,err);
-                    else{
-                        res.status(201);
-                        res.send(newSession);
-                    }
-                })
-            }
-            else {
-                res.status(201);
-                res.send(session);
-            }
+            res.status(201);
+            res.send(session);
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
@@ -1128,121 +1027,6 @@ MongoClient.connect(url, {
         res.redirect('/');
     });
 
-    // app.get('/activityNotification',serverHelper.isLoggedIn,(req, res) =>{
-    //     db.collection('activityItems').count(function(err,count){
-    //         res.send({result:count});
-    //     });
-    // });
-
-    // app.get('/postNotification',serverHelper.isLoggedIn,(req, res) =>{
-    //     db.collection('postFeedItems').count(function(err,count){
-    //         res.send({result:count});
-    //     });
-    // });
-
-    app.post('/friendRequest/:sender/:target',serverHelper.isLoggedIn,(req, res) =>{
-        var sender = req.params.sender;
-        if(sender.str!==req.user._id.str) return res.status(401).end();
-        var target = req.params.target;
-        db.collection('notificationItems').insertOne({
-            sender: new ObjectID(sender),
-            target: new ObjectID(target),
-            type:"FR"
-        },function(err,result){
-            if(err)
-                serverHelper.sendDatabaseError(res,err);
-            else{
-                db.collection('users').findOneAsync({_id:new ObjectID(target)})
-                .then(userData=>{
-                    db.collection('notifications').updateOne({_id:userData.notification},{
-                        $addToSet:{
-                            contents: result.insertedId
-                        }
-                    },function(err){
-                        if(err)
-                            serverHelper.sendDatabaseError(res,err);
-                        else {
-                            res.send();
-                        }
-                    });
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res,err));
-            }
-        });
-    });
-
-    app.post('/activityJoinRequest/:sender/:target/:activityid',serverHelper.isLoggedIn,(req, res) =>{
-        var sender = req.params.sender;
-        if(sender.str!==req.user._id.str) return res.status(401).end();
-        var target = req.params.target;
-        var activityid = req.params.activityid;
-        db.collection('notificationItems').insertOne({
-            sender: new ObjectID(sender),
-            target: new ObjectID(target),
-            type:"AN",
-            RequestOrInvite:"request",
-            activityid: new ObjectID(activityid)
-        },function(err,result){
-            if(err){
-                serverHelper.sendDatabaseError(res,err);
-            }
-            else{
-                db.collection('users').findOneAsync({_id:new ObjectID(target)})
-                .then(userData=>{
-                    db.collection('notifications').updateOne({_id:userData.notification},{
-                        $addToSet:{
-                            contents: result.insertedId
-                        }
-                    },function(err){
-                        if(err){
-                            serverHelper.sendDatabaseError(res,err);
-                        }
-                        else{
-                            res.send();
-                        }
-                    });
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res,err));
-            }
-        });
-    });
-
-    app.post('/activityInviteRequest/:sender/:target/:activityid',serverHelper.isLoggedIn,(req, res) =>{
-        var sender = req.params.sender;
-        if(sender.str!==req.user._id.str) return res.status(401).end();
-        var target = req.params.target;
-        var activityid = req.params.activityid;
-        db.collection('notificationItems').insertOne({
-            sender: new ObjectID(sender),
-            target: new ObjectID(target),
-            type:"AN",
-            RequestOrInvite:"invite",
-            activityid: new ObjectID(activityid)
-        },function(err,result){
-            if(err){
-                serverHelper.sendDatabaseError(res,err);
-            }
-            else{
-                db.collection('users').findOneAsync({_id:new ObjectID(target)})
-                .then(userData=>{
-                    db.collection('notifications').updateOne({_id:userData.notification},{
-                        $addToSet:{
-                            contents: result.insertedId
-                        }
-                    },function(err){
-                        if(err){
-                            serverHelper.sendDatabaseError(res,err);
-                        }
-                        else{
-                            res.send();
-                        }
-                    });
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res,err));
-            }
-        });
-    });
-
     var server, httpsServer;
 
     if(PROD){
@@ -1279,80 +1063,117 @@ MongoClient.connect(url, {
 
     function onAuthorizeFail(data, message, error, accept) {
         if(error)
-            throw new Error(message);
-        console.log('failed connection to socket.io:', message);
+            console.log('failed connection to socket.io:', message);
         accept(null, false);
     }
 
+    var socketUserMap = {};
+
     io.on('connection', (socket)=>{
-        //disconnect means user logs out
+        //disconnect is called when user closes browser or refresh the page
         socket.on('disconnect', function () {
             db.collection('userSocketIds').findOne({socketId:socket.id},function(err,socketData){
                 if(socketData!==null){
-                    db.collection('users').updateOneAsync({_id:socketData.userId},{
-                        $set:{
-                            online:false
-                        }
-                    })
-                    .then(()=>{
-                        var data = {
-                            user: socketData.userId,
+                    db.collection('users').findAndModifyAsync(
+                        {_id: socketData.userId},
+                        [],
+                        {$set: {online: false}},
+                        {new: true}
+                    )
+                    .then(res=>{
+                        let userData = res.value;
+                        //join to all the chat sessions
+                        userData.sessions.forEach(session=>{
+                            socket.leave('chat/'+session)
+                        });
+        
+                        socket.broadcast.emit('online',{
+                            user: socketData.userId.toString(),
                             online: false
-                        }
-                        socket.broadcast.emit('online',data);
-                        db.collection('userSocketIds').remove({socketId:socket.id});
-                    })
+                        });
+                    });
                 }
             });
         });
 
-        //when user
+        //when user clicks the logout button
         socket.on('logout',function(userId){
-            db.collection('users').updateOneAsync({_id:new ObjectID(userId)},{
-                $set:{
-                    online:false
-                }
-            })
-            .then(()=>{
-                var data = {
+
+            socket.leave('user/'+userId);
+            db.collection('users').findAndModifyAsync(
+                {_id: new ObjectID(userId)},
+                [],
+                {$set: {online: false}},
+                {new: true}
+            )
+            .then(res=>{
+                let userData = res.value;
+                //join to all the chat sessions
+                userData.sessions.forEach(session=>{
+                    socket.leave('chat/'+session)
+                });
+
+                socket.broadcast.emit('online',{
                     user: userId,
                     online: false
-                }
-                socket.broadcast.emit('online',data);
-            })
-            db.collection('userSocketIds').remove({socketId:socket.id});
+                });
+            });
         });
 
-        socket.on('user',function(user){
-            db.collection('users').updateOneAsync({_id:new ObjectID(user)},{
-                $set:{
-                    online:true
-                }
-            })
-            .then(()=>{
-                var data = {
-                    user: user,
+        
+        socket.on('user',function(userId){
+            // join to it's own user id
+            socket.join('user/'+userId);
+
+            //put socketId -> userId to the map
+            socketUserMap[socket.id] = userId;
+
+            db.collection('users').findAndModifyAsync(
+                {_id: new ObjectID(userId)},
+                [],
+                {$set: {online: true}},
+                {new: true}
+            )
+            .then(res=>{
+                let userData = res.value;
+                //join to all the chat sessions
+                userData.sessions.forEach(session=>{
+                    socket.join('chat/'+session)
+                });
+
+                socket.broadcast.emit('online',{
+                    user: userId,
                     online: true
-                }
-                socket.broadcast.emit('online',data);
-            })
-            db.collection('userSocketIds').updateOne({userId:new ObjectID(user)},{
+                })
+            });
+
+            //update socketid
+            db.collection('userSocketIds').updateOne({userId:new ObjectID(userId)},{
                 $set:{
                     socketId:socket.id
                 }
             },{upsert: true});
+
         });
 
         socket.on('chat',function(data){
-            db.collection('userSocketIds').findOne({userId:new ObjectID(data.friend)},function(err,socketData){
-                if(err)
-                    io.emit('chat',err);
-                else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
-                    io.sockets.connected[socketData.socketId].emit('chat');
-                }
+            chatHelper.postMessage(new ObjectID(data.sender), new ObjectID(data.target), 
+                new ObjectID(data.sessionId), data.date, data.message, data.imgs)
+            .then((updatedSession)=>{
+                io.to('chat/'+data.sessionId).emit('chat',{
+                    sender: data.sender,
+                    sessionData: updatedSession,
+                    date: data.date,
+                    message: data.message,
+                    imgs: data.imgs
+                });
+            })
+            .catch(err=>{
+                console.log(err);
             });
         });
 
+        /*This part is fine*/
         socket.on('newPost',()=>{
             socket.broadcast.emit('newPost');
         });
@@ -1361,38 +1182,62 @@ MongoClient.connect(url, {
             socket.broadcast.emit('newActivity');
         });
 
-        socket.on('notification',function(data){
-            db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
-                if(err)
-                io.emit('notification',err);
-                else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
-                    io.sockets.connected[socketData.socketId].emit('notification');
-                }
+        socket.on('activity notification',(data)=>{
+            // io.to('user/'+data.sender).emit('activity notification', {error: false});
+            notificationHelper.activityNotification(new ObjectID(data.sender),
+            new ObjectID(data.target), new ObjectID(data.activityId), data.type)
+            .then(()=>{
+                io.to('user/'+data.target).emit('notification');
+                io.to('user/'+data.sender).emit('activity notification', {error: false});
+            })
+            .catch(err=>{
+                console.log(err);
+                io.to('user/'+data.sender).emit('activity notification', {error: true});
+            });
+        });
+
+        socket.on('friend notification',(data)=>{
+            // io.to('user/'+data.sender).emit('friend notification',{error: true});
+            serverHelper.friendReuqest(new ObjectID(data.sender), new ObjectID(data.target))
+            .then(()=>{
+                io.to('user/'+data.target).emit('notification');
+                io.to('user/'+data.sender).emit('friend notification',{error: false});
+            })
+            .catch(err=>{
+                console.log(err);
+                io.to('user/'+data.sender).emit('friend notification',{error: true});
             });
         });
 
         socket.on('friend request accepted',function(data){
-            db.collection('userSocketIds').findOne({userId:new ObjectID(data.target)},function(err,socketData){
-                if(err)
-                    io.emit('friend request accepted',err);
-                else if(socketData!==null && io.sockets.connected[socketData.socketId]!==undefined){
-                    db.collection('users').findOne({_id:new ObjectID(data.sender)},function(err,userData){
-                        if(err)
-                        io.emit('friend request accepted',err);
-                        else{
-                            io.sockets.connected[socketData.socketId].emit('friend request accepted',{sender:userData.fullname});
-                        }
-                    });
+            chatHelper.getSession(new ObjectID(data.senderId), new ObjectID(data.target))
+            .then(session=>{
+                let senderSocketId = Object.keys(io.sockets.adapter.rooms['user/'+data.senderId].sockets)[0];
+                let targetSocketId = Object.keys(io.sockets.adapter.rooms['user/'+data.target].sockets)[0];
+                if(io.sockets.connected[senderSocketId] !== undefined){
+                    io.sockets.connected[senderSocketId].join('chat/'+session._id);
                 }
-            });
+                if(io.sockets.connected[targetSocketId] !== undefined) {
+                    io.sockets.connected[targetSocketId].join('chat/'+session._id);
+                }
+                io.to('user/'+data.target).emit('friend request accepted',{
+                    sender: data.senderName
+                });
+            })
+            .catch(err=>{
+                console.log(err);
+            })
         });
 
         socket.on('join activity chat room',(data)=>{
-            socket.join(data.activityId);
+            socket.join('activity/'+data.activityId);
+
+            let users = io.sockets.adapter.rooms[data.activityId];
+
             serverHelper.getUserData(new ObjectID(data.user))
             .then(userData=>{
                 io.to(data.activityId).emit('user joined',{
-                    numberOfUsers: io.sockets.adapter.rooms[data.activityId].length,
+                    numberOfUsers: users === undefined ? 0: users.length,
                     user: userData
                 })
             })
@@ -1402,7 +1247,7 @@ MongoClient.connect(url, {
         });
 
         socket.on('leave activity chat room',(data)=>{
-            socket.leave(data.activityId);
+            socket.join('activity/'+data.activityId);
             serverHelper.getUserData(new ObjectID(data.user))
             .then(userData=>{
                 let users = io.sockets.adapter.rooms[data.activityId];
@@ -1433,7 +1278,7 @@ MongoClient.connect(url, {
             })
             .then(userData=>{
                 chatData.author = userData
-                io.to(activityId).emit('new activity chat message', chatData);
+                io.to('activity/'+activityId).emit('new activity chat message', chatData);
             })
             .catch(err=>{
                 console.log(err);

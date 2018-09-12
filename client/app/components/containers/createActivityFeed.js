@@ -1,9 +1,7 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
-import {createActivity, sendInviteActivityRequest} from '../../utils';
-import {CreateActivityFriendItem} from './';
+import {createActivity} from '../../utils';
 import {hideElement} from '../../utils';
-import {socket} from '../../utils';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
 //mui
@@ -41,8 +39,6 @@ class CreateActivityFeed extends React.Component {
             alert:false,
             sizealert:false,
             fileWrongType:false,
-            invitedlist:[],
-            reset:false
         }
     }
 
@@ -76,15 +72,6 @@ class CreateActivityFeed extends React.Component {
         e.target.value = null;
     }
 
-    handleInviteUser(e){
-        var invitedUsers = this.state.invitedlist;
-        invitedUsers.push(e);
-        this.setState({
-            invitedlist: invitedUsers,
-            reset:false
-        })
-    }
-
     handleRequestHide = ()=>{
         this.setState({
             cropperOpen: false,
@@ -98,8 +85,6 @@ class CreateActivityFeed extends React.Component {
             img: this.refs.cropper.getCroppedCanvas().toDataURL()
         });
     }
-
-
 
     handleSubmit(e){
         e.preventDefault();
@@ -130,20 +115,6 @@ class CreateActivityFeed extends React.Component {
             data.type = type;
             createActivity(data)
             .then(response=>{
-                let data = response.data;
-                socket.emit('newActivity',{user:this.props.user});
-                this.state.invitedlist.map((targetid)=>{
-                    sendInviteActivityRequest(this.props.user._id,targetid,data._id)
-                    .then(response=>{
-                        socket.emit('notification',{
-                            sender: this.props.user,
-                            target: targetid
-                        });
-                    })
-                    .catch(err=>{
-                        //todo: handle err;
-                    })
-                });
                 return swal({
                   title:"Success",
                   icon: "success",
@@ -154,27 +125,16 @@ class CreateActivityFeed extends React.Component {
                 this.props.history.push('/activity');
             })
             .catch(err=>{
-                // TODO: handle err
+                return swal({
+                  title:"Create Activity Failed",
+                  icon: "error",
+                  button: "OK"
+                });
             })
         }
         else{
             this.setState({alert:true})
         }
-    }
-
-    handlereset(e){
-        e.preventDefault();
-        this.setState({
-            invitedlist: [],
-            reset:true
-        });
-    }
-
-    handleInvite(e){
-        e.preventDefault();
-        this.setState({
-            reset:false
-        })
     }
 
     handleTitle(e){
@@ -377,34 +337,6 @@ class CreateActivityFeed extends React.Component {
                                 <div className="panel-footer">
                                     <div className="row">
                                         <div className="col-md-6 nopadding">
-                                            <button type="button" className="btn btn-blue-grey pull-Left nomargin" onClick={(e)=>this.handleInvite(e)} name="button" data-toggle="modal" data-target="#invitemodal">Invite Friend</button>
-                                            <div className="modal fade " id="invitemodal" tabIndex="-1" role="dialog" aria-labelledby="myModalLabel">
-                                                <div className="modal-dialog" role="document">
-                                                    <div className="modal-content">
-                                                        <div className="modal-header">
-                                                            <button type="button" className="close"  data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                                            <h3 className="modal-title">Invite friends</h3>
-
-                                                        </div>
-                                                        <div className="modal-body " style={{
-                                                            "padding":'0px'
-                                                        }}>
-                                                        <ul className="media-list">
-                                                            {this.props.user.friends === undefined ? null : this.props.user.friends.map((friend,i)=>{
-                                                                return <CreateActivityFriendItem data={friend} key={i} reset={this.state.reset} onInvite={(e)=>this.handleInviteUser(e)}/>
-                                                                })}
-                                                            </ul>
-                                                        </div>
-
-                                                        <div className="modal-footer" style={{
-                                                            'border':'none'
-                                                        }}>
-                                                            <button type="button" className="btn btn-primary btn-blue-grey" onClick={(e)=>this.handlereset(e)}>Reset</button>
-                                                            <button type="button" className="btn btn-default btn-blue-grey" data-dismiss="modal">Confirm</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <label type="button" className="btn btn-blue-grey pull-left" name="button">
                                                 Upload activity header <input type="file" style={{"display":"none"}}
                                                 onClick={(e)=>this.handleFileClick(e)} onChange={(e)=>this.handleFile(e)}/>

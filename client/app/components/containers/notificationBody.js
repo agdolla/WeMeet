@@ -90,7 +90,7 @@ export default class NotificationBody extends React.Component{
                             </Link>
                         <ListItemText primary={AN.sender.fullname}
                         secondary={
-                            <Link to={"/activityDetail/"+AN.activityid}>
+                            <Link to={"/activityDetail/"+AN.activityid} target="_blank">
                                 {text}
                             </Link>
                         }/>
