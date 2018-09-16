@@ -1216,17 +1216,14 @@ MongoClient.connect(url, {
             io.to('user/'+data.target).emit('notification');
         });
 
-        
-
         socket.on('join activity chat room',(data)=>{
             socket.join('activity/'+data.activityId);
 
-            let users = io.sockets.adapter.rooms[data.activityId];
-
+            let users = io.sockets.adapter.rooms['activity/'+data.activityId];
             serverHelper.getUserData(new ObjectID(data.user))
             .then(userData=>{
-                io.to(data.activityId).emit('user joined',{
-                    numberOfUsers: users === undefined ? 0: users.length,
+                io.to('activity/'+data.activityId).emit('user joined',{
+                    numberOfUsers: users === undefined ? 0:users.length,
                     user: userData
                 })
             })
@@ -1239,9 +1236,9 @@ MongoClient.connect(url, {
             socket.join('activity/'+data.activityId);
             serverHelper.getUserData(new ObjectID(data.user))
             .then(userData=>{
-                let users = io.sockets.adapter.rooms[data.activityId];
+                let users = io.sockets.adapter.rooms['activity/'+data.activityId];
                 if(users !== undefined) {
-                    io.to(data.activityId).emit('user left',{
+                    io.to('activity/'+data.activityId).emit('user left',{
                         numberOfUsers: users.length,
                         user: userData
                     })
