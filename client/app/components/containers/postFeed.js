@@ -31,7 +31,7 @@ export default class PostFeed extends React.Component{
             })
         } else {
             this.setState({
-                loading:init,
+                loading:false,
             });
         }
         var date = init || this.state.contents.length===0?(new Date()).getTime():
