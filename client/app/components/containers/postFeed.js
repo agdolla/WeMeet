@@ -57,6 +57,9 @@ export default class PostFeed extends React.Component{
     }
 
     onPost(text,img){
+        this.setState({
+            loading:true
+        });
         postStatus(this.props.user._id, text, img)
         .then(()=>{
             socket.emit('newPost');
