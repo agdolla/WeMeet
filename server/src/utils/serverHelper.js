@@ -2,13 +2,13 @@
 const Promise = require("bluebird");
 
 module.exports = class ServerHelper {
-    
+
     constructor(db) {
         this.database = db;
     }
 
     isLoggedIn(req, res, next) {
-        if (req.isAuthenticated()){
+        if (req.isAuthenticated()) {
             return next();
         }
         res.status(401).end();
@@ -26,43 +26,43 @@ module.exports = class ServerHelper {
             // in the userList.
             var query = {
                 $or: userList.map((id) => {
-                    return {_id: id}
+                    return { _id: id }
                 })
             };
             // Resolve 'like' counter
             this.database.collection('users').findAsync(query)
-            .then(cursor=>{
-                return cursor.toArrayAsync();
-            })
-            .then(users=>{
-                var userMap = {};
-                users.forEach((user) => {
-                    delete user.password;
-                    delete user.sessions;
-                    delete user.friends;
-                    delete user.post;
-                    delete user.notification;
-                    delete user.activity;
-                    userMap[user._id] = user;
-                });
-                callback(null, userMap);
-            })
-            .catch(err => callback(err))
+                .then(cursor => {
+                    return cursor.toArrayAsync();
+                })
+                .then(users => {
+                    var userMap = {};
+                    users.forEach((user) => {
+                        delete user.password;
+                        delete user.sessions;
+                        delete user.friends;
+                        delete user.post;
+                        delete user.notification;
+                        delete user.activity;
+                        userMap[user._id] = user;
+                    });
+                    callback(null, userMap);
+                })
+                .catch(err => callback(err))
         }
     }
 
     resolveComments(comments) {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
             var userList = [];
-            comments.forEach((comment)=>{
+            comments.forEach((comment) => {
                 userList.push(comment.author);
             });
 
-            this.resolveUserObjects(userList, (err, userMap)=>{
-                if(err)
+            this.resolveUserObjects(userList, (err, userMap) => {
+                if (err)
                     reject(err);
-                else{
-                    comments.forEach((comment)=> {
+                else {
+                    comments.forEach((comment) => {
                         comment.author = userMap[comment.author];
                     });
                     resolve(comments);
@@ -77,28 +77,28 @@ module.exports = class ServerHelper {
     }
 
     getUserData(userId) {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
             this.database.collection('users').findOneAsync({
                 _id: userId
             })
-            .then(userData => {
-                if(userData===null){
-                    resolve(null)
-                }
-                else {
-                    this.resolveUserObjects(userData.friends, (err, userMap) => {
-                        if(err) reject(err);
-                        userData.friends = userData.friends.map((id) => userMap[id]);
-                        delete userData.password;
-                        delete userData.notification;
-                        delete userData.post;
-                        delete userData.activity;
-                        delete userData.sessions;
-                        resolve(userData);
-                    });
-                }
-            })
-            .catch(err => {reject(err)})
+                .then(userData => {
+                    if (userData === null) {
+                        resolve(null)
+                    }
+                    else {
+                        this.resolveUserObjects(userData.friends, (err, userMap) => {
+                            if (err) reject(err);
+                            userData.friends = userData.friends.map((id) => userMap[id]);
+                            delete userData.password;
+                            delete userData.notification;
+                            delete userData.post;
+                            delete userData.activity;
+                            delete userData.sessions;
+                            resolve(userData);
+                        });
+                    }
+                })
+                .catch(err => { reject(err) })
         })
     }
 

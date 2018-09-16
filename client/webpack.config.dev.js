@@ -5,7 +5,7 @@ var HappyPack = require('happypack');
 module.exports = {
   // The main "entry point" of your web app. WebPack will pack every module that
   // this file depends on (and its dependencies depend on).
-  entry: './app/app.js',
+  entry: './app/app.jsx',
   // Package up the application as 'app.js' in the 'build/js' directory.
   // __dirname is a magic variable that contains the directory that webpack.config.js
   // is located in.
@@ -25,26 +25,16 @@ module.exports = {
   plugins: [
     new HappyPack({
       loaders: [
-      {
-        loader: 'babel-loader',
-        query: {
-          cacheDirectory: true,
-          presets: ['es2015', 'react'],
-          plugins: ["transform-class-properties"]
+        {
+          loader: 'babel-loader',
+          query: {
+            cacheDirectory: true,
+            presets: ['es2015', 'react'],
+            plugins: ["transform-class-properties"]
+          }
         }
-    }
-    ]
-    }),
-    // new webpack.DefinePlugin({
-    //   'process.env': {
-    //     NODE_ENV: JSON.stringify('production')
-    //   }
-    // }),
-    // new webpack.optimize.UglifyJsPlugin({
-    //     compress: {
-    //         warnings: false
-    //     }
-    // })
+      ]
+    })
   ],
   module: {
     // Transforms your application's code using Babel.
@@ -56,20 +46,21 @@ module.exports = {
     rules: [
       {
         // Only transform *.js files.
-        test: /\.js$/,
+        test: /\.jsx?$/,
         // Don't transform any of the modules you depend on -- just transform
         // *your* code.
         exclude: /(node_modules|bower_components)/,
         use: 'happypack/loader'
         // loader: 'babel-loader'
-    },
-    {
+      },
+      {
         test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
-    }
+        use: ['style-loader', 'css-loader']
+      }
     ]
   },
   resolve: {
+    extensions: ['.js', '.jsx'],
     alias: {
       react: path.resolve(__dirname, './node_modules/react'),
       React: path.resolve(__dirname, './node_modules/react')
@@ -77,6 +68,6 @@ module.exports = {
     modules: [__dirname, './node_modules']
   },
   resolveLoader: {
-      modules: [__dirname, './node_modules']
+    modules: [__dirname, './node_modules']
   }
 };

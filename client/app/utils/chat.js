@@ -1,9 +1,9 @@
 let axiosHelper = require('./axiosHelper');
 
-export function getMessages(time,userid,id){
-    return axiosHelper.get('/user/'+userid+'/chatsession/'+id+"/"+time);
+export function getMessages(time, userid, id) {
+    return axiosHelper.get('/user/' + userid + '/chatsession/' + id + "/" + time);
 }
 
-export function getSessionId(userid,targetid){
-    return axiosHelper.get('/getsession/'+userid+'/'+targetid);
+export function getSessionId(userid, targetid) {
+    return axiosHelper.get('/getsession/' + userid + '/' + targetid);
 }

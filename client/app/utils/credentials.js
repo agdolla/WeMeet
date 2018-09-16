@@ -6,8 +6,8 @@ export var socket = io();
 /**
  * Stores authentication credentials.
  */
- var user = null;
- // var debug = require('react-debug');
+var user = null;
+// var debug = require('react-debug');
 
 /**
  * Get the user ID of the currently authenticated user.
@@ -34,23 +34,23 @@ export function updateCredentials(newUser) {
 export function isUserLoggedIn() {
   // Replace later.
   user = JSON.parse(localStorage.getItem('user'));
-  return user!==null && user!==undefined;
+  return user !== null && user !== undefined;
 }
 /**
  * Logs the user out.
  * You will implement this during the workshop.
  */
- export function logout() {
-     if(user!==null){
-         socket.emit('logout',user._id);
-         user=null;
-         localStorage.removeItem('user');
-     }
-     axiosHelper.get('/logout');
- }
+export function logout() {
+  if (user !== null) {
+    socket.emit('logout', user._id);
+    user = null;
+    localStorage.removeItem('user');
+  }
+  axiosHelper.get('/logout');
+}
 
- export function getUserDataFromLocal(){
-  if(isUserLoggedIn()){
+export function getUserDataFromLocal() {
+  if (isUserLoggedIn()) {
     return user;
   }
- }
+}

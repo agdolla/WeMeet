@@ -16,7 +16,7 @@ import ChatEntry from './chatentry'
 import ChatNavChatItem from './chatnavchatitem'
 
 
-export{
+export {
     ActivityFeedItem,
     ActivityDetailCommentEntry,
     ActivityCommentThread,

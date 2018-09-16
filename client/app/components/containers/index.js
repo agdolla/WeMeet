@@ -26,7 +26,7 @@ import SearchEntry from './searchEntry';
 import SettingProfileInfo from './settingprofileinfo';
 import SettingSystemInfo from './settingsysteminfo';
 
-export{
+export {
     ActivityFeed,
     ActivityDetailBody,
     ActivityChatPanel,
