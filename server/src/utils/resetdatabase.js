@@ -90,13 +90,15 @@ var initialData = {
       "_id":new ObjectID("000000000000000000000001"),
       "target":new ObjectID("000000000000000000000001"),
       "sender":new ObjectID("000000000000000000000002"),
-      "type": "FR"
+      "type": "FR",
+      "accept": false
     },
     "2": {
       "_id":new ObjectID("000000000000000000000002"),
       "target":new ObjectID("000000000000000000000001"),
       "sender":new ObjectID("000000000000000000000003"),
       "type": "AN",
+      "accept": false,
       "RequestOrInvite": "request",
       "activityid":new ObjectID("000000000000000000000001")
     },
@@ -105,6 +107,7 @@ var initialData = {
       "target":new ObjectID("000000000000000000000001"),
       "sender":new ObjectID("000000000000000000000003"),
       "type": "AN",
+      "accept": false,
       "RequestOrInvite": "invite",
       "activityid":new ObjectID("000000000000000000000003")
     }

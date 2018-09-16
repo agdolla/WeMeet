@@ -128,12 +128,13 @@ module.exports = class NotificationHelper {
         });
     }
 
-    activityNotification(senderId, targetId, activityId, type) {
+    activityNotification(senderId, targetId, activityId, type, accept) {
         return new Promise((resolve, reject)=>{
             this.database.collection('notificationItems').insertOneAsync({
                 sender: senderId,
                 target: targetId,
                 type:"AN",
+                accept: accept,
                 RequestOrInvite: type,
                 activityid: activityId
             })
@@ -152,6 +153,42 @@ module.exports = class NotificationHelper {
                 })
             })
             .then((res)=>{
+                return this.database.collection('notifications').updateOneAsync({
+                    _id:res.userData.notification
+                },{
+                    $addToSet:{
+                        contents: res.result.insertedId
+                    }
+                })
+            })
+            .then(()=>{
+                resolve();
+            })
+            .catch(err=>reject(err));
+        });
+    }
+
+    friendReuqest(senderId, targetId, accept) {
+        return new Promise((resolve, reject)=>{
+            this.database.collection('notificationItems').insertOneAsync({
+                sender: senderId,
+                target: targetId,
+                type:"FR",
+                accept: accept
+            })
+            .then((result)=>{
+                return new Promise((resolve, reject)=>{
+                    this.database.collection('users').findOneAsync({_id: targetId})
+                    .then(userData=>{
+                        resolve({
+                            userData: userData,
+                            result: result
+                        })
+                    })
+                    .catch(err=>reject(err));
+                })
+            })
+            .then(res=>{
                 return this.database.collection('notifications').updateOneAsync({
                     _id:res.userData.notification
                 },{

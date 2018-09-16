@@ -6,11 +6,6 @@ import Icon from '@material-ui/core/Icon';
 
 export default class LandingBackground extends React.Component{
 
-
-    handleClick(e){
-        this.props.onclick(e)
-    }
-
     render(){
         var btn_style={
             margin:'10px',
@@ -22,10 +17,10 @@ export default class LandingBackground extends React.Component{
                 <h1 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="70px"/></span> WeMeet</h1>
                 <h2 style={{color:'white'}}>Join nearby activities and make friends!</h2>
                 <br/>
-                <Button variant="contained" color="primary" style={btn_style} onClick={(e)=>{this.handleClick(e)}}>
+                <Button variant="contained" color="primary" style={btn_style} onClick={this.props.handleOpen("signUpOpen")}>
                     Sign up
                 </Button>
-                <Button variant="contained" color="secondary" style={btn_style} onClick={(e)=>this.handleClick(e)}>
+                <Button variant="contained" color="secondary" style={btn_style} onClick={this.props.handleOpen("loginOpen")}>
                     Log in
                 </Button>
                 <Button variant="contained" color="default" style={{

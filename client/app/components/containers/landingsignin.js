@@ -6,6 +6,10 @@ import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 
 class LandingSignin extends React.Component{
@@ -15,10 +19,18 @@ class LandingSignin extends React.Component{
             signInEmail:"",
             signInPass:"",
             failedLogin:false,
-            submitted:false
+            submitted:false,
+            open: false
         }
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.props.open !== prevProps.open) {
+            this.setState({
+                open: this.props.open
+            })
+        }
+    }
 
     handleChange(field, e) {
         e.preventDefault();
@@ -53,66 +65,53 @@ class LandingSignin extends React.Component{
         }
     }
 
-
-
     render(){
         return(
-            <div className="col-md-6 signin">
-                <div className={"alert alert-danger " + hideElement(!this.state.failedLogin)} role="alert">
-                    <strong>Invalid email address or password.</strong> Please try a different email address or password, and try logging in again.
-                </div>
-                <div className="panel panel-primary">
-                    <div className="panel-heading">
-                        <h4>Log in</h4>
-                    </div>
-                    <div className="panel-body">
-                        <div className="row">
-                            <div className="col-md-7 col-md-offset-2">
-                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="signInEmail">
-                                    Email
-                                    </InputLabel>
-                                    <Input
-                                    id="signInEmail"
-                                    value={this.state.signInEmail}
-                                    onChange={(e)=>this.handleChange("signInEmail",e)}
-                                    onKeyUp={(e)=>this.handleSignIn(e)}
-                                    />
-                                </FormControl>
-                            </div>
-                            <div className="col-md-7 col-md-offset-2">
-                                <FormControl style={{width:'100%'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="signInPass">
-                                    Password
-                                    </InputLabel>
-                                    <Input
-                                    id="signInPass"
-                                    value={this.state.signInPass}
-                                    onChange={(e)=>this.handleChange("signInPass",e)}
-                                    onKeyUp={(e)=>this.handleSignIn(e)}
-                                    type="password"
-                                    />
-                                </FormControl>
-                            </div>
+            <Dialog
+            open={this.state.open}
+            onClose={this.props.handleClose('loginOpen')}>
+                <DialogTitle>{"Log in"}</DialogTitle>
+                <DialogContent>
+                    <div className={"alert alert-danger " + hideElement(!this.state.failedLogin)} role="alert">
+                        <strong>Invalid email address or password.</strong>
+                        <br/>
+                        Please try a different email address or password, and try logging in again.
                         </div>
-                    </div>
-                    <div className="panel-footer">
-                        <div className="row">
-                            <div className="col-md-12">
-                            <Button variant="contained" style={{fontSize:'14px'}} className='pull-right' disabled={this.state.submitted} 
-                            onClick={(e)=>this.handleSignIn(e)}>
-                                Log in
-                            </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                    <FormControl style={{width:'100%', marginBottom: '20px'}}>
+                        <InputLabel
+                        style={{color:'#607D8B'}}
+                        htmlFor="signInEmail">
+                        Email
+                        </InputLabel>
+                        <Input
+                        id="signInEmail"
+                        value={this.state.signInEmail}
+                        onChange={(e)=>this.handleChange("signInEmail",e)}
+                        onKeyUp={(e)=>this.handleSignIn(e)}
+                        />
+                    </FormControl>
+                    <FormControl style={{width:'100%'}}>
+                        <InputLabel
+                        style={{color:'#607D8B'}}
+                        htmlFor="signInPass">
+                        Password
+                        </InputLabel>
+                        <Input
+                        id="signInPass"
+                        value={this.state.signInPass}
+                        onChange={(e)=>this.handleChange("signInPass",e)}
+                        onKeyUp={(e)=>this.handleSignIn(e)}
+                        type="password"
+                        />
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="contained" style={{fontSize:'14px'}} className='pull-right' disabled={this.state.submitted} 
+                        onClick={(e)=>this.handleSignIn(e)}>
+                            Log in
+                    </Button>
+                </DialogActions>
+            </Dialog>
         )
     }
 }

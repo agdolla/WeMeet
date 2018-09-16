@@ -73,22 +73,23 @@ export default class Notification extends React.Component{
     }
 
     handleFriendAccept = (id, user)=>{
-        acceptFriendRequest(id,this.props.user._id)
+        acceptFriendRequest(id, this.props.user._id)
         .then(()=>{
             this.getData();
-            socket.emit("friend request accepted",{
-                senderId: this.props.user._id,
-                senderName: this.props.user.fullname,
+            socket.emit("accept notification",{
                 target: user
             });
             location.reload();
         });
     }
 
-    handleActivityAccept = (notificationid)=>{
-        acceptActivityRequest(notificationid,this.props.user._id)
+    handleActivityAccept = (notificationid, user)=>{
+        acceptActivityRequest(notificationid, this.props.user._id)
         .then(()=>{
             this.getData();
+            socket.emit("accept notification",{
+                target: user
+            });
         });
     }
 

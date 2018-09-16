@@ -6,6 +6,10 @@ import Button from '@material-ui/core/Button';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormControl from '@material-ui/core/FormControl';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 class LandingSignup extends React.Component{
     constructor(props){
@@ -20,10 +24,18 @@ class LandingSignup extends React.Component{
             submitted:false,
             passwordStrength:0,
             passwordClass:"progress-bar-danger",
-            passwordTooSimple:false
+            passwordTooSimple:false,
+            open: false
         }
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.props.open !== prevProps.open) {
+            this.setState({
+                open: this.props.open
+            })
+        }
+    }
 
     handleSignUp(e){
         e.preventDefault();
@@ -141,114 +153,99 @@ class LandingSignup extends React.Component{
         this.setState(update);
     }
 
-
-
     render(){
         return(
-            <div className="col-md-6 signup">
-                <div className={hideElement(!this.state.failedSignUp) + " alert alert-danger"} role="alert"><strong>
-                    Invalid account signup.</strong><br/>
-                    1.It is possible that you already have an account with that particular email address<br/>
-                    2.you didn't fill in all the blanks.<br/>
-                    3.email format is not correct
-                </div>
-                <div className={hideElement(!this.state.passwordError) + " alert alert-danger"} role="alert"><strong>
-                    Invalid account signup.</strong> two passwords don't match
-                </div>
-                <div className={hideElement(!this.state.passwordTooSimple) + " alert alert-danger"} role="alert"><strong>
-                    Password is too simple</strong>
-                </div>
-                <div className="panel panel-primary">
-                    <div className="panel-heading">
-                        <h4>Sign up</h4>
+            <Dialog
+            open={this.state.open}
+            onClose={this.props.handleClose('signUpOpen')}>
+                <DialogTitle>{"Sign up"}</DialogTitle>
+                <DialogContent>
+                    <div className={hideElement(!this.state.failedSignUp) + " alert alert-danger"} role="alert"><strong>
+                        Invalid account signup.</strong><br/>
+                        1.It is possible that you already have an account with that particular email address<br/>
+                        2.you didn't fill in all the blanks.<br/>
+                        3.email format is not correct
                     </div>
-                    <div className="panel-body">
-                        <div className="row">
-                            <div className="col-md-7 col-md-offset-2">
-                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="signUpUsername">
-                                    Username
-                                    </InputLabel>
-                                    <Input
-                                    id="signUpUsername"
-                                    value={this.state.signUpName}
-                                    onChange={(e)=>this.handleChange("signUpName",e)}
-                                    onKeyUp={(e)=>this.handleSignUp(e)}
-                                    />
-                                </FormControl>
-                            </div>
-                            <div className="col-md-7 col-md-offset-2">
-                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="signUpEmail">
-                                    Email
-                                    </InputLabel>
-                                    <Input
-                                    id="signUpEmail"
-                                    value={this.state.signUpEmail}
-                                    onChange={(e)=>this.handleChange("signUpEmail",e)}
-                                    onKeyUp={(e)=>this.handleSignUp(e)}
-                                    />
-                                </FormControl>
-                            </div>
-                            <div className="col-md-7 col-md-offset-2">
-                                <FormControl style={{width:'100%', marginBottom:'20px'}}>
-                                    <InputLabel
-                                    style={{color:'#607D8B'}}
-                                    htmlFor="signUpPass">
-                                    Password
-                                    </InputLabel>
-                                    <Input
-                                    id="signUpPass"
-                                    type="password"
-                                    value={this.state.signUpPass}
-                                    onChange={(e)=>this.handleChange("signUpPass",e)}
-                                    onKeyUp={(e)=>this.handleSignUp(e)}
-                                    />
-                                </FormControl>
-                                <div className="progress" style={{height:'6px', marginTop:'-15px',borderRadius:'0'}}>
-                                    <div className={"progress-bar "+this.state.passwordClass}
-                                    role="progressbar"
-                                    aria-valuemin="0"
-                                    aria-valuemax="100"
-                                    style={{width:this.state.passwordStrength+"%"}}>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-md-7 col-md-offset-2">
-                            <FormControl style={{width:'100%', marginBottom:'20px'}}>
-                                <InputLabel
-                                style={{color:'#607D8B'}}
-                                htmlFor="signUpPass2">
-                                Confirm password
-                                </InputLabel>
-                                <Input
-                                id="signUpPass2"
-                                type="password"
-                                value={this.state.signUpPass2}
-                                onChange={(e)=>this.handleChange("signUpPass2",e)}
-                                onKeyUp={(e)=>this.handleSignUp(e)}
-                                />
-                            </FormControl>
+                    <div className={hideElement(!this.state.passwordError) + " alert alert-danger"} role="alert"><strong>
+                        Invalid account signup.</strong> two passwords don't match
+                    </div>
+                    <div className={hideElement(!this.state.passwordTooSimple) + " alert alert-danger"} role="alert"><strong>
+                        Password is too simple</strong>
+                    </div>
+
+                    <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                        <InputLabel
+                        style={{color:'#607D8B'}}
+                        htmlFor="signUpUsername">
+                        Username
+                        </InputLabel>
+                        <Input
+                        id="signUpUsername"
+                        value={this.state.signUpName}
+                        onChange={(e)=>this.handleChange("signUpName",e)}
+                        onKeyUp={(e)=>this.handleSignUp(e)}
+                        />
+                    </FormControl>
+
+                    <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                        <InputLabel
+                        style={{color:'#607D8B'}}
+                        htmlFor="signUpEmail">
+                        Email
+                        </InputLabel>
+                        <Input
+                        id="signUpEmail"
+                        value={this.state.signUpEmail}
+                        onChange={(e)=>this.handleChange("signUpEmail",e)}
+                        onKeyUp={(e)=>this.handleSignUp(e)}
+                        />
+                    </FormControl>
+
+                    <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                        <InputLabel
+                        style={{color:'#607D8B'}}
+                        htmlFor="signUpPass">
+                        Password
+                        </InputLabel>
+                        <Input
+                        id="signUpPass"
+                        type="password"
+                        value={this.state.signUpPass}
+                        onChange={(e)=>this.handleChange("signUpPass",e)}
+                        onKeyUp={(e)=>this.handleSignUp(e)}
+                        />
+                    </FormControl>
+                    <div className="progress" style={{height:'6px', marginTop:'-15px',borderRadius:'0'}}>
+                        <div className={"progress-bar "+this.state.passwordClass}
+                        role="progressbar"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        style={{width:this.state.passwordStrength+"%"}}>
                         </div>
                     </div>
-                </div>
-                <div className="panel-footer">
-                    <div className="row">
-                        <div className="col-md-12">
-                            <Button className='pull-right' style={{backgroundColor: '#403e3e', color:'white'}} 
-                            variant='contained'
-                            onClick={(e)=>this.handleSignUp(e)}>
-                                Join us!
-                            </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    <FormControl style={{width:'100%', marginBottom:'20px'}}>
+                    <InputLabel
+                    style={{color:'#607D8B'}}
+                    htmlFor="signUpPass2">
+                    Confirm password
+                    </InputLabel>
+                    <Input
+                    id="signUpPass2"
+                    type="password"
+                    value={this.state.signUpPass2}
+                    onChange={(e)=>this.handleChange("signUpPass2",e)}
+                    onKeyUp={(e)=>this.handleSignUp(e)}
+                    />
+                </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button className='pull-right' style={{backgroundColor: '#403e3e', color:'white'}} 
+                        variant='contained'
+                        onClick={(e)=>this.handleSignUp(e)}>
+                            Join us!
+                    </Button>
+                </DialogActions>
+            </Dialog>
         )
     }
 }

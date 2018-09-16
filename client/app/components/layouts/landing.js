@@ -11,8 +11,11 @@ class Landing extends React.Component {
 
     constructor(props){
         super(props);
+        this.state = {
+            signUpOpen: false,
+            loginOpen: false
+        }
     }
-
 
     componentDidMount(){
         if(isUserLoggedIn()){
@@ -20,22 +23,24 @@ class Landing extends React.Component {
         }
     }
 
-    handleClick(e){
-        e.preventDefault();
-        window.scrollTo(0,document.body.scrollHeight);
+    handleOpen = value => ()=>{
+        this.setState({
+            [value]: true
+        })
     }
 
+    handleClose = value => ()=>{
+        this.setState({
+            [value]: false
+        })
+    }
 
-      render(){
+    render(){
         return(
             <div>
-                <LandingBackground onclick={this.handleClick.bind(this)}/>
-                <div className="container index LandingPage">
-                    <div className="row">
-                        <LandingSignin />
-                        <LandingSignup />
-                    </div>
-                </div>
+                <LandingBackground handleOpen={this.handleOpen}/>
+                <LandingSignin open={this.state.loginOpen} handleClose={this.handleClose}/>
+                <LandingSignup open={this.state.signUpOpen} handleClose={this.handleClose}/>
                 <div className="row footer">
                     <div className="col-md-8 col-md-offset-2">
                         <h3 style={{color:'white'}}><span><img src="../img/logo/mipmap-xxxhdpi/ic_launcher.png" width="50px"/></span></h3>
@@ -44,7 +49,7 @@ class Landing extends React.Component {
                 </div>
             </div>
         );
-      }
+    }
 }
 
 export default withRouter(Landing);

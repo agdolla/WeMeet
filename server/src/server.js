@@ -25,7 +25,6 @@ let PostHelper = require('./utils/postHelper');
 let ChatHelper = require('./utils/chatHelper');
 let NotificationHelper = require('./utils/notificationHelper');
 let Jimp = require("jimp");
-let uuidV1 = require('uuid/v1');
 let zxcvbn = require('zxcvbn');
 
 if(PROD){
@@ -805,6 +804,7 @@ MongoClient.connect(url, {
                 }
             });
             chatHelper.createSession(notification.sender._id, userId);
+            notificationHelper.friendReuqest(userId, notification.sender._id, true);
             return notificationHelper.deleteNotification(notificationId, userId);
         })
         .then(notificationData=>{
@@ -840,22 +840,25 @@ MongoClient.connect(url, {
                 userToAdd = notification.target._id
             }
 
-            db.collection('activityItems').updateOne({
+            db.collection('activityItems').updateOneAsync({
                 _id:notification.activityid
             },{
                 $addToSet:{
                     participants:userToAdd
                 }
-            },function(err){
-                if(err){
-                    return serverHelper.sendDatabaseError(res,err);
-                }
-                notificationHelper.deleteNotification(notificationId,user)
-                .then(notificationData=>{
-                    res.send(notificationData);
-                })
-                .catch(err=>serverHelper.sendDatabaseError(res, err));
             })
+            .then(()=>{
+                notificationHelper.activityNotification(notification.target._id, 
+                    notification.sender._id, notification.activityid, 
+                    notification.RequestOrInvite, true);
+                return notificationHelper.deleteNotification(notificationId,user)
+            })
+            .then(notificationData=>{
+                res.send(notificationData);
+            })
+            .catch(err=>{
+                return serverHelper.sendDatabaseError(res,err);
+            });
         })
         .catch(err=>serverHelper.sendDatabaseError(res,err));
     });
@@ -1185,7 +1188,7 @@ MongoClient.connect(url, {
         socket.on('activity notification',(data)=>{
             // io.to('user/'+data.sender).emit('activity notification', {error: false});
             notificationHelper.activityNotification(new ObjectID(data.sender),
-            new ObjectID(data.target), new ObjectID(data.activityId), data.type)
+            new ObjectID(data.target), new ObjectID(data.activityId), data.type, false)
             .then(()=>{
                 io.to('user/'+data.target).emit('notification');
                 io.to('user/'+data.sender).emit('activity notification', {error: false});
@@ -1198,7 +1201,7 @@ MongoClient.connect(url, {
 
         socket.on('friend notification',(data)=>{
             // io.to('user/'+data.sender).emit('friend notification',{error: true});
-            serverHelper.friendReuqest(new ObjectID(data.sender), new ObjectID(data.target))
+            notificationHelper.friendReuqest(new ObjectID(data.sender), new ObjectID(data.target), false)
             .then(()=>{
                 io.to('user/'+data.target).emit('notification');
                 io.to('user/'+data.sender).emit('friend notification',{error: false});
@@ -1209,25 +1212,11 @@ MongoClient.connect(url, {
             });
         });
 
-        socket.on('friend request accepted',function(data){
-            chatHelper.getSession(new ObjectID(data.senderId), new ObjectID(data.target))
-            .then(session=>{
-                let senderSocketId = Object.keys(io.sockets.adapter.rooms['user/'+data.senderId].sockets)[0];
-                let targetSocketId = Object.keys(io.sockets.adapter.rooms['user/'+data.target].sockets)[0];
-                if(io.sockets.connected[senderSocketId] !== undefined){
-                    io.sockets.connected[senderSocketId].join('chat/'+session._id);
-                }
-                if(io.sockets.connected[targetSocketId] !== undefined) {
-                    io.sockets.connected[targetSocketId].join('chat/'+session._id);
-                }
-                io.to('user/'+data.target).emit('friend request accepted',{
-                    sender: data.senderName
-                });
-            })
-            .catch(err=>{
-                console.log(err);
-            })
+        socket.on('accept notification',function(data){
+            io.to('user/'+data.target).emit('notification');
         });
+
+        
 
         socket.on('join activity chat room',(data)=>{
             socket.join('activity/'+data.activityId);

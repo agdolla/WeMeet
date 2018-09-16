@@ -49,6 +49,12 @@ export default class NotificationBody extends React.Component{
         let friendRequestContent = 
         <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
             {this.props.FR.length===0?"Nothing here":this.props.FR.map((fr,i)=>{
+                var content = "";
+                if(fr.accept) {
+                    content = "accepted your friend request.";
+                } else {
+                    content = "wants to be your friend."
+                }
                 return <div key={i}>
                     <ListItem style={{padding:'20px'}}>
                             <Link to={"/profile/"+fr.sender._id}>
@@ -57,11 +63,12 @@ export default class NotificationBody extends React.Component{
                                 </ListItemAvatar>
                             </Link>
                             <ListItemText primary={fr.sender.fullname}
-                            secondary="sent you a friend request"/>
+                            secondary={content}/>
                         <ListItemSecondaryAction>
+                            {fr.accept?null:
                             <IconButton onClick={()=>this.props.handleFriendAccept(fr._id, fr.sender._id)}>
                                 <Icon className='fas fa-check' style={{color:'#43A047'}}/>
-                            </IconButton>
+                            </IconButton>}
                             <IconButton onClick={()=>this.props.handleDelete(fr._id)}>
                                 <Icon className='fas fa-trash' style={{color:'#e53935'}}/>
                             </IconButton>
@@ -73,32 +80,41 @@ export default class NotificationBody extends React.Component{
         </List>
         let activityRequestContent = 
         <List style={{backgroundColor: '#ffffff',padding:0, boxShadow:'0 10px 28px 0 rgba(137,157,197,.12)'}}>
-        {this.props.AN.length===0?"Nothing here":this.props.AN.map((AN,i)=>{
+        {this.props.AN.length===0?"Nothing here":this.props.AN.map((an,i)=>{
             var text = "";
-            if (AN.RequestOrInvite === "request"){
-                text = "sent you a request to join activity"
+            if (an.RequestOrInvite === "request"){
+                if(an.accept) {
+                    text = "accepted your request to join activity";
+                } else {
+                    text = "sent you a request to join activity";
+                }
             }
             else{
-                text = "invited you to join activity"
+                if(an.accept) {
+                    text = "accepted your invitation";
+                } else {
+                    text = "invited you to join activity";
+                }
             }
             return <div key={i}>
                     <ListItem style={{padding:'20px'}}>
-                            <Link to={"/profile/"+AN.sender._id}>
+                            <Link to={"/profile/"+an.sender._id}>
                                 <ListItemAvatar>
-                                    <Avatar src={AN.sender.avatar}/>
+                                    <Avatar src={an.sender.avatar}/>
                                 </ListItemAvatar>
                             </Link>
-                        <ListItemText primary={AN.sender.fullname}
+                        <ListItemText primary={an.sender.fullname}
                         secondary={
-                            <Link to={"/activityDetail/"+AN.activityid} target="_blank">
+                            <Link to={"/activityDetail/"+an.activityid} target="_blank">
                                 {text}
                             </Link>
                         }/>
                         <ListItemSecondaryAction>
-                            <IconButton onClick={()=>this.props.handleActivityAccept(AN._id)}>
+                            {an.accept?null:
+                            <IconButton onClick={()=>this.props.handleActivityAccept(an._id, an.sender._id)}>
                                 <Icon className='fas fa-check' style={{color:'#43A047'}}/>
-                            </IconButton>
-                            <IconButton onClick={()=>this.props.handleDelete(AN._id)}>
+                            </IconButton>}
+                            <IconButton onClick={()=>this.props.handleDelete(an._id)}>
                                 <Icon className='fas fa-trash' style={{color:'#e53935'}}/>
                             </IconButton>
                         </ListItemSecondaryAction>

@@ -51,20 +51,6 @@ class Navbar extends React.Component{
     logout();
     this.props.history.push('/');
   }
-
-  onNewPost = () => {
-    this.notifyMe('/post',"Hey there! You have new posts!");
-    this.setState({
-      post:true
-    });
-  }
-
-  onNewActivity = () =>{
-    this.notifyMe('/activity',"Hey there! You have new activities!");
-    this.setState({
-      activity:true
-    });
-  }
   
   onChat = ()=>{
     this.setState({
@@ -79,30 +65,18 @@ class Navbar extends React.Component{
     });
   }
 
-  onFriendRequestAccepted = (data)=>{
-    this.notifyMe('/chat',data.sender+" accepted your request");
-  }
-
   componentDidMount(){
     this.setState({
-      activity:false,
-      post:false,
       chat:false,
       notification:false
     });
-    socket.on('newActivity',this.onNewActivity);
-    socket.on('newPost',this.onNewPost);
     socket.on('chat',this.onChat);
     socket.on('notification',this.onNotification);
-    socket.on('friend request accepted',this.onFriendRequestAccepted);
   }
 
   componentWillUnmount(){
-    socket.removeListener("newPost",this.onNewPost);
-    socket.removeListener("newActivity",this.onNewActivity);
     socket.removeListener("chat",this.onChat);
     socket.removeListener("notification",this.onNotification);
-    socket.removeListener("friend request accepted",this.onFriendRequestAccepted);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -306,11 +280,12 @@ class Navbar extends React.Component{
             <div className="collapse navbar-collapse" id="navbar">
               <ul className="nav navbar-nav nav-left">
                 <li className={this.props.activity}>
-                  <Link to='/activity'> Activities <i className={"fa fa-circle "+hideElement(!this.state.activity)} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i>
+                  <Link to='/activity'> 
+                    Activities
                   </Link>
                 </li>
                 <li className={this.props.post}>
-                  <Link to='/post'>Trend <i className={"fa fa-circle "+hideElement(!this.state.post)} style={{fontSize:"12px",marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>
+                  <Link to='/post'>Trend</Link>
                 </li>
                 <li className={this.props.chat}>
                   <Link to={'/chat'}>Chat <i className={"fa fa-circle "+hideElement(!this.state.chat||this.props.chat==="active")} style={{fontSize:'12px',marginLeft:'2px',color:'#EF9A9A'}}aria-hidden="true"></i></Link>

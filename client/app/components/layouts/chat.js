@@ -6,7 +6,7 @@ import {getUserData,getMessages,getSessions,getSessionId} from '../../utils';
 import {socket} from '../../utils';
 import Drawer from '@material-ui/core/Drawer';
 
-let debug = require('react-debug');
+// let debug = require('react-debug');
 let Promise = require('bluebird');
 
 export default class Chat extends React.Component {

@@ -4,6 +4,8 @@ import {PostFeedItem} from '../presentations';
 import {getAllPosts,postStatus} from '../../utils';
 import {socket,isBottom} from '../../utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button';
+import Icon from '@material-ui/core/Icon';
 
 // var debug = require('react-debug');
 
@@ -15,15 +17,23 @@ export default class PostFeed extends React.Component{
         this.state = {
             contents: [],
             moreToLoad: true,
-            loading: true
+            loading: true,
+            new: false
         }
     }
 
     handleLoad(init){
         document.removeEventListener('scroll', this.trackScrolling);
-        this.setState({
-            loading:init
-        });
+        if(init) {
+            this.setState({
+                new: false,
+                loading: true
+            })
+        } else {
+            this.setState({
+                loading:init,
+            });
+        }
         var date = init || this.state.contents.length===0?(new Date()).getTime():
         this.state.contents[this.state.contents.length-1].contents.postDate;
         getAllPosts(date)
@@ -49,7 +59,7 @@ export default class PostFeed extends React.Component{
     onPost(text,img){
         postStatus(this.props.user._id, text, img)
         .then(()=>{
-            socket.emit('newPost',{user:this.props.user._id});
+            socket.emit('newPost');
             this.handleLoad(true);
         });
     }
@@ -70,15 +80,37 @@ export default class PostFeed extends React.Component{
 
     componentDidMount(){
         this.handleLoad(true);
+        socket.on('newPost',this.onNewPost);
     }
 
     componentWillUnmount(){
         document.removeEventListener('scroll', this.trackScrolling);
+        socket.removeEventListener('newPost',this.onNewPost);
+    }
+
+    onNewPost = ()=>{
+        this.setState({
+            new:true
+        });
+    }
+
+    handleNew = () => {
+        this.handleLoad(true);
+        window.scrollTo(0,0);
     }
 
     render(){
         return (
             <div className="postFeedItem" id="postFeed">
+                {this.state.new?
+                <Button variant="extendedFab" color="primary" style={{
+                    position: 'fixed',
+                    zIndex: 100,
+                    left: '45%'
+                }} onClick={this.handleNew}>
+                    <Icon style={{marginRight:'5px'}} className="fas fa-arrow-alt-circle-up" />
+                    new posts
+                </Button>:null}
                 <PostEntry userData={this.props.user} onPost={(text,img)=>this.onPost(text,img)}/>
                 {
                     this.state.loading? <div style={{textAlign:'center', color:'#61B4E4', marginTop:'30px', marginBottom:'30px'}}>

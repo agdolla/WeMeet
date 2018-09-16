@@ -1,6 +1,6 @@
 import React from 'react';
 import {withRouter} from 'react-router-dom';
-import {createActivity} from '../../utils';
+import {createActivity, socket} from '../../utils';
 import {hideElement} from '../../utils';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';
@@ -122,6 +122,7 @@ class CreateActivityFeed extends React.Component {
                 });
             })
             .then(()=>{
+                socket.emit('newActivity');
                 this.props.history.push('/activity');
             })
             .catch(err=>{
