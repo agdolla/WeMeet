@@ -78,7 +78,7 @@ module.exports = {
     rules: [
       {
         // Only transform *.js files.
-        test: /\.jsx$/,
+        test: /\.jsx?$/,
         // Don't transform any of the modules you depend on -- just transform
         // *your* code.
         exclude: /(node_modules|bower_components)/,
