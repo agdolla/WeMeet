@@ -3,7 +3,7 @@ import { Navbar } from '../containers';
 import { ChatNavBody } from '../containers';
 import { ChatWindow } from '../containers';
 import { getUserData, getMessages, getSessions, getSessionId } from '../../utils';
-import { socket } from '../../utils';
+import { socket } from '../../utils/credentials';
 import Drawer from '@material-ui/core/Drawer';
 
 // let debug = require('react-debug');

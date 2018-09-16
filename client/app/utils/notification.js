@@ -1,4 +1,4 @@
-const axiosHelper = require('./axiosHelper');
+const axiosHelper = require('./axiosHelper.js');
 
 export function deleteNotification(id, user) {
     return axiosHelper.delete('/notification/' + id + '/' + user);

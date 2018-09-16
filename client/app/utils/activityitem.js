@@ -1,4 +1,4 @@
-var moment = require('moment');
+const moment = require('moment');
 const axiosHelper = require('./axiosHelper.js');
 // let debug = require('react-debug');
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
-import { createActivity, socket } from '../../utils';
+import { createActivity } from '../../utils';
+import { socket } from '../../utils/credentials';
 import { hideElement } from '../../utils';
 import Cropper from 'react-cropper';
 import 'node_modules/cropperjs/dist/cropper.css';

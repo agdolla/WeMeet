@@ -1,4 +1,4 @@
-let axiosHelper = require('./axiosHelper');
+const axiosHelper = require('./axiosHelper.js');
 
 export function getNotificationData(user) {
     return axiosHelper.get('/user/' + user + '/notification');

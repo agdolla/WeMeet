@@ -4,8 +4,9 @@ import { ActivityCommentThread } from '../presentations';
 import { ActivityChatPanel } from '.';
 import {
   getActivityDetail, postActivityDetailComment, likeActivity,
-  unLikeActivity, socket, hideElement, didUserLike, getActivityItemCommments
+  unLikeActivity, hideElement, didUserLike, getActivityItemCommments
 } from '../../utils';
+import { socket } from '../../utils/credentials';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -45,6 +46,7 @@ export default class ActivityDetailBody extends React.Component {
       snackbarColor: 'green',
       snackbarType: 'success',
       inviteDialogOpen: false,
+      usersDialogOpen: false,
       invitedFriendList: [],
 
     };

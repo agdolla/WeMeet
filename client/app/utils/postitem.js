@@ -1,4 +1,4 @@
-let axiosHelper = require('./axiosHelper');
+const axiosHelper = require('./axiosHelper');
 
 export function likePost(feedItemId, user) {
     return axiosHelper.put('/postItem/' + feedItemId + '/likelist/' + user);

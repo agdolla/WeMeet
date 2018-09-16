@@ -5,7 +5,7 @@ import { getAllActivities, isBottom } from '../../utils';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-import { socket } from '../../utils';
+import { socket } from '../../utils/credentials';
 // var debug = require('react-debug');
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { searchquery } from '../../utils';
 import { ActivityFeedItem } from '../presentations';
 import { PostFeedItem } from '../presentations';
-import { socket } from '../../utils';
+import { socket } from '../../utils/credentials';
 import Link from 'react-router-dom/Link';
 //mui
 import Input from '@material-ui/core/Input';

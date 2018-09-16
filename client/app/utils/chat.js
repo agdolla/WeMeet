@@ -1,4 +1,4 @@
-let axiosHelper = require('./axiosHelper');
+const axiosHelper = require('./axiosHelper.js');
 
 export function getMessages(time, userid, id) {
     return axiosHelper.get('/user/' + userid + '/chatsession/' + id + "/" + time);

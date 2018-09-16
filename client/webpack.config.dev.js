@@ -12,7 +12,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, "build", "js"),
     publicPath: "/js/",
-    filename: "app.js",
+    filename: "[name].app.js",
     pathinfo: true
   },
   mode: 'development',
@@ -30,7 +30,7 @@ module.exports = {
           query: {
             cacheDirectory: true,
             presets: ['es2015', 'react'],
-            plugins: ["transform-class-properties"]
+            plugins: ["transform-class-properties", "syntax-dynamic-import"]
           }
         }
       ]

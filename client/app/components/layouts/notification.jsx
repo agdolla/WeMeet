@@ -5,7 +5,7 @@ import {
     getNotificationData, deleteNotification,
     acceptFriendRequest, acceptActivityRequest
 } from '../../utils';
-import { socket } from '../../utils';
+import { socket } from '../../utils/credentials';
 
 // let debug = require('react-debug');
 

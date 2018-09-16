@@ -53,7 +53,6 @@ import { hideElement, disabledElement, didUserLike, isBottom, uploadImg } from '
 //unsolve repeate name
 //import {getUserData} from './credentials'
 
-
 export {
     //export activityitem function
     likeActivity,

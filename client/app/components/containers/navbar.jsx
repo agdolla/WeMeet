@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, withRouter } from 'react-router-dom';
-import { socket } from '../../utils';
+import { socket } from '../../utils/credentials';
 import { logout } from '../../utils';
 import { hideElement, hasNewNotification } from '../../utils';
 import Badge from '@material-ui/core/Badge';

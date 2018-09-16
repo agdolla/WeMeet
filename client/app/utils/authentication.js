@@ -1,7 +1,8 @@
 import { updateCredentials } from './';
-import { socket } from './';
+import { socket } from './credentials';
+
 const axiosHelper = require('./axiosHelper');
-// let debug = require('react-debug');
+const debug = require('react-debug');
 
 export function signup(email, username, password, cb) {
     axiosHelper.post('/signup', {
@@ -28,5 +29,8 @@ export function login(email, password, cb) {
             location.reload();
             cb(true);
         })
-        .catch(err => cb(false));
+        .catch(err => {
+            debug(err);
+            cb(false)
+        });
 }

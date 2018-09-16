@@ -1,13 +1,13 @@
 import io from 'socket.io-client';
-const axiosHelper = require('./axiosHelper');
+
+const axiosHelper = require('./axiosHelper.js');
 // var debug = require('react-debug');
 
-export var socket = io();
+export const socket = io();
 /**
  * Stores authentication credentials.
  */
-var user = null;
-// var debug = require('react-debug');
+let user = null;
 
 /**
  * Get the user ID of the currently authenticated user.

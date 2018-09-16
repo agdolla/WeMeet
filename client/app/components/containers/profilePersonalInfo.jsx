@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'react-router-dom/Link';
-import { socket } from '../../utils'
+import { socket } from '../../utils/credentials';
 // material ui
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
