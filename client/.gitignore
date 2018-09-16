@@ -2,8 +2,9 @@
 node_modules
 
 # Ignores your built application.
-build/js/*.app.js
-build/js/*.app.js.map
+build/js/main.app.js
+build/js/main.app.js.map
+build/js/[0-9]*
 .DS_Store
 
 # Ignores .gitignore
