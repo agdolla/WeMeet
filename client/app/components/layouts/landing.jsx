@@ -26,13 +26,13 @@ class Landing extends React.Component {
     handleOpen = value => () => {
         this.setState({
             [value]: true
-        })
+        });
     }
 
     handleClose = value => () => {
         this.setState({
             [value]: false
-        })
+        });
     }
 
     render() {
