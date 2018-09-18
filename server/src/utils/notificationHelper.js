@@ -1,6 +1,6 @@
-'use strict';
-let ServerHelper = require('./serverHelper');
-let Promise = require('bluebird');
+"use strict";
+let ServerHelper = require("./serverHelper");
+let Promise = require("bluebird");
 
 module.exports = class NotificationHelper {
     constructor(db) {
@@ -10,71 +10,95 @@ module.exports = class NotificationHelper {
 
     getNotificationItem(notificationId) {
         return new Promise((resolve, reject) => {
-            this.database.collection('notificationItems').findOneAsync({
-                _id: notificationId
-            })
+            this.database
+                .collection("notificationItems")
+                .findOneAsync({
+                    _id: notificationId
+                })
                 .then(notification => {
-                    if (notification === null)
-                        return resolve(null);
+                    if (notification === null) return resolve(null);
                     else {
-                        var userList = [notification.sender, notification.target];
-                        this.serverHelper.resolveUserObjects(userList, function (err, userMap) {
-                            if (err)
-                                reject(err);
+                        var userList = [
+                            notification.sender,
+                            notification.target
+                        ];
+                        this.serverHelper.resolveUserObjects(userList, function(
+                            err,
+                            userMap
+                        ) {
+                            if (err) reject(err);
                             else {
-                                notification.sender = userMap[notification.sender];
-                                notification.target = userMap[notification.target];
-                                resolve(notification)
+                                notification.sender =
+                                    userMap[notification.sender];
+                                notification.target =
+                                    userMap[notification.target];
+                                resolve(notification);
                             }
                         });
                     }
                 })
                 .catch(err => reject(err));
-        })
+        });
     }
 
     getNotificationData(notificationId) {
         return new Promise((resolve, reject) => {
-            this.database.collection('notifications').findOneAsync({
-                _id: notificationId
-            })
+            this.database
+                .collection("notifications")
+                .findOneAsync({
+                    _id: notificationId
+                })
                 .then(notifications => {
                     if (notifications === null) {
-                        return resolve(null)
+                        return resolve(null);
                     }
                     var resolvedContents = [];
                     if (notifications.contents.length === 0) {
                         resolve(notifications);
                     } else {
-                        this.processNextFeedItem(resolvedContents, notifications, resolve, reject, 0);
+                        this.processNextFeedItem(
+                            resolvedContents,
+                            notifications,
+                            resolve,
+                            reject,
+                            0
+                        );
                     }
                 })
                 .catch(err => reject(err));
-        })
+        });
     }
 
     deleteNotification(notificationId, userId) {
         return new Promise((resolve, reject) => {
             //remove item from notification items
-            this.database.collection('notificationItems').removeAsync({
+            this.database.collection("notificationItems").removeAsync({
                 _id: notificationId
             });
             // find and modify notifications of the user
-            this.database.collection('users').findOneAsync({
-                _id: userId
-            })
+            this.database
+                .collection("users")
+                .findOneAsync({
+                    _id: userId
+                })
                 .then(userData => {
-                    if (userData === null)
-                        return resolve(null);
-                    return this.database.collection('notifications').findAndModifyAsync({
-                        _id: userData.notification
-                    }, [], {
-                            $pull: {
-                                contents: notificationId
+                    if (userData === null) return resolve(null);
+                    return this.database
+                        .collection("notifications")
+                        .findAndModifyAsync(
+                            {
+                                _id: userData.notification
+                            },
+                            [],
+                            {
+                                $pull: {
+                                    contents: notificationId
+                                }
+                            },
+                            {
+                                new: true
                             }
-                        }, {
-                            new: true
-                        });
+                        );
                 })
                 .then(updatedNotificationData => {
                     let notifications = updatedNotificationData.value;
@@ -82,16 +106,22 @@ module.exports = class NotificationHelper {
                     if (notifications.contents.length === 0) {
                         resolve(notifications);
                     } else {
-                        this.processNextFeedItem(resolvedContents, notifications, resolve, reject, 0);
+                        this.processNextFeedItem(
+                            resolvedContents,
+                            notifications,
+                            resolve,
+                            reject,
+                            0
+                        );
                     }
                 })
                 .catch(err => reject(err));
-        })
+        });
     }
 
     processNextFeedItem(resolvedContents, notifications, resolve, reject, i) {
         if (notifications === undefined) {
-            return
+            return;
         }
         this.getNotificationItem(notifications.contents[i])
             .then(notification => {
@@ -100,7 +130,13 @@ module.exports = class NotificationHelper {
                     notifications.contents = resolvedContents;
                     return resolve(notifications);
                 } else {
-                    this.processNextFeedItem(resolvedContents, notifications, resolve, reject, i + 1);
+                    this.processNextFeedItem(
+                        resolvedContents,
+                        notifications,
+                        resolve,
+                        reject,
+                        i + 1
+                    );
                 }
             })
             .catch(err => {
@@ -110,56 +146,71 @@ module.exports = class NotificationHelper {
 
     hasNewNotification(userId) {
         return new Promise((resolve, reject) => {
-            this.database.collection('users').findOneAsync({
-                _id: userId
-            })
+            this.database
+                .collection("users")
+                .findOneAsync({
+                    _id: userId
+                })
                 .then(userData => {
-                    return this.database.collection('notifications').findOneAsync({
-                        _id: userData.notification
-                    })
+                    return this.database
+                        .collection("notifications")
+                        .findOneAsync({
+                            _id: userData.notification
+                        });
                 })
                 .then(notifications => {
                     if (notifications === null) {
-                        return resolve(0)
+                        return resolve(0);
                     }
                     resolve(notifications.contents.length);
                 })
-                .catch(err => { reject(err) });
+                .catch(err => {
+                    reject(err);
+                });
         });
     }
 
     activityNotification(senderId, targetId, activityId, type, accept) {
         return new Promise((resolve, reject) => {
-            this.database.collection('notificationItems').insertOneAsync({
-                sender: senderId,
-                target: targetId,
-                type: "AN",
-                accept: accept,
-                RequestOrInvite: type,
-                activityid: activityId
-            })
-                .then((result) => {
+            this.database
+                .collection("notificationItems")
+                .insertOneAsync({
+                    sender: senderId,
+                    target: targetId,
+                    type: "AN",
+                    accept: accept,
+                    RequestOrInvite: type,
+                    activityid: activityId
+                })
+                .then(result => {
                     return new Promise((resolve, reject) => {
-                        this.database.collection('users').findOneAsync({
-                            _id: targetId
-                        })
+                        this.database
+                            .collection("users")
+                            .findOneAsync({
+                                _id: targetId
+                            })
                             .then(res => {
                                 resolve({
                                     userData: res,
                                     result: result
-                                })
+                                });
                             })
                             .catch(err => reject(err));
-                    })
+                    });
                 })
-                .then((res) => {
-                    return this.database.collection('notifications').updateOneAsync({
-                        _id: res.userData.notification
-                    }, {
-                            $addToSet: {
-                                contents: res.result.insertedId
+                .then(res => {
+                    return this.database
+                        .collection("notifications")
+                        .updateOneAsync(
+                            {
+                                _id: res.userData.notification
+                            },
+                            {
+                                $addToSet: {
+                                    contents: res.result.insertedId
+                                }
                             }
-                        })
+                        );
                 })
                 .then(() => {
                     resolve();
@@ -170,32 +221,41 @@ module.exports = class NotificationHelper {
 
     friendReuqest(senderId, targetId, accept) {
         return new Promise((resolve, reject) => {
-            this.database.collection('notificationItems').insertOneAsync({
-                sender: senderId,
-                target: targetId,
-                type: "FR",
-                accept: accept
-            })
-                .then((result) => {
+            this.database
+                .collection("notificationItems")
+                .insertOneAsync({
+                    sender: senderId,
+                    target: targetId,
+                    type: "FR",
+                    accept: accept
+                })
+                .then(result => {
                     return new Promise((resolve, reject) => {
-                        this.database.collection('users').findOneAsync({ _id: targetId })
+                        this.database
+                            .collection("users")
+                            .findOneAsync({ _id: targetId })
                             .then(userData => {
                                 resolve({
                                     userData: userData,
                                     result: result
-                                })
+                                });
                             })
                             .catch(err => reject(err));
-                    })
+                    });
                 })
                 .then(res => {
-                    return this.database.collection('notifications').updateOneAsync({
-                        _id: res.userData.notification
-                    }, {
-                            $addToSet: {
-                                contents: res.result.insertedId
+                    return this.database
+                        .collection("notifications")
+                        .updateOneAsync(
+                            {
+                                _id: res.userData.notification
+                            },
+                            {
+                                $addToSet: {
+                                    contents: res.result.insertedId
+                                }
                             }
-                        })
+                        );
                 })
                 .then(() => {
                     resolve();
@@ -203,4 +263,4 @@ module.exports = class NotificationHelper {
                 .catch(err => reject(err));
         });
     }
-}
+};

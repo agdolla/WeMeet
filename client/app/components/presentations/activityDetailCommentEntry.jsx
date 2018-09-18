@@ -1,17 +1,17 @@
-import React from 'react';
-import Link from 'react-router-dom/Link';
+import React from "react";
+import Link from "react-router-dom/Link";
 
 export default class ActivityDetailCommentEntry extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             text: ""
-        }
+        };
     }
 
     handleChange(e) {
         e.preventDefault();
-        this.setState({ text: e.target.value })
+        this.setState({ text: e.target.value });
     }
 
     handleSubmit(e) {
@@ -28,18 +28,36 @@ export default class ActivityDetailCommentEntry extends React.Component {
                 <div className="media">
                     <div className="media-left">
                         <Link to={"/profile/" + this.props.user}>
-                            <img className="media-object" src={this.props.avatar} height="45px" style={{ marginTop: '1px' }} />
+                            <img
+                                className="media-object"
+                                src={this.props.avatar}
+                                height="45px"
+                                style={{ marginTop: "1px" }}
+                            />
                         </Link>
                     </div>
                     <div className="media-body">
-                        <textarea name="name" rows="8" cols="40" placeholder="Post your comments" value={this.state.text} onChange={(e) => this.handleChange(e)}></textarea>
+                        <textarea
+                            name="name"
+                            rows="8"
+                            cols="40"
+                            placeholder="Post your comments"
+                            value={this.state.text}
+                            onChange={e => this.handleChange(e)}
+                        />
 
-                        <button type="button" className="btn btn-blue-grey pull-right waves-effect waves-light" type="button" name="button" onClick={(e) => this.handleSubmit(e)}>Post</button>
+                        <button
+                            type="button"
+                            className="btn btn-blue-grey pull-right waves-effect waves-light"
+                            type="button"
+                            name="button"
+                            onClick={e => this.handleSubmit(e)}
+                        >
+                            Post
+                        </button>
                     </div>
                 </div>
             </div>
-
-
         );
     }
 }

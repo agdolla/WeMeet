@@ -1,6 +1,6 @@
-import React from 'react';
-import { PostFeed } from '../containers';
-import { Navbar } from '../containers';
+import React from "react";
+import { PostFeed } from "../containers";
+import { Navbar } from "../containers";
 
 export default class Post extends React.Component {
     constructor(props) {
@@ -9,7 +9,7 @@ export default class Post extends React.Component {
 
     render() {
         return (
-            <div style={{ marginTop: '70px' }}>
+            <div style={{ marginTop: "70px" }}>
                 <Navbar post="active" user={this.props.user} />
                 <div className="container">
                     <div className="row">

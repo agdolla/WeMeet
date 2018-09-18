@@ -1,8 +1,7 @@
-'use strict';
+"use strict";
 const Promise = require("bluebird");
 
 module.exports = class ServerHelper {
-
     constructor(db) {
         this.database = db;
     }
@@ -20,23 +19,24 @@ module.exports = class ServerHelper {
         // query with an empty array.
         if (userList.length === 0) {
             callback(null, {});
-        }
-        else {
+        } else {
             // Build up a Mongothis.database "OR" query to resolve all of the user objects
             // in the userList.
             var query = {
-                $or: userList.map((id) => {
-                    return { _id: id }
+                $or: userList.map(id => {
+                    return { _id: id };
                 })
             };
             // Resolve 'like' counter
-            this.database.collection('users').findAsync(query)
+            this.database
+                .collection("users")
+                .findAsync(query)
                 .then(cursor => {
                     return cursor.toArrayAsync();
                 })
                 .then(users => {
                     var userMap = {};
-                    users.forEach((user) => {
+                    users.forEach(user => {
                         delete user.password;
                         delete user.sessions;
                         delete user.friends;
@@ -47,28 +47,27 @@ module.exports = class ServerHelper {
                     });
                     callback(null, userMap);
                 })
-                .catch(err => callback(err))
+                .catch(err => callback(err));
         }
     }
 
     resolveComments(comments) {
         return new Promise((resolve, reject) => {
             var userList = [];
-            comments.forEach((comment) => {
+            comments.forEach(comment => {
                 userList.push(comment.author);
             });
 
             this.resolveUserObjects(userList, (err, userMap) => {
-                if (err)
-                    reject(err);
+                if (err) reject(err);
                 else {
-                    comments.forEach((comment) => {
+                    comments.forEach(comment => {
                         comment.author = userMap[comment.author];
                     });
                     resolve(comments);
                 }
             });
-        })
+        });
     }
 
     sendDatabaseError(res, err) {
@@ -78,33 +77,40 @@ module.exports = class ServerHelper {
 
     getUserData(userId) {
         return new Promise((resolve, reject) => {
-            this.database.collection('users').findOneAsync({
-                _id: userId
-            })
+            this.database
+                .collection("users")
+                .findOneAsync({
+                    _id: userId
+                })
                 .then(userData => {
                     if (userData === null) {
-                        resolve(null)
-                    }
-                    else {
-                        this.resolveUserObjects(userData.friends, (err, userMap) => {
-                            if (err) reject(err);
-                            userData.friends = userData.friends.map((id) => userMap[id]);
-                            delete userData.password;
-                            delete userData.notification;
-                            delete userData.post;
-                            delete userData.activity;
-                            delete userData.sessions;
-                            resolve(userData);
-                        });
+                        resolve(null);
+                    } else {
+                        this.resolveUserObjects(
+                            userData.friends,
+                            (err, userMap) => {
+                                if (err) reject(err);
+                                userData.friends = userData.friends.map(
+                                    id => userMap[id]
+                                );
+                                delete userData.password;
+                                delete userData.notification;
+                                delete userData.post;
+                                delete userData.activity;
+                                delete userData.sessions;
+                                resolve(userData);
+                            }
+                        );
                     }
                 })
-                .catch(err => { reject(err) })
-        })
+                .catch(err => {
+                    reject(err);
+                });
+        });
     }
 
     validateEmail(email) {
         const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return re.test(email);
     }
-
-}
+};

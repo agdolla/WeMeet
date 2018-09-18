@@ -1,6 +1,6 @@
-import io from 'socket.io-client';
+import io from "socket.io-client";
 
-const axiosHelper = require('./axiosHelper.js');
+const axiosHelper = require("./axiosHelper.js");
 // var debug = require('react-debug');
 
 export const socket = io();
@@ -13,18 +13,17 @@ let user = null;
  * Get the user ID of the currently authenticated user.
  */
 export function getUserId() {
-  if (isUserLoggedIn()) {
-    return user._id;
-  }
-  return null;
+    if (isUserLoggedIn()) {
+        return user._id;
+    }
+    return null;
 }
-
 
 /**
  * Update the token and user document of the currently authenticated user.
  */
 export function updateCredentials(newUser) {
-  localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem("user", JSON.stringify(newUser));
 }
 
 /**
@@ -32,25 +31,25 @@ export function updateCredentials(newUser) {
  * You will implement this during the workshop.
  */
 export function isUserLoggedIn() {
-  // Replace later.
-  user = JSON.parse(localStorage.getItem('user'));
-  return user !== null && user !== undefined;
+    // Replace later.
+    user = JSON.parse(localStorage.getItem("user"));
+    return user !== null && user !== undefined;
 }
 /**
  * Logs the user out.
  * You will implement this during the workshop.
  */
 export function logout() {
-  if (user !== null) {
-    socket.emit('logout', user._id);
-    user = null;
-    localStorage.removeItem('user');
-  }
-  axiosHelper.get('/logout');
+    if (user !== null) {
+        socket.emit("logout", user._id);
+        user = null;
+        localStorage.removeItem("user");
+    }
+    axiosHelper.get("/logout");
 }
 
 export function getUserDataFromLocal() {
-  if (isUserLoggedIn()) {
-    return user;
-  }
+    if (isUserLoggedIn()) {
+        return user;
+    }
 }
